@@ -16,7 +16,7 @@ class Board extends React.Component {
           {
             this.state.spaces.map((v, i) => (<p className={`tile_${v.position}` } key={ i }>{ v.position }</p>))
           }
-          <div className="center"></div>
+          <div className="board__center"></div>
       </div>
     );
   }

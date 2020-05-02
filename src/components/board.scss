@@ -23,17 +23,16 @@
         't33 . . . . . . . . . t17'
         't32 . . . . . . . . . t18'
         't31 . . . . . . . . . t19'
-        't30 t29 t28 t27 t26 t25 t24 t23 t22 t21 t20'
+        't30 t29 t28 t27 t26 t25 t24 t23 t22 t21 t20';
 
+    &__center {
+        grid-row: 2 / 11;
+        grid-column: 2 / 11;
+    }
 }
 
 @for $i from 0 through 39 {
     .tile_#{$i} {
         grid-area: t#{$i};
     }
-}
-
-.center {
-    grid-row: 2 / 11;
-    grid-column: 2 / 11;
 }
