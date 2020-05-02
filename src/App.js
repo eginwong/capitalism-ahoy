@@ -1,10 +1,11 @@
 import React from 'react';
+import Board from './components/board';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-      // Your code here
+      <Board />
     </div>
   );
 }
