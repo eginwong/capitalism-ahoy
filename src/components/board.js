@@ -5,7 +5,7 @@ class Board extends React.Component {
   constructor (props) {
     super(props);
     // TODO: Get properties
-    const properties = Array(40).fill(null).map((_, i) => i);
+    const properties = Array(40).fill(null).map((_, i) => ({ position: i }));
     this.state = {
       spaces: properties
     }
@@ -14,7 +14,7 @@ class Board extends React.Component {
     return (
       <div className="board">
           {
-            this.state.spaces.map((v) => (<p key={ v }>{ v }</p>))
+            this.state.spaces.map((v, i) => (<p className={`tile_${v.position}` } key={ i }>{ v.position }</p>))
           }
           <div className="center"></div>
       </div>

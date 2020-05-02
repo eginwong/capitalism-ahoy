@@ -1,0 +1,39 @@
+// TODO: Add proper SCSS Script in Package.json
+// NOTE: Interim - run with `$(npm bin)/node-sass src/components/board.scss src/components/board.css`
+.board {
+    --width: 80px;
+    --height: 125px;
+    --length: calc(var(--width) * 9 + var(--height) * 2);
+
+    width: var(--length);
+    height: var(--length);
+
+    display: grid;
+    grid-template-rows: var(--height) repeat(9, var(--width)) var(--height);
+    grid-template-columns: var(--height) repeat(9, var(--width)) var(--height);
+
+    grid-template-areas:
+        't0 t1 t2 t3 t4 t5 t6 t7 t8 t9 t10'
+        't39 . . . . . . . . . t11'
+        't38 . . . . . . . . . t12'
+        't37 . . . . . . . . . t13'
+        't36 . . . . . . . . . t14'
+        't35 . . . . . . . . . t15'
+        't34 . . . . . . . . . t16'
+        't33 . . . . . . . . . t17'
+        't32 . . . . . . . . . t18'
+        't31 . . . . . . . . . t19'
+        't30 t29 t28 t27 t26 t25 t24 t23 t22 t21 t20'
+
+}
+
+@for $i from 0 through 39 {
+    .tile_#{$i} {
+        grid-area: t#{$i};
+    }
+}
+
+.center {
+    grid-row: 2 / 11;
+    grid-column: 2 / 11;
+}
