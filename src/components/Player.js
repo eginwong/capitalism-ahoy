@@ -8,8 +8,9 @@ class Player extends Component {
       name: props.name,
       position: 0,
       jail: false,
-      token: "/resources/tokens/" + props.token + ".png",
+      token: `/resources/tokens/${props.token}.png`,
       cash: 1500,
+      getOutOfJailFreeCards: 0,
       properties: []
     };
   }
