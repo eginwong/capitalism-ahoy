@@ -7,9 +7,10 @@ class Player extends Component {
     this.state = {
       name: props.name,
       position: 0,
-      jail: false,
+      jailed: -1,
       token: `/resources/tokens/${props.token}.png`,
       cash: 1500,
+      netWorth: 1500,
       getOutOfJailFreeCards: 0,
       properties: []
     };
