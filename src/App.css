@@ -1,3 +1,7 @@
 * {
     width: 100%;
 }
+
+.app {
+    display: flex;
+}

@@ -1,68 +1,125 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Capitalism, Ahoy
 
-## Available Scripts
 
-In the project directory, you can run:
+## TODO
+- set up game loop
+- have players able to take actions
+- material-ui to make things look nice
+- display properties
+- move pieces
+- TDD/BDD (given when then)
 
-### `yarn start`
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Rules
+- [Reference](https://www.hasbro.com/common/instruct/00009.pdf)
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+## Inspiration
+- [Jen Simmons](https://codepen.io/jensimmons/pen/qRGRjO)
+- [John Coppola](https://codepen.io/johnnycopes/pen/yzQyMp)
+- [Daniel Stern](https://github.com/danielstern/science/blob/master/monopoly.json)
+- [Hoare Triples](https://en.wikipedia.org/wiki/Hoare_logic)
 
-### `yarn test`
+## Appendix
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Scratch Notes
+Developed property = houses, hotels
 
-### `yarn build`
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Game Features
+  - Community Chest / Chance cards
+    - Random community chest / chance cards
+    - Use get-out-of-jail-free cards
+  - Special custom play pieces
+  - Allow user to see property cards
+  - Mortgages
+    - On mortgage, the bank loans the player 50% of value of property denoted on card
+    - On paying back the mortgage, must pay back 50% of the value of the property + 10%
+    - If a mortgaged property is sold to another player, that player can optionally pay back the mortgage right away (50% + 10% for interest) or they can pay 10% interest to transfer and then pay another 50% + 10% interest when they pay back the loan
+    - Cannot develop property in a set as long as one property is mortgaged
+  - Double Unimproved Rent
+    - When an entire set of property is owned, double the unimproved cost of rent
+    - Mortgages have no impact on being able to double unimproved cost of rent for un-mortgaged properties
+  - Trading
+    - A player is able to trade another player. At least one of the parties must offer at least 1 property for trade.
+    - A player is not allowed to trade cash for cash
+  - Selling
+    - Selling developed property is paid out at 50% of the cost of the development (e.g., a house cost $300 to build. Resale value is $150).
+    - A property cannot be sold/traded to another player if there is developed property on it.
+  - Auction ability
+    - If a user lands on an unbought property, they can choose not to purchase it. If they do not, an auction occurs between all players starting at any price starting at the lowest price of any property ($60). 
+  - Doubles
+    - When a player rolls doubles, they can go again.
+  - Allow Speeding when a player rolls doubles three consecutive times. This sends the player to jail.
+  - Jail Logic
+    - Can pay fine first and then roll freely
+    - Roll up to three turns to try and roll a double and on the third turn, if not escaped, must pay fine and move the spaces
+    - If fine is not paid, a double will let the player escape the jail but they cannot continue rolling
+  - Developed property must be added evenly across the set (e.g., if a property set has 3 properties included, a player can only develop houses by putting 1 on each property. All properties must have the same or 1 fewer house/hotel than the maximum number of houses in the corresponding property set).
+  - Finite hotels available
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+- Application Features
+  - Activity Log
+  - Rotate the board
+  - Advanced Statistics (turns in jail, times caught speeding, net-worth over time)
+  - Toggle animation speed
+  - Animate pieces moving around the board
+  - Roll Dice animation
+  - AI Computers
+  - Visual indicators for the owner of a property
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Entities:
+- Player
+  - Figurines / Player Token (car, iron, dog)
+  - Position + Player ID
+  - Jail* (shorthand as Boolean, else us Position as Rule)
+  - Cash
+  - List of Property ID
 
-### `yarn eject`
+- (JimmyEat)World
+  - Properties (Global Properties) (is also board -- plot twist !)
+  - Hotels
+  - Houses
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+- Functions / Thoughts:
+  - takeTurn currentPlayer gamestate = doTurnActions
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- turnActions
+  - bag of actions
+  - Dice roll -> automove player position
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- Game Loop
+  - Rules for what happens
+  - game [] _ = promptToGetPlayers
+  - game _ () = selectBoard
+  - game listOfPlayers board = start
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+- !! Cannon Fodder
+```js 
+function gameLoop () {
+    // gameState.turn
+    const currentPlayer = getCurrentPlayer; 
 
-## Learn More
+    await takeTurn(currentPlayer, gameState);
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+}
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+function takeTurn(player, state) {
 
-### Code Splitting
+    let action; 
+    do {
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+    } while (action != ACTION.END_TURN);
+    return 
+}
+```
 
-### Analyzing the Bundle Size
+```js
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+class Console extends UI {}
 
-### Making a Progressive Web App
+class UI {}
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+```
 
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `yarn build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+- TODO: create game in cli/repl? 
+  - ETHOS: decoupling UI from game logic 

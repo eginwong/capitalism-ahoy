@@ -6,7 +6,7 @@ import PlayerList from './components/PlayerList';
 
 function App() {
   return (
-    <div className="App">
+    <div className="app">
       <PlayerList/>
       <Board />
     </div>

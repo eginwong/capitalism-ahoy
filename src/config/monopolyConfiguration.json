@@ -360,19 +360,19 @@
     },
     {
       "name": "Chance",
-      "id": "chance",
+      "id": "chance1",
       "position": 7,
       "group": "Special"
     },
     {
       "name": "Chance",
-      "id": "chance",
+      "id": "chance2",
       "position": 22,
       "group": "Special"
     },
     {
       "name": "Chance",
-      "id": "chance",
+      "id": "chance3",
       "position": 36,
       "group": "Special"
     },
@@ -384,19 +384,19 @@
     },
     {
       "name": "Community Chest",
-      "id": "communitychest",
+      "id": "communitychest1",
       "position": 2,
       "group": "Special"
     },
     {
       "name": "Community Chest",
-      "id": "communitychest",
+      "id": "communitychest2",
       "position": 17,
       "group": "Special"
     },
     {
       "name": "Community Chest",
-      "id": "communitychest",
+      "id": "communitychest3",
       "position": 33,
       "group": "Special"
     },
