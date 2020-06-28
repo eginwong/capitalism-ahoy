@@ -1,5 +1,5 @@
 const expect = require("chai").expect;
-const { GameState } = require("./../GameState");
+const { GameState } = require("../entities/GameState");
 
 describe("GameState", () => {
   describe("scaffolding", () => {
