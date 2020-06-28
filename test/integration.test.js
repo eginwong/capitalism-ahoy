@@ -1,6 +1,6 @@
 const expect = require("chai").expect;
 const sinon = require("sinon");
-const { GameState } = require("./../GameState");
+const { GameState } = require("../entities/GameState");
 
 function gwt(strings) {
   const statements = strings.raw[0].split(" | ");

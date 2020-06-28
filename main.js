@@ -8,7 +8,7 @@
 
 const EventEmitter = require("events");
 const { consoleUI } = require("./ConsoleUI");
-const { GameState } = require("./GameState");
+const { GameState } = require("./entities/GameState");
 
 let gameState = new GameState();
 gameState.players = [createPlayer({name: "player1"}), createPlayer({name: "player2"})];
@@ -16,7 +16,7 @@ gameState.players = [createPlayer({name: "player1"}), createPlayer({name: "playe
 const eventBus = new EventEmitter();
 const UI = Object.assign({}, consoleUI);
 
-require("./Game")(eventBus, UI, gameState);
+require("./entities/Game")(eventBus, UI, gameState);
 
 // TODO: replace with class
 function createPlayer({ name }) {

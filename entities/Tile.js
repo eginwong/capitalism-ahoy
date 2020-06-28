@@ -177,7 +177,7 @@ class PropertyService {
   }
 }
 
-PropertyService._propertiesMeta = require("./src/config/monopolyConfiguration").properties;
+PropertyService._propertiesMeta = require("../config/monopolyConfiguration").properties;
 PropertyService._properties = PropertyService._propertiesMeta.map((p) => {
   if (p.group !== "Special") {
     switch (p.group) {
