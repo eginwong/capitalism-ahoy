@@ -67,7 +67,7 @@ module.exports = function (eventBus, userInterface, gameState) {
   }
 
   function rollDice() {
-    userInterface.rollingDice();
+    if (gameState.debug) userInterface.rollingDice();
     const roll1 = Math.floor(Math.random() * 6) + 1;
     const roll2 = Math.floor(Math.random() * 6) + 1;
 
