@@ -11,6 +11,7 @@ class GameState {
   players = [];
   _allPlayerActions = {};
   currentPlayerActions = {};
+  debug = false;
 
   get currentPlayer() {
     return this.players[this.turn % this.players.length];

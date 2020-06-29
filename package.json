@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "dependencies": {
+    "chalk": "^4.1.0",
     "lodash": "^4.17.15",
     "readline-sync": "^1.4.10"
   },

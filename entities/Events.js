@@ -43,35 +43,30 @@ module.exports = function (eventBus, userInterface, gameState) {
     ));
 
     userInterface.displayAvailableActions(actions);
-    const answer = userInterface.prompt(`What action would you like to take? `);
+    const answer = userInterface.prompt(`What action would you like to take?\n\n`);
     // validate answer
     const desiredAction = Object.keys(actions).find(
       (a) => a === answer.toUpperCase()
     );
     if (desiredAction) {
-      console.log(`DESIRED ACTION IS: ${desiredAction}`);
+      if (gameState.debug) console.log(`\nDESIRED ACTION IS: ${desiredAction}`);
+      console.log("\n");
       actions[desiredAction].execute();
     } else {
       console.log("ACTION DOESN'T EXIST");
     }
   }
 
-  function endTurn() {
-    userInterface.endTurn();
-    // UI: fancy game animation
-    gameState.turn++;
-    // begin next turn
-    eventBus.emit("START_TURN");
-  }
-
   function refreshActions(player, gameState) {
     // determine available actions
     const actions = gameState.allPlayerActions;
+    console.log("\n");
     Object.keys(gameState.allPlayerActions).forEach((action) => {
       const isAvailableAction = actions[action].isAvailable(player, gameState);
-      actions[action].toggleDisplay(isAvailableAction);
+      if (gameState.debug) actions[action].toggleDisplay(isAvailableAction);
       if (!isAvailableAction) delete actions[action];
     });
+    if (gameState.debug) console.log("\n");
     return actions;
   }
 
@@ -103,7 +98,7 @@ module.exports = function (eventBus, userInterface, gameState) {
   }
 
   function diceRolledNormal(isDoubles) {
-    userInterface.rollNormalDice();
+    if (gameState.debug) userInterface.rollNormalDice();
     // reset to 0 because refresh actions checks speeding counter
     gameState.speedingCounter = isDoubles ? gameState.speedingCounter + 1 : 0;
 
@@ -135,56 +130,9 @@ module.exports = function (eventBus, userInterface, gameState) {
     eventBus.emit("CONTINUE_TURN");
   }
 
-  function enforcePayFine() {
-    const FINE = 50;
-    // TODO: investigate using setter for bankruptcy logic
-    gameState.currentPlayer.cash -= FINE;
-    // REVISIT: NETWORTH
-    // if (gameState.currentPlayer.cash < 0 && gameState.currentPlayer.netWorth < Math.abs(gameState.currentPlayer.cash)) {
-    if (
-      gameState.currentPlayer.netWorth < Math.abs(gameState.currentPlayer.cash)
-    ) {
-      eventBus.emit("BANKRUPTCY");
-    } else if (gameState.currentPlayer.cash < 0) {
-      // UI: show liquidation menu
-      // TODO: KENTINUE
-    }
-    gameState.currentPlayer.jailed = -1;
-    eventBus.emit("MOVE_PLAYER", gameState.lastRoll);
-  }
-
-  function payFine() {
-    userInterface.payFine();
-    const FINE = 50;
-    gameState.currentPlayer.cash -= FINE;
-    // TODO: investigate using setter for bankruptcy logic
-
-    // REVISIT: NETWORTH
-    // if (gameState.currentPlayer.cash < 0 && gameState.currentPlayer.netWorth < Math.abs(gameState.currentPlayer.cash)) {
-    if (
-      gameState.currentPlayer.netWorth < Math.abs(gameState.currentPlayer.cash)
-    ) {
-      eventBus.emit("BANKRUPTCY");
-    } else if (gameState.currentPlayer.cash < 0) {
-      // UI: show liquidation menu
-      // TODO: KENTINUE
-    }
-    gameState.currentPlayer.jailed = -1;
-
-    // UI: disable action
-  }
-
   function passGo() {
     userInterface.passGo();
     gameState.currentPlayer.cash += 200;
-  }
-
-  function rollDice() {
-    userInterface.rollingDice();
-    const roll1 = Math.floor(Math.random() * 6) + 1;
-    const roll2 = Math.floor(Math.random() * 6) + 1;
-
-    eventBus.emit("DICE_ROLLED", [roll1, roll2]);
   }
 
   // TODO: KENTINUE
