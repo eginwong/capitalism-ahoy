@@ -1,27 +1,4 @@
-## Capitalism, Ahoy
-
-
-## TODO
-- set up game loop
-- have players able to take actions
-- material-ui to make things look nice
-- display properties
-- move pieces
-- TDD/BDD (given when then)
-
-
-## Rules
-- [Reference](https://www.hasbro.com/common/instruct/00009.pdf)
-
-## Inspiration
-- [Jen Simmons](https://codepen.io/jensimmons/pen/qRGRjO)
-- [John Coppola](https://codepen.io/johnnycopes/pen/yzQyMp)
-- [Daniel Stern](https://github.com/danielstern/science/blob/master/monopoly.json)
-- [Hoare Triples](https://en.wikipedia.org/wiki/Hoare_logic)
-
-## Appendix
-
-### Scratch Notes
+# Scratch Notes
 Developed property = houses, hotels
 
 
@@ -120,6 +97,3 @@ class Console extends UI {}
 class UI {}
 
 ```
-
-- TODO: create game in cli/repl? 
-  - ETHOS: decoupling UI from game logic 
