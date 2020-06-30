@@ -13,6 +13,7 @@
 - ~~TODO: Complete a turn~~
 - ~~TODO: VALIDATION, do not allow user to end turn without rolling dice~~
 - ~~TODO: testing framework~~
+- TODO: add end game function to stop execution?
 - TODO: UI implementation for frontend 
   - material-ui to make things look nice
   - display properties
@@ -23,6 +24,7 @@
 - TODO: random array of movement emojis
   - read: emoji manifesto
 - TODO: enforce global house limits (32), hotel limits (12)
+- TODO: use inquirer for prompts instead
 - TODO: remaining
   - ~~startTurn~~
   - ~~PropertyService~~

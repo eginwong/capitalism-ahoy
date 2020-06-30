@@ -10,7 +10,7 @@ class GameState {
   turnTaken = false;
   players = [];
   _allPlayerActions = {};
-  currentPlayerActions = {};
+  _currentPlayerActions = {};
   debug = false;
 
   get currentPlayer() {
@@ -28,11 +28,11 @@ class GameState {
 
   // current-player stateful actions
   get currentPlayerActions() {
-    return this.currentPlayerActions;
+    return this._currentPlayerActions;
   }
 
   set currentPlayerActions(actions) {
-    this.currentPlayerActions = actions;
+    this._currentPlayerActions = actions;
   }
 }
 

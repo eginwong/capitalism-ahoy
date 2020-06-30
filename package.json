@@ -9,11 +9,12 @@
   },
   "scripts": {
     "start": "node main.js",
-    "test": "mocha -w"
+    "test": "nyc --reporter=text --reporter=html mocha -w"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^8.0.1",
+    "nyc": "^15.1.0",
     "sinon": "^9.0.2"
   }
 }
