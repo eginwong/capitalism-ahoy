@@ -6,7 +6,7 @@
 .pnp.js
 
 # testing
-/coverage
+coverage
 .vscode
 .nyc_output
 
