@@ -11,7 +11,7 @@ class GameState {
   players = [];
   _allPlayerActions = {};
   _currentPlayerActions = {};
-  debug = false;
+  // constraints?
 
   get currentPlayer() {
     return this.players[this.turn % this.players.length];

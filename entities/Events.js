@@ -1,10 +1,9 @@
-
-const { PropertyService } = require("./Tile");
+const { PropertyService } = require("./PropertyService");
 
 /**
- * Responsibility: 
+ * Responsibility:
  *   Global events for the game; events have an effect on the game world.
-*/
+ */
 module.exports = function (eventBus, userInterface, gameState) {
   return {
     START_GAME: startGame,
@@ -17,6 +16,8 @@ module.exports = function (eventBus, userInterface, gameState) {
     DICE_ROLLED: diceRolled,
     MOVE_PLAYER: movePlayer,
     PASS_GO: passGo,
+    SPEEDING: speeding,
+    JAIL: jail,
   };
 
   // ======================================FUNCTIONS======================================
@@ -29,10 +30,7 @@ module.exports = function (eventBus, userInterface, gameState) {
     gameState.speedingCounter = 0;
     userInterface.startTurn(player);
 
-    // TODO: KENTINUE
-    // DESIGNDEC: explicitly call
-    continueTurn();
-    // reaction
+    eventBus.emit("CONTINUE_TURN");
   }
 
   function continueTurn() {
@@ -43,14 +41,14 @@ module.exports = function (eventBus, userInterface, gameState) {
     ));
 
     userInterface.displayAvailableActions(actions);
-    const answer = userInterface.prompt(`What action would you like to take?\n\n`);
+    const answer = userInterface.prompt(
+      `What action would you like to take?\n\n`
+    );
     // validate answer
     const desiredAction = Object.keys(actions).find(
-      (a) => a === answer.toUpperCase()
+      (a) => a === String(answer).toUpperCase()
     );
     if (desiredAction) {
-      if (gameState.debug) console.log(`\nDESIRED ACTION IS: ${desiredAction}`);
-      console.log("\n");
       actions[desiredAction].execute();
     } else {
       console.log("ACTION DOESN'T EXIST");
@@ -63,10 +61,10 @@ module.exports = function (eventBus, userInterface, gameState) {
     console.log("\n");
     Object.keys(gameState.allPlayerActions).forEach((action) => {
       const isAvailableAction = actions[action].isAvailable(player, gameState);
-      if (gameState.debug) actions[action].toggleDisplay(isAvailableAction);
+      actions[action].toggleDisplay(isAvailableAction);
       if (!isAvailableAction) delete actions[action];
     });
-    if (gameState.debug) console.log("\n");
+    console.log("\n");
     return actions;
   }
 
@@ -98,7 +96,7 @@ module.exports = function (eventBus, userInterface, gameState) {
   }
 
   function diceRolledNormal(isDoubles) {
-    if (gameState.debug) userInterface.rollNormalDice();
+    userInterface.rollNormalDice();
     // reset to 0 because refresh actions checks speeding counter
     gameState.speedingCounter = isDoubles ? gameState.speedingCounter + 1 : 0;
 
@@ -136,9 +134,9 @@ module.exports = function (eventBus, userInterface, gameState) {
   }
 
   // TODO: KENTINUE
-  function bankruptcy() {
-    // gameState.currentPlayerActions["END_TURN"].execute()
-  }
+  // function bankruptcy() {
+  // gameState.currentPlayerActions["END_TURN"].execute()
+  // }
 
   function jail() {
     userInterface.jail();

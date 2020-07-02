@@ -13,9 +13,6 @@ const { GameState } = require("./entities/GameState");
 let gameState = new GameState();
 gameState.players = [createPlayer({name: "player1"}), createPlayer({name: "player2"})];
 
-// set debug flag to true
-// gameState.debug = true;
-
 const eventBus = new EventEmitter();
 const UI = Object.assign({}, consoleUI);
 

@@ -8,7 +8,6 @@ describe("GameState", () => {
     gameState = new GameState();
   });
   it("should load default values", () => {
-    expect(gameState.debug).be.false;
     expect(gameState.turn).equal(0);
     expect(gameState.turnTaken).to.be.false;
     expect(gameState.players.length).equal(0);

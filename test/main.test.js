@@ -1,19 +1,23 @@
+// integration tests
 const expect = require("chai").expect;
 const sinon = require("sinon");
 const EventEmitter = require("events");
 const { GameState } = require("../entities/GameState");
-const { createPlayer } = require("./testutils");
+const { createPlayer, setupMockDice } = require("./testutils");
 
 function gwt(strings) {
   const statements = strings.raw[0].split(" | ");
   return `GIVEN ${statements[0]} WHEN ${statements[1]} THEN ${statements[2]}`;
 }
 
+// write an integration test framework for json
+
 // given when then {P}C{Q}
 describe("game", () => {
   describe("feature: starts", () => {
     let gameState;
     let mockUI;
+    let eventBusEmitter;
     // mock?
     // spy on functions?
     beforeEach(() => {
@@ -41,6 +45,7 @@ describe("game", () => {
         passGo: () => true,
         jail: () => true,
       };
+      eventBusEmitter = new EventEmitter();
     });
 
     afterEach(() => {
@@ -51,20 +56,33 @@ describe("game", () => {
     it(
       gwt`cold start | game is loaded | first player rolls dice and ends turn`,
       () => {
-        var eventBusEmitter = new EventEmitter();
+        require("../entities/Game")(eventBusEmitter, mockUI, gameState);
+
+        // arrange
         const startGameSpy = sinon.spy();
         const promptStub = sinon.stub();
         promptStub.onCall(0).returns("ROLL_DICE");
-        promptStub.onCall(1).returns("END_TURN");
-        promptStub.onCall(2).returns("END_EXECUTION");
+        promptStub.onCall(1).returns("ROLL_DICE");
+        promptStub.onCall(2).returns("END_TURN");
         mockUI.startGame = startGameSpy;
         mockUI.prompt = promptStub;
 
-        require("../entities/Game")(eventBusEmitter, mockUI, gameState);
+        // TODO: refactor to be cleaner
+        sinon.stub(gameState._allPlayerActions.ROLL_DICE, "execute").callsFake(
+          setupMockDice(
+            [
+              [1, 1],
+              [1, 2],
+            ],
+            eventBusEmitter
+          )
+        );
+
+        // act
         eventBusEmitter.emit("START_GAME");
 
-        console.dir(gameState);
-        expect(startGameSpy.calledOnce).to.be.true;
+        // assert
+        expect(startGameSpy.callCount).to.equal(1);
         expect(gameState.turn).equal(1);
         expect(gameState.players[0].position).not.to.equal(0);
         expect(gameState.players[1].position).to.equal(0);

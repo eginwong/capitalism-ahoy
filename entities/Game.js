@@ -28,7 +28,6 @@ module.exports = function(eventBus, userInterface, gameState) {
   // create loop to iterate over all events to add listeners
   Object.keys(EVENTS).forEach((e) => {
     eventBus.on(e, EVENTS[e]);
-    if (gameState.debug) console.log(EVENTS[e]);
   });
 
   return {

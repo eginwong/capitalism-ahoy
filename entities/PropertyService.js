@@ -1,4 +1,3 @@
-
 /**
  * Responsibility: 
  *   Defines a model and associated metadata for a space on the game board.
@@ -183,7 +182,7 @@ PropertyService._properties = PropertyService._propertiesMeta.map((p) => {
     switch (p.group) {
       case "Utilities":
         return new UtilitySpace(p);
-      case "RailRoad":
+      case "Railroad":
         return new RailRoadSpace(p);
       default:
         return new PropertySpace(p);
