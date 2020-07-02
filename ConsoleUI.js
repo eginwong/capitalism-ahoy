@@ -10,7 +10,7 @@ const consoleUI = (function (readline) {
     // UI: toggle active class on that player
     // UI: maybe animate player token?
     displayAvailableActions: (actions) =>
-      console.log(chalk.magenta(`AVAILABLE ACTIONS: ${Object.keys(actions).join(", ")}`)),
+      console.log(chalk.magenta(`AVAILABLE ACTIONS: `) + chalk.cyan(`${Object.keys(actions).join(", ")}`)),
     prompt: readline.question,
     endTurn: () => console.log(chalk.bold.red("ENDING TURN")),
     rollingDice: () => console.log("🎲ROLLING🎲"),

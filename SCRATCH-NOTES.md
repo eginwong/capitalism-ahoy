@@ -97,3 +97,39 @@ class Console extends UI {}
 class UI {}
 
 ```
+
+integration test framework
+```json
+[
+    {
+        case: "gwt test description",
+        playerActions: [
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "END_TURN",
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "ROLL_DICE",
+            "ROLL_DICE",
+        ],
+        startGameState: {},
+        endGameState: {
+            players: [{ }]
+            turn: 4,
+        }
+    }
+]
+```
