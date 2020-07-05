@@ -1,5 +1,8 @@
 ## Capitalism, Ahoy
 
+[![Build Status](https://travis-ci.com/eginwong/capitalism-ahoy.svg?branch=master)](https://travis-ci.com/eginwong/capitalism-ahoy)
+[![codecov](https://codecov.io/gh/eginwong/capitalism-ahoy/branch/master/graph/badge.svg)](https://codecov.io/gh/eginwong/capitalism-ahoy)
+
 ## Rules
 - [Reference](https://www.hasbro.com/common/instruct/00009.pdf)
 
@@ -46,6 +49,7 @@
 - ~~TODO: testing framework~~
 - ~~TODO: TDD/BDD (given when then), integration testing framework~~
 - ~~TODO: chalk for console UI + testing~~
+- ~~TODO: set up travis ci for test coverage check~~
 - TODO: linter
 - TODO: prettier
 - TODO: look into removing gameState from PlayerActions#execute by passing it in

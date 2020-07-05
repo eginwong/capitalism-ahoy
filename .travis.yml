@@ -1,0 +1,9 @@
+branches:
+  only: 
+    - master
+language: node_js
+node_js:
+  - 14
+script: 
+- yarn coverage
+- yarn report-coverage

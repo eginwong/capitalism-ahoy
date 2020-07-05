@@ -10,12 +10,21 @@
   "scripts": {
     "start": "node main.js",
     "test": "mocha -w",
+    "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "coverage": "nyc --reporter=text --reporter=html mocha"
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "codecov": "^3.7.0",
     "mocha": "^8.0.1",
     "nyc": "^15.1.0",
     "sinon": "^9.0.2"
+  },
+  "nyc": {
+    "check-coverage": true,
+    "branches": 80,
+    "lines": 80,
+    "functions": 80,
+    "statements": 80
   }
 }
