@@ -3,12 +3,12 @@
  * Responsibility: 
  *   Player-driven actions that can be executed depending on certain game conditions.
 */
-module.exports = function (eventBus, userInterface, gameState) {
+module.exports = function (eventBus, userInterface, _gameState) {
   return {
     ROLL_DICE: {
       execute: rollDice,
       isAvailable: (_, gameState) =>
-        !gameState.turnTaken || gameState.speedingCounter > 0,
+        !gameState.turnTaken || (gameState.speedingCounter > 0),
       toggleDisplay: (shouldDisplay) => userInterface.rollDiceDisplay(shouldDisplay),
     },
     // USE_GET_OUT_OF_JAIL_CARD,
@@ -24,7 +24,7 @@ module.exports = function (eventBus, userInterface, gameState) {
       execute: endTurn,
       // FUTURE: think about bankrupt or jail
       isAvailable: (_, gameState) =>
-        gameState.turnTaken && gameState.speedingCounter === 0,
+        gameState.turnTaken && (gameState.speedingCounter === 0),
       toggleDisplay: (shouldDisplay) => userInterface.endTurnDisplay(shouldDisplay),
     },
     // CONSTRUCT_HOUSE,
@@ -60,6 +60,7 @@ module.exports = function (eventBus, userInterface, gameState) {
     } else if (gameState.currentPlayer.cash < 0) {
       // UI: show liquidation menu
       // TODO: KENTINUE
+      eventBus.emit("LIQUIDATION");
     }
     gameState.currentPlayer.jailed = -1;
 

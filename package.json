@@ -9,9 +9,9 @@
   },
   "scripts": {
     "start": "node main.js",
-    "test": "mocha -w",
+    "test": "mocha --recursive -w",
     "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
-    "coverage": "nyc --reporter=text --reporter=html mocha"
+    "coverage": "nyc --reporter=text --reporter=html mocha --recursive"
   },
   "devDependencies": {
     "chai": "^4.2.0",

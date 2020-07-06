@@ -11,6 +11,7 @@ class GameState {
   players = [];
   _allPlayerActions = {};
   _currentPlayerActions = {};
+  speedingCounter = 0;
   // constraints?
 
   get currentPlayer() {
