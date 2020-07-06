@@ -3,7 +3,7 @@
  * Responsibility: 
  *   Player-driven actions that can be executed depending on certain game conditions.
 */
-module.exports = function (eventBus, userInterface, _gameState) {
+module.exports = function (eventBus, userInterface, gameState) {
   return {
     ROLL_DICE: {
       execute: rollDice,
