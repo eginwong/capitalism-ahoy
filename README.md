@@ -56,9 +56,12 @@
 - TODO: continue gamestate (check PropService?)
 - TODO: validate GameState
 - TODO: use inquirer for prompts instead
+- TODO: Investigate using Mocha's reporter flag for NYC
+- TODO: Refactor Mocha-bloat (not a Mocha-Float); leverage modules
 
 ### REFLECTIONS
 - dependency on UI 
 - issues with event-driven architecture with dependencies
   - UI
 - generators are cool 🧐🧐🧐🧐🧐
+- pre-condition testing for event-driven architecture

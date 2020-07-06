@@ -36,8 +36,6 @@ describe("PlayerActions -> ROLL_DICE", () => {
     
     beforeEach(() => {
       outputSpy = sinon.spy();
-      // Clear default listeners to prevent side-effects*
-      eventBusEmitter.removeAllListeners(outputEvent)
       eventBusEmitter.on(outputEvent, outputSpy);
       
       methodUnderTest = PLAYER_ACTIONS.ROLL_DICE.execute;
@@ -75,7 +73,7 @@ describe("PlayerActions -> ROLL_DICE", () => {
       };
     });
 
-    it("should be available before first roll of the dice", () => {
+    xit("should be available before first roll of the dice", () => {
       let result = methodUnderTest();
       expect(result).to.equal(true, "Action was not available before first dice roll");
 
@@ -94,7 +92,7 @@ describe("PlayerActions -> ROLL_DICE", () => {
       let result = methodUnderTest();
       expect(result).to.equal(true, "Action was unavailable after rolling doubles");
     });
-    it("shouldn't be available if player is speeding", () => {
+    xit("shouldn't be available if player is speeding", () => {
       mockRolls([
         [1, 1],
         [2, 2],

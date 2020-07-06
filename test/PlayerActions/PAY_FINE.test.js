@@ -38,11 +38,8 @@ describe("PlayerActions -> PAY_FINE", () => {
     beforeEach(() => {
       bankruptcySpy = sinon.spy();
       liquidationSpy = sinon.spy();
-      // Clear default listeners to prevent side-effects*
-      eventBusEmitter.removeAllListeners(bankruptcyEvent);
       eventBusEmitter.on(bankruptcyEvent, bankruptcySpy);
 
-      eventBusEmitter.removeAllListeners(liquidationEvent);
       eventBusEmitter.on(liquidationEvent, liquidationSpy);
 
       methodUnderTest = PLAYER_ACTIONS.PAY_FINE.execute;

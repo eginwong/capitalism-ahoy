@@ -1,6 +1,5 @@
 const expect = require("chai").expect;
 const EventEmitter = require("events");
-const sinon = require("sinon");
 
 const mockUIFactory = require('../mocks/UI');
 
@@ -12,7 +11,7 @@ describe("PlayerActions", function () {
   let mockUI;
   let eventBusEmitter;
   let PLAYER_ACTIONS;
-
+  
   beforeEach(() => {
     gameState = new GameState();
     eventBusEmitter = new EventEmitter();
@@ -20,11 +19,6 @@ describe("PlayerActions", function () {
 
     gameState.players = [createPlayer({ name: "player1" })];
     PLAYER_ACTIONS = require("../../entities/PlayerActions")(eventBusEmitter, mockUI, gameState);
-  });
-
-  afterEach(() => {
-    // Restore the default sandbox here
-    sinon.restore();
   });
 
   it("exports a valid and well-formed module", () => {
