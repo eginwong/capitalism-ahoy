@@ -13,7 +13,7 @@ function gwt(strings) {
 // write an integration test framework for json
 
 // given when then {P}C{Q}
-describe("game", () => {
+describe("main", () => {
   describe("feature: starts", () => {
     let gameState;
     let mockUI;
@@ -44,6 +44,7 @@ describe("game", () => {
         payFine: () => true,
         passGo: () => true,
         jail: () => true,
+        unknownAction: () => true
       };
       eventBusEmitter = new EventEmitter();
     });

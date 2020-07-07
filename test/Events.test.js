@@ -36,6 +36,7 @@ describe("Events", () => {
       payFine: () => true,
       passGo: () => true,
       jail: () => true,
+      unknownAction: () => true
     };
     eventBusEmitter = new EventEmitter();
     EVENTS = require("../entities/Events")(eventBusEmitter, mockUI, gameState);
@@ -46,15 +47,9 @@ describe("Events", () => {
     sinon.restore();
   });
   it("constructor should return object with associated event listeners", () => {
-    expect(Object.keys(EVENTS).length).to.equal(8);
-    expect(typeof EVENTS.START_GAME).to.equal("function");
-    expect(typeof EVENTS.START_TURN).to.equal("function");
-    expect(typeof EVENTS.CONTINUE_TURN).to.equal("function");
-    expect(typeof EVENTS.DICE_ROLLED).to.equal("function");
-    expect(typeof EVENTS.MOVE_PLAYER).to.equal("function");
-    expect(typeof EVENTS.PASS_GO).to.equal("function");
-    expect(typeof EVENTS.SPEEDING).to.equal("function");
-    expect(typeof EVENTS.JAIL).to.equal("function");
+    for (property in EVENTS) {
+      expect(typeof EVENTS[property]).to.equal("function");
+    }
   });
 
   describe("startGame", () => {
@@ -165,11 +160,14 @@ describe("Events", () => {
       expect(uiSpy.callCount).to.be.equal(1);
       expect(executeSpy.callCount).to.be.equal(1);
     });
-    it("should do nothing if incorrect input is received for the action", () => {
+    it("should make error ui call if incorrect input is received for the action", () => {
       const uiSpy = sinon.stub().callsFake(() => undefined);
+      const uiUnknownActionSpy = sinon.spy();
       mockUI.prompt = uiSpy;
+      mockUI.unknownAction = uiUnknownActionSpy;
       EVENTS.CONTINUE_TURN();
       expect(uiSpy.callCount).to.be.equal(1);
+      expect(uiUnknownActionSpy.callCount).to.be.equal(1);
     });
   });
   describe("diceRolled", () => {

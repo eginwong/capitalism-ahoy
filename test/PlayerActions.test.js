@@ -30,6 +30,7 @@ describe("PlayerActions", () => {
       payFine: () => true,
       passGo: () => true,
       jail: () => true,
+      unknownAction: () => true
     };
     eventBusEmitter = new EventEmitter();
     gameState.players = [createPlayer({ name: "player1" })];
