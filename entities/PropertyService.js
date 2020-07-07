@@ -172,7 +172,7 @@ class PropertyService {
       (prop) => prop.position === position
     );
     landedOnProperty.land();
-    console.dir(landedOnProperty);
+    // console.dir(landedOnProperty);
   }
 }
 

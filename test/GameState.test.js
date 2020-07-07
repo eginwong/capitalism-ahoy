@@ -7,17 +7,8 @@ describe("GameState", () => {
   beforeEach(() => {
     gameState = new GameState();
   });
-  it("should load default values", () => {
-    expect(gameState.turn).equal(0);
-    expect(gameState.turnTaken).to.be.false;
-    expect(gameState.players.length).equal(0);
-    expect(gameState.allPlayerActions).to.be.an("object");
-    expect(gameState.allPlayerActions).not.to.include.keys("ROLL_DICE");
-    expect(gameState.currentPlayerActions).to.be.an("object");
-    expect(gameState.currentPlayerActions).not.to.include.keys("ROLL_DICE");
-  });
-  it("should not throw error if no players and trying to get current player", () => {
-    expect(gameState.currentPlayer).not.to.throw;
+  it("should return undefined if no players and trying to get current player", () => {
+    expect(gameState.currentPlayer).to.equal(undefined);
   });
   it("should retrieve current player", () => {
     gameState.players = [createPlayer({name: "player1"}), createPlayer({name: "player2"}), createPlayer({name: "player3"}), createPlayer({name: "player4"})];

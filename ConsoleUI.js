@@ -25,6 +25,7 @@ const consoleUI = (function (readline) {
     payFine: () => console.log(`PAYING FINE 💸💸💸`),
     passGo: () => console.log(`PASSING GO!`),
     jail: () => console.log(`IN JAIL 🤩🤩🤩🤩🤩`),
+    unknownAction: () => console.error(`unknown action attempted`)
   };
 })(require("readline-sync"));
 

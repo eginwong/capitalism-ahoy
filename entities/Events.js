@@ -23,7 +23,6 @@ module.exports = function (eventBus, userInterface, gameState) {
   // ======================================FUNCTIONS======================================
 
   function startTurn() {
-    console.log("\n");
     const player = gameState.currentPlayer;
     // TODO: refactor to setup function
     gameState.turnTaken = false;
@@ -51,20 +50,18 @@ module.exports = function (eventBus, userInterface, gameState) {
     if (desiredAction) {
       actions[desiredAction].execute();
     } else {
-      console.log("ACTION DOESN'T EXIST");
+      userInterface.unknownAction();
     }
   }
 
   function refreshActions(player, gameState) {
     // determine available actions
     const actions = gameState.allPlayerActions;
-    console.log("\n");
     Object.keys(gameState.allPlayerActions).forEach((action) => {
       const isAvailableAction = actions[action].isAvailable(player, gameState);
       actions[action].toggleDisplay(isAvailableAction);
       if (!isAvailableAction) delete actions[action];
     });
-    console.log("\n");
     return actions;
   }
 

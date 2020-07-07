@@ -27,6 +27,7 @@ describe("Game", () => {
       payFine: () => true,
       passGo: () => true,
       jail: () => true,
+      unknownAction: () => true
     };
   });
   afterEach(() => {
