@@ -23,6 +23,6 @@ describe("PropertyService", () => {
     );
     landedOnProperty.land = propertySpy;
     PropertyService.landOn(fakePosition);
-    expect(propertySpy.calledOnce).to.be.true;
+    expect(propertySpy.calledOnce).to.equal(true);
   });
 });

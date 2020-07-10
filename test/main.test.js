@@ -79,14 +79,12 @@ describe("main", () => {
           )
         );
 
-        // act
         eventBusEmitter.emit("START_GAME");
 
-        // assert
-        expect(startGameSpy.callCount).to.equal(1);
-        expect(gameState.turn).equal(1);
-        expect(gameState.players[0].position).not.to.equal(0);
-        expect(gameState.players[1].position).to.equal(0);
+        expect(startGameSpy.callCount).to.equal(1, "Game did not start");
+        expect(gameState.turn).equal(1, "Incorrect turn value");
+        expect(gameState.players[0].position).not.to.equal(0, "Player #1 did not move");
+        expect(gameState.players[1].position).to.equal(0, "Player #2 moved");
       }
     );
 
