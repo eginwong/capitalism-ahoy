@@ -42,7 +42,7 @@ describe("Game", () => {
         mockUI,
         gameState
       );
-      expect(Object.keys(gameObj.EVENTS)).to.deep.equal([
+      expect(Object.keys(gameObj.EVENTS)).to.have.deep.members([
         "START_GAME",
         "START_TURN",
         "CONTINUE_TURN",
@@ -51,22 +51,17 @@ describe("Game", () => {
         "PASS_GO",
         "SPEEDING",
         "JAIL"
-      ]);
-      expect(Object.keys(gameObj.PLAYER_ACTIONS)).to.deep.equal([
+      ], "Missing events");
+      expect(Object.keys(gameObj.PLAYER_ACTIONS)).to.have.deep.members([
         "ROLL_DICE",
         "PAY_FINE",
         "END_TURN",
-      ]);
+      ], "Missing player actions");
     });
     it("constructor should populate all player actions on gamestate and event listeners on emitter", () => {
       const eventBusEmitter = new EventEmitter();
       require("../entities/Game")(eventBusEmitter, mockUI, gameState);
-      expect(Object.keys(gameState.allPlayerActions)).to.deep.equal([
-        "ROLL_DICE",
-        "PAY_FINE",
-        "END_TURN",
-      ]);
-      expect(eventBusEmitter.eventNames()).to.deep.equal([
+      expect(eventBusEmitter.eventNames()).to.have.deep.members([
         "START_GAME",
         "START_TURN",
         "CONTINUE_TURN",
@@ -75,7 +70,12 @@ describe("Game", () => {
         "PASS_GO",
         "SPEEDING",
         "JAIL"
-      ]);
+      ], "Missing events");
+      expect(Object.keys(gameState.allPlayerActions)).to.have.deep.members([
+        "ROLL_DICE",
+        "PAY_FINE",
+        "END_TURN",
+      ], "Missing player actions");
     });
   });
 });

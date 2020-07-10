@@ -48,7 +48,7 @@ describe("Events", () => {
   });
   it("constructor should return object with associated event listeners", () => {
     for (property in EVENTS) {
-      expect(typeof EVENTS[property]).to.equal("function");
+      expect(typeof EVENTS[property]).to.equal("function", `Invalid property type, should be function for ${property}`);
     }
   });
 
@@ -71,8 +71,8 @@ describe("Events", () => {
       gameState.speedingCounter = 1;
       gameState.turnTaken = true;
       EVENTS.START_TURN();
-      expect(gameState.speedingCounter).to.equal(0);
-      expect(gameState.turnTaken).to.be.false;
+      expect(gameState.speedingCounter).to.equal(0, "Speeding counter should be reset to 0");
+      expect(gameState.turnTaken).to.equal(false, "Turn should not be taken at the start of turn");
     });
     it("should emit continue turn event", () => {
       const continueTurnSpy = sinon.spy();
@@ -85,16 +85,13 @@ describe("Events", () => {
       mockUI.startTurn = startTurnUISpy;
       EVENTS.START_TURN();
       expect(startTurnUISpy.callCount).to.equal(1);
-      expect(startTurnUISpy.getCall(0).args).to.deep.equal([
-        gameState.players[0],
-      ]);
+      expect(startTurnUISpy.getCall(0).args).to.have.deep.members([gameState.players[0]]);
     });
   });
   describe("passGo", () => {
     it("should increase player cash by 200", () => {
-      expect(gameState.currentPlayer.cash).to.equal(1500);
       EVENTS.PASS_GO();
-      expect(gameState.currentPlayer.cash).to.equal(1700);
+      expect(gameState.currentPlayer.cash).to.equal(1700, "Player passed GO, Player did NOT collect $200");
     });
     it("should make ui call", () => {
       const uiSpy = sinon.spy();
@@ -132,10 +129,10 @@ describe("Events", () => {
       EVENTS.CONTINUE_TURN();
       expect(
         uiRollDiceSpy.calledOnceWithExactly(gameState.currentPlayer, gameState)
-      ).to.be.true;
+      ).to.equal(true);
       expect(
         uiEndTurnSpy.calledOnceWithExactly(gameState.currentPlayer, gameState)
-      ).to.be.true;
+      ).to.equal(true);
     });
     it("should toggle display of all player actions", () => {
       const uiRollDiceSpy = sinon.spy();
@@ -143,13 +140,13 @@ describe("Events", () => {
       gameState._allPlayerActions["ROLL_DICE"].toggleDisplay = uiRollDiceSpy;
       gameState._allPlayerActions["END_TURN"].toggleDisplay = uiEndTurnSpy;
       EVENTS.CONTINUE_TURN();
-      expect(uiRollDiceSpy.calledOnceWithExactly(true)).to.be.true;
-      expect(uiEndTurnSpy.calledOnceWithExactly(false)).to.be.true;
+      expect(uiRollDiceSpy.calledOnceWithExactly(true)).to.equal(true);
+      expect(uiEndTurnSpy.calledOnceWithExactly(false)).to.equal(true);
     });
     it("should remove actions that are unavailable from current player actions", () => {
       EVENTS.CONTINUE_TURN();
-      expect(Object.keys(gameState.allPlayerActions).length).to.equal(2);
-      expect(Object.keys(gameState.currentPlayerActions).length).to.equal(1);
+      expect(Object.keys(gameState.allPlayerActions).length).to.equal(2, "Should have a total of 2 global actions");
+      expect(Object.keys(gameState.currentPlayerActions).length).to.equal(1, "Should have removed one available action");
     });
     it("should execute action if available", () => {
       const uiSpy = sinon.stub().callsFake(() => "roll_dice");
@@ -157,8 +154,8 @@ describe("Events", () => {
       gameState._allPlayerActions["ROLL_DICE"].execute = executeSpy;
       mockUI.prompt = uiSpy;
       EVENTS.CONTINUE_TURN();
-      expect(uiSpy.callCount).to.be.equal(1);
-      expect(executeSpy.callCount).to.be.equal(1);
+      expect(uiSpy.callCount).to.equal(1);
+      expect(executeSpy.callCount).to.equal(1);
     });
     it("should make error ui call if incorrect input is received for the action", () => {
       const uiSpy = sinon.stub().callsFake(() => undefined);
@@ -166,21 +163,21 @@ describe("Events", () => {
       mockUI.prompt = uiSpy;
       mockUI.unknownAction = uiUnknownActionSpy;
       EVENTS.CONTINUE_TURN();
-      expect(uiSpy.callCount).to.be.equal(1);
-      expect(uiUnknownActionSpy.callCount).to.be.equal(1);
+      expect(uiSpy.callCount).to.equal(1);
+      expect(uiUnknownActionSpy.callCount).to.equal(1);
     });
   });
   describe("diceRolled", () => {
     it("should set turn taken flag to true", () => {
       gameState.turnTaken = false;
       EVENTS.DICE_ROLLED([1, 2]);
-      expect(gameState.turnTaken).to.be.true;
+      expect(gameState.turnTaken).to.equal(true);
     });
     it("should make ui call", () => {
       const uiSpy = sinon.spy();
       mockUI.diceRollResults = uiSpy;
       EVENTS.DICE_ROLLED([1, 2]);
-      expect(uiSpy.callCount).to.be.equal(1);
+      expect(uiSpy.callCount).to.equal(1);
     });
     it("should update gamestate", () => {
       EVENTS.DICE_ROLLED([1, 2]);
@@ -195,7 +192,7 @@ describe("Events", () => {
         const uiSpy = sinon.spy();
         mockUI.rollJailDice = uiSpy;
         EVENTS.DICE_ROLLED([1, 2]);
-        expect(uiSpy.callCount).to.be.equal(1);
+        expect(uiSpy.callCount).to.equal(1);
       });
       it("should increase jailed counter if roll is not doubles", () => {
         EVENTS.DICE_ROLLED([1, 2]);
@@ -217,7 +214,7 @@ describe("Events", () => {
         eventBusEmitter.on("MOVE_PLAYER", movementSpy);
         EVENTS.DICE_ROLLED([1, 1]);
         expect(movementSpy.callCount).to.equal(1);
-        expect(movementSpy.calledOnceWithExactly(2)).to.be.true;
+        expect(movementSpy.calledOnceWithExactly(2)).to.equal(true);
       });
     });
 
@@ -226,7 +223,7 @@ describe("Events", () => {
         const uiSpy = sinon.spy();
         mockUI.rollNormalDice = uiSpy;
         EVENTS.DICE_ROLLED([1, 2]);
-        expect(uiSpy.callCount).to.be.equal(1);
+        expect(uiSpy.callCount).to.equal(1);
       });
       it("should increment speeding counter if roll is doubles", () => {
         gameState.speedingCounter = 0;
@@ -245,16 +242,16 @@ describe("Events", () => {
         eventBusEmitter.on("MOVE_PLAYER", movementSpy);
         gameState.speedingCounter = 2;
         EVENTS.DICE_ROLLED([1, 1]);
-        expect(gameState.speedingCounter).to.equal(3);
-        expect(speedingSpy.callCount).to.equal(1);
-        expect(movementSpy.callCount).to.equal(0);
+        expect(gameState.speedingCounter).to.equal(3, "Incorrect speeding counter after speeding");
+        expect(speedingSpy.callCount).to.equal(1, "Speeding was not called");
+        expect(movementSpy.callCount).to.equal(0, "Player should not have moved if speeding");
       });
       it("should emit move the player by the roll", () => {
         const movementSpy = sinon.spy();
         eventBusEmitter.on("MOVE_PLAYER", movementSpy);
         EVENTS.DICE_ROLLED([1, 1]);
         expect(movementSpy.callCount).to.equal(1);
-        expect(movementSpy.calledOnceWithExactly(2)).to.be.true;
+        expect(movementSpy.calledOnceWithExactly(2)).to.equal(true, "Incorrectly moved the player");
       });
     });
   });
@@ -264,8 +261,8 @@ describe("Events", () => {
       const uiSpy = sinon.spy();
       mockUI.playerMovement = uiSpy;
       EVENTS.MOVE_PLAYER(10);
-      expect(uiSpy.callCount).to.be.equal(1);
-      expect(uiSpy.calledOnceWithExactly(20)).to.be.true;
+      expect(uiSpy.callCount).to.equal(1);
+      expect(uiSpy.calledOnceWithExactly(20)).to.equal(true);
     });
     it("should emit pass go when player wraps around board", () => {
       gameState.currentPlayer.position = 39;
@@ -278,7 +275,7 @@ describe("Events", () => {
       const propertyServiceStub = sinon.spy(PropertyService, "landOn");
       gameState.currentPlayer.position = 39;
       EVENTS.MOVE_PLAYER(10);
-      expect(propertyServiceStub.calledOnceWithExactly(9)).to.be.true;
+      expect(propertyServiceStub.calledOnceWithExactly(9)).to.equal(true);
     });
     it("should continue the player's turn", () => {
       const continueTurnSpy = sinon.spy();
@@ -292,7 +289,7 @@ describe("Events", () => {
       const uiSpy = sinon.spy();
       mockUI.caughtSpeeding = uiSpy;
       EVENTS.SPEEDING();
-      expect(uiSpy.callCount).to.be.equal(1);
+      expect(uiSpy.callCount).to.equal(1);
     });
     it("should send the player to jail", () => {
       const jailSpy = sinon.spy();
@@ -306,7 +303,7 @@ describe("Events", () => {
       const uiSpy = sinon.spy();
       mockUI.jail = uiSpy;
       EVENTS.JAIL();
-      expect(uiSpy.callCount).to.be.equal(1);
+      expect(uiSpy.callCount).to.equal(1);
     });
     it("should set jailed counter", () => {
       EVENTS.JAIL();

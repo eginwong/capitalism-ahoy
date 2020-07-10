@@ -12,9 +12,7 @@ module.exports = {
   },
   setupMockDice: function (rolls, eventBus) {
     const diceGenerator = function* _diceGenerator() {
-      for (rollCombo of rolls) {
-        let roll1 = rollCombo[0];
-        let roll2 = rollCombo[1];
+      for ([roll1, roll2] of rolls) {
         if (roll1 > 6 || roll1 < 1 || roll2 > 6 || roll2 < 1) {
           throw Error("bad input to mock roll dice function");
         }
