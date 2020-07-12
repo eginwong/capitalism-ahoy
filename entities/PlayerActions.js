@@ -1,4 +1,6 @@
 
+const { DiceService } = require("../services/DiceService");
+
 /**
  * Responsibility: 
  *   Player-driven actions that can be executed depending on certain game conditions.
@@ -64,9 +66,6 @@ module.exports = function (eventBus, userInterface, gameState) {
 
   function rollDice() {
     userInterface.rollingDice();
-    const roll1 = Math.floor(Math.random() * 6) + 1;
-    const roll2 = Math.floor(Math.random() * 6) + 1;
-
-    eventBus.emit("DICE_ROLLED", [roll1, roll2]);
+    eventBus.emit("DICE_ROLLED", DiceService.roll({diceQuantity: 2}));
   }
 };
