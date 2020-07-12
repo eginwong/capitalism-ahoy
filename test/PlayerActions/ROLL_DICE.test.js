@@ -73,7 +73,7 @@ describe("PlayerActions -> ROLL_DICE", () => {
       };
     });
 
-    xit("should be available before first roll of the dice", () => {
+    it("should be available before first roll of the dice", () => {
       let result = methodUnderTest();
       expect(result).to.equal(true, "Action was not available before first dice roll");
 
@@ -81,6 +81,8 @@ describe("PlayerActions -> ROLL_DICE", () => {
         [1, 3],
       ]);
       PLAYER_ACTIONS.ROLL_DICE.execute();
+      gameState.turnTaken = true;
+
       result = methodUnderTest();
       expect(result).to.equal(false, "Action was available after first dice roll");
     });
@@ -89,20 +91,11 @@ describe("PlayerActions -> ROLL_DICE", () => {
         [1, 1],
       ]);
       PLAYER_ACTIONS.ROLL_DICE.execute();
+      gameState.turnTaken = true;
+      gameState.speedingCounter++;
+
       let result = methodUnderTest();
       expect(result).to.equal(true, "Action was unavailable after rolling doubles");
-    });
-    xit("shouldn't be available if player is speeding", () => {
-      mockRolls([
-        [1, 1],
-        [2, 2],
-        [3, 3],
-      ]);
-      PLAYER_ACTIONS.ROLL_DICE.execute();
-      PLAYER_ACTIONS.ROLL_DICE.execute();
-      PLAYER_ACTIONS.ROLL_DICE.execute();
-      let result = methodUnderTest();
-      expect(result).to.equal(false, "Action available after speeding");
     });
   });
 

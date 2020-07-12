@@ -76,7 +76,7 @@ describe("PlayerActions -> END_TURN", () => {
       };
     });
 
-    xit("should be available after rolling dice", () => {
+    it("should be available after rolling dice", () => {
         let result = methodUnderTest();
         expect(result).to.equal(false, "Available before rolling dice");
 
@@ -84,22 +84,30 @@ describe("PlayerActions -> END_TURN", () => {
             [1, 3],
         ]);
         PLAYER_ACTIONS.ROLL_DICE.execute();
+        gameState.turnTaken = true;
+
         result = methodUnderTest();
         expect(result).to.equal(true, "Unavailable after rolling dice");
     });
 
-    xit("should be unavailable on doubles", () => {
+    it("should be unavailable on doubles", () => {
         mockRolls([
             [1, 1],
             [2, 2],
             [3, 4]
         ]);
         PLAYER_ACTIONS.ROLL_DICE.execute();
+        gameState.turnTaken = true;
+        gameState.speedingCounter++;
+        
         let result = methodUnderTest();
         expect(result).to.equal(false, "Available on doubles");
-
+        
         PLAYER_ACTIONS.ROLL_DICE.execute();
+        gameState.speedingCounter++;
         PLAYER_ACTIONS.ROLL_DICE.execute();
+        gameState.speedingCounter = 0;
+        
         result = methodUnderTest();
         expect(result).to.equal(true, "Unavailable on non-doubles roll after rolling doubles");
     });
