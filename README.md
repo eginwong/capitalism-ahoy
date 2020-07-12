@@ -25,6 +25,7 @@
 - TODO: random array of movement emojis
   - read: emoji manifesto
 - TODO: enforce global house limits (32), hotel limits (12)
+- TODO: game log
 - TODO: remaining
   - ~~startTurn~~
   - ~~PropertyService~~
@@ -44,6 +45,30 @@
       - trade
       - sell
       - auction
+- TODO: Pass in options to set fine/go parameters/max houses
+- TODO: House service to manage property purchasing/global maximums
+- Q: does gamestate have dependency on house service (so that it knows how to set playeractions for buy house if available)? Or should that be on the property service?
+
+### ARCHITECTURE
+- Services
+  - BuildingService (buy/sell houses, enforce housing limits, handle buy/sell logic)
+    - requires propertyService OR gameState
+  - PropertyService (lookup of position <-> property, calculates rent, handles auctions/purchases/sales of property)
+  - CashManagementService (networth calculation, increment, decrement, liquidation, bankruptcy)
+    - Q: need to know when to calculate networth
+    - requires player
+  - CardService (community chest, chance, randomly draws card from open deck, shuffles)
+    - 
+- PlayerActions
+  - main actors
+- Events
+  - main actors
+- GameState
+  - glue
+- Game
+  - glue, configuration, start/continue
+- main
+
 
 ### CODE
 - ~~TODO: testing framework~~
@@ -52,6 +77,7 @@
 - ~~TODO: set up travis ci for test coverage check~~
 - TODO: linter
 - TODO: prettier
+- TODO: [add check for if there are formatting changes outstanding on build](https://github.com/yyx990803/yorkie)
 - TODO: look into removing gameState from PlayerActions#execute by passing it in
 - TODO: continue gamestate (check PropService?)
 - TODO: validate GameState

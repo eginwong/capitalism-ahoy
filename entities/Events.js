@@ -16,6 +16,7 @@ module.exports = function (eventBus, userInterface, gameState) {
     DICE_ROLLED: diceRolled,
     MOVE_PLAYER: movePlayer,
     PASS_GO: passGo,
+    // RESOLVE_PROPERTY: resolveProperty // auction, buy, set RESOLUTION PHASE ON in gamestate
     SPEEDING: speeding,
     JAIL: jail,
   };
@@ -118,7 +119,9 @@ module.exports = function (eventBus, userInterface, gameState) {
       futurePosition % PropertyService.properties.length);
     // UI: move token
 
-    PropertyService.landOn(tilePosition);
+    // get tile number to transform into tile type
+    // based on tile type, can either [RESOLUTION PHASE] (refresh actions) BUY, AUCTION, LIQUIDATE, PAY_RENT
+    PropertyService.landOn(tilePosition); // potentially return array of possible actions?
     eventBus.emit("CONTINUE_TURN");
   }
 

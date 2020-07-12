@@ -1,4 +1,6 @@
 
+const { DiceService } = require("../services/DiceService");
+
 /**
  * Responsibility: 
  *   Player-driven actions that can be executed depending on certain game conditions.
@@ -12,8 +14,6 @@ module.exports = function (eventBus, userInterface, gameState) {
       toggleDisplay: (shouldDisplay) => userInterface.rollDiceDisplay(shouldDisplay),
     },
     // USE_GET_OUT_OF_JAIL_CARD,
-    // BUY_GET_OUT_OF_JAIL_CARD,
-    // SELL_GET_OUT_JAIL_CARD,
     PAY_FINE: {
       execute: payFine,
       isAvailable: () => true,
@@ -27,11 +27,8 @@ module.exports = function (eventBus, userInterface, gameState) {
         !!gameState.lastRoll && (gameState.speedingCounter === 0),
       toggleDisplay: (shouldDisplay) => userInterface.endTurnDisplay(shouldDisplay),
     },
-    // CONSTRUCT_HOUSE,
-    // DECONSTRUCT_HOUSE,
-    // CONSTRUCT_HOTEL,
-    // DECONSTRUCT_HOTEL,
-    // MORTGAGE_PROPERTY,
+    // MANAGE_BUILDINGS,
+    // LIQUIDATE,
     // INITIATE_TRADE
   };
 
@@ -70,9 +67,6 @@ module.exports = function (eventBus, userInterface, gameState) {
 
   function rollDice() {
     userInterface.rollingDice();
-    const roll1 = Math.floor(Math.random() * 6) + 1;
-    const roll2 = Math.floor(Math.random() * 6) + 1;
-
-    eventBus.emit("DICE_ROLLED", [roll1, roll2]);
+    eventBus.emit("DICE_ROLLED", DiceService.roll({diceQuantity: 2}));
   }
 };
