@@ -133,3 +133,104 @@ integration test framework
     }
 ]
 ```
+
+# Architecture rework
+
+## The Keegan Approach
+### Step 1: Burn the Orphanarium
+- Game is the glue
+- Game imports all the components (f: tokens)
+    - Services
+    - Cards? 
+    - PlayerActions
+    - Events
+    - GameState?
+- Game hooks tokens via rules
+    - "When card is drawn, do this"
+    - e.g., game signals player turn
+    - throw out the UI stuff for the player,
+    - rule: tell the player what they can do
+    - player can choose one of the things they can do
+    - game receives signal associated with a rule
+    - rule: do the thing
+- Game is event bus / coordination
+- event emitting should be in the game instead
+- GRIPE: rule is embedded in other rules
+
+- gameState manipulation should happen outside
+```
+func when(signal, response) {
+    eventEmitter.on('signal', response);
+}
+
+// somewhere in game.js
+
+const diceRoll = get('ROLL_DICE', movePlayerResponse);
+when('RESOLVE_ROLL_DICE', subsequentResponse);
+
+subsequentResponse() {
+    // check doubles
+    // binding logic?
+}
+
+when('PLAYER_MOVED', displayUI);
+when('PLAYER_MOVED', showAnimation);
+
+```
+E: 
+game | middle | ruleEvaluation
+
+**service** | middle | game | ruleEvaluation
+deck        | translate card into rules | game | ruleEvaluation
+dice
+turn        | translate to current player | game | ruleEvaluation
+playerAction | (IO) -> translate to options | game | ruleEvaluation
+playerAction (IO) -> | translate to options | game | ruleEvaluation
+
+namespace Service {
+    Class Service {
+
+    }
+
+    static function ServiceAdapter(Service) {
+        getDice();
+
+    }
+}
+
+ServiceAdapter(Service, getDice)
+ServiceAdapter(Service.getDice())
+
+const getDice = ServiceAdapter(Service.getDice());
+
+when('DICE_ROLLED', (diceRoll) => DiceAdapter.format(diceRoll))
+
+## Eric Files
+
+- Services: pure input/output
+
+- like this because simple to grok:
+Game object
+composed of 
+PlayerActions/Events
+
+- don't like this because of overly explicit: 
+dice roll
+dice roll resolve
+
+## Tenets
+
+// services are features/components of the Game
+- diceService
+- turnService
+- movementService // boardService?
+- wealthService
+- communityChestService
+- chanceService
+- userPromptService
+  - gameState.actions = [];
+- actionService // each one should be different
+- jailService
+- speedingService
+- gameService
+- passGoService // rule

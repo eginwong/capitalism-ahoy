@@ -12,8 +12,6 @@ module.exports = function (eventBus, userInterface, gameState) {
       toggleDisplay: (shouldDisplay) => userInterface.rollDiceDisplay(shouldDisplay),
     },
     // USE_GET_OUT_OF_JAIL_CARD,
-    // BUY_GET_OUT_OF_JAIL_CARD,
-    // SELL_GET_OUT_JAIL_CARD,
     PAY_FINE: {
       execute: payFine,
       isAvailable: () => true,
@@ -27,11 +25,8 @@ module.exports = function (eventBus, userInterface, gameState) {
         gameState.turnTaken && (gameState.speedingCounter === 0),
       toggleDisplay: (shouldDisplay) => userInterface.endTurnDisplay(shouldDisplay),
     },
-    // CONSTRUCT_HOUSE,
-    // DECONSTRUCT_HOUSE,
-    // CONSTRUCT_HOTEL,
-    // DECONSTRUCT_HOTEL,
-    // MORTGAGE_PROPERTY,
+    // MANAGE_BUILDINGS,
+    // LIQUIDATE,
     // INITIATE_TRADE
   };
 

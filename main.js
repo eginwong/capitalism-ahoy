@@ -10,7 +10,7 @@ const EventEmitter = require("events");
 const { consoleUI } = require("./ConsoleUI");
 const { GameState } = require("./entities/GameState");
 
-let gameState = new GameState();
+let gameState = new GameState(); // or loads gameState
 gameState.players = [createPlayer({name: "player1"}), createPlayer({name: "player2"})];
 
 const eventBus = new EventEmitter();

@@ -172,6 +172,8 @@ class PropertyService {
       (prop) => prop.position === position
     );
     landedOnProperty.land();
+    // should this emit a callback with a specific action?
+    // either auction, purchase, or rent, or no-op?
     // console.dir(landedOnProperty);
   }
 }
