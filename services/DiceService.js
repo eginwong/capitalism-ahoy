@@ -1,10 +1,8 @@
 class DiceService {
-    static roll(param) {
-        const diceQuantity = param && param.diceQuantity || 1;
-        const diceFaces = param && param.diceFaces || 6;
+    static roll({ quantity = 1, faces = 6}) {
         let result = [];
-        for(let i = 0; i < diceQuantity; i++) {
-           result.push(Math.floor(Math.random() * diceFaces) + 1);
+        for(let i = 0; i < quantity; i++) {
+           result.push(Math.floor(Math.random() * faces) + 1);
         }
         return result;
     }
