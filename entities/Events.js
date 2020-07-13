@@ -25,7 +25,6 @@ module.exports = function (eventBus, userInterface, gameState) {
   function startTurn() {
     const player = gameState.currentPlayer;
     // TODO: refactor to setup function
-    gameState.turnTaken = false;
     gameState.speedingCounter = 0;
     userInterface.startTurn(player);
 
@@ -66,8 +65,6 @@ module.exports = function (eventBus, userInterface, gameState) {
   }
 
   function diceRolled([roll1, roll2]) {
-    // dirty the turnTaken flag for end turn
-    gameState.turnTaken = true;
     userInterface.diceRollResults(roll1, roll2);
     gameState.lastRoll = roll1 + roll2;
     const isDoubles = roll1 === roll2;

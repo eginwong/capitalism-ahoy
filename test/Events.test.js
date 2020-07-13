@@ -67,12 +67,10 @@ describe("Events", () => {
     });
   });
   describe("startTurn", () => {
-    it("should reset speeding counter and turn taken flag", () => {
+    it("should reset speeding counter", () => {
       gameState.speedingCounter = 1;
-      gameState.turnTaken = true;
       EVENTS.START_TURN();
       expect(gameState.speedingCounter).to.equal(0, "Speeding counter should be reset to 0");
-      expect(gameState.turnTaken).to.equal(false, "Turn should not be taken at the start of turn");
     });
     it("should emit continue turn event", () => {
       const continueTurnSpy = sinon.spy();
@@ -168,11 +166,6 @@ describe("Events", () => {
     });
   });
   describe("diceRolled", () => {
-    it("should set turn taken flag to true", () => {
-      gameState.turnTaken = false;
-      EVENTS.DICE_ROLLED([1, 2]);
-      expect(gameState.turnTaken).to.equal(true);
-    });
     it("should make ui call", () => {
       const uiSpy = sinon.spy();
       mockUI.diceRollResults = uiSpy;

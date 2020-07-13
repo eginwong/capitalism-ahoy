@@ -7,7 +7,6 @@ const { cloneDeep } = require("lodash");
 */
 class GameState {
   turn = 0;
-  turnTaken = false;
   players = [];
   _allPlayerActions = {};
   _currentPlayerActions = {};

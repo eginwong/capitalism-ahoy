@@ -81,7 +81,7 @@ describe("PlayerActions -> ROLL_DICE", () => {
         [1, 3],
       ]);
       PLAYER_ACTIONS.ROLL_DICE.execute();
-      gameState.turnTaken = true;
+      gameState.lastRoll = 4;
 
       result = methodUnderTest();
       expect(result).to.equal(false, "Action was available after first dice roll");
@@ -91,7 +91,7 @@ describe("PlayerActions -> ROLL_DICE", () => {
         [1, 1],
       ]);
       PLAYER_ACTIONS.ROLL_DICE.execute();
-      gameState.turnTaken = true;
+      gameState.lastRoll = 2;
       gameState.speedingCounter++;
 
       let result = methodUnderTest();

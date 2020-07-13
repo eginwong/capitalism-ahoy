@@ -84,7 +84,7 @@ describe("PlayerActions -> END_TURN", () => {
             [1, 3],
         ]);
         PLAYER_ACTIONS.ROLL_DICE.execute();
-        gameState.turnTaken = true;
+        gameState.lastRoll = 4;
 
         result = methodUnderTest();
         expect(result).to.equal(true, "Unavailable after rolling dice");
@@ -97,15 +97,17 @@ describe("PlayerActions -> END_TURN", () => {
             [3, 4]
         ]);
         PLAYER_ACTIONS.ROLL_DICE.execute();
-        gameState.turnTaken = true;
+        gameState.lastRoll = 2;
         gameState.speedingCounter++;
         
         let result = methodUnderTest();
         expect(result).to.equal(false, "Available on doubles");
         
         PLAYER_ACTIONS.ROLL_DICE.execute();
+        gameState.lastRoll = 4;
         gameState.speedingCounter++;
         PLAYER_ACTIONS.ROLL_DICE.execute();
+        gameState.lastRoll = 7;
         gameState.speedingCounter = 0;
         
         result = methodUnderTest();
