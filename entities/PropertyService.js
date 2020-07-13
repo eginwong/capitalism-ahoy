@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 /**
  * Responsibility: 
  *   Defines a model and associated metadata for a space on the game board.
