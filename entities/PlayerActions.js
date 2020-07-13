@@ -8,7 +8,7 @@ module.exports = function (eventBus, userInterface, gameState) {
     ROLL_DICE: {
       execute: rollDice,
       isAvailable: (_, gameState) =>
-        !gameState.turnTaken || (gameState.speedingCounter > 0),
+        !gameState.lastRoll || (gameState.speedingCounter > 0),
       toggleDisplay: (shouldDisplay) => userInterface.rollDiceDisplay(shouldDisplay),
     },
     // USE_GET_OUT_OF_JAIL_CARD,
@@ -24,7 +24,7 @@ module.exports = function (eventBus, userInterface, gameState) {
       execute: endTurn,
       // FUTURE: think about bankrupt or jail
       isAvailable: (_, gameState) =>
-        gameState.turnTaken && (gameState.speedingCounter === 0),
+        !!gameState.lastRoll && (gameState.speedingCounter === 0),
       toggleDisplay: (shouldDisplay) => userInterface.endTurnDisplay(shouldDisplay),
     },
     // CONSTRUCT_HOUSE,
@@ -40,6 +40,7 @@ module.exports = function (eventBus, userInterface, gameState) {
   function endTurn() {
     userInterface.endTurn();
     // UI: fancy game animation
+    delete gameState.lastRoll;
     gameState.turn++;
     // begin next turn
     eventBus.emit("START_TURN");
