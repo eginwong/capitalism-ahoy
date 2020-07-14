@@ -3,9 +3,12 @@
  * Responsibility: 
  *   Imports resources and starts game loop for node.js environment.
 */
+// global error handler
+process.on('uncaughtException', function (err) {
+  console.error(err);
+});
 
-// TODO: Consider making static?
-
+// Game Dependencies
 const EventEmitter = require("events");
 const { consoleUI } = require("./ConsoleUI");
 const { GameState } = require("./entities/GameState");
@@ -14,9 +17,12 @@ let gameState = new GameState(); // or loads gameState
 gameState.players = [createPlayer({name: "player1"}), createPlayer({name: "player2"})];
 
 const eventBus = new EventEmitter();
-const UI = Object.assign({}, consoleUI);
+const userInterface = Object.assign({}, consoleUI);
 
-require("./entities/Game")(eventBus, UI, gameState);
+// Start the game
+require("./entities/Game")({ eventBus, userInterface, gameState });
+
+// ------------------------------- //
 
 // TODO: replace with class
 function createPlayer({ name }) {
@@ -29,12 +35,4 @@ function createPlayer({ name }) {
     getOutOfJailFreeCards: 0,
     properties: [],
   };
-}
-
-// global error handler
-process.on('uncaughtException', function (err) {
-  console.error(err);
-  console.error("OHSNAPZ");
-});
-
-eventBus.emit("START_GAME");
+};
