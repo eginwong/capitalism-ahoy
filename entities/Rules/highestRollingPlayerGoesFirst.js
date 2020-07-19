@@ -3,7 +3,7 @@
  * Effect: Reorder PlayerList Component based on Contest with Dice Component
  */
 const dice = require('../Components/Dice');
-module.exports = function highestRollingPlayerGoesFirst ({ notify, UI }, { players }) {
+module.exports = function highestRollingPlayerGoesFirst ({ UI }, { players }) {
     // TODO: UI.prompt -> UI.anyKey
     let rolls = players.map(({ name }) => {
         UI.prompt(`${ name } roll dice - `);
@@ -19,6 +19,4 @@ module.exports = function highestRollingPlayerGoesFirst ({ notify, UI }, { playe
     // TODO: Handle Ties
     let shiftValue = (players.length - highest) % players.length;
     for(; shiftValue > 0; --shiftValue) players.push(players.shift());
-
-    notify("PLAYERS_REORDERED");
 };
