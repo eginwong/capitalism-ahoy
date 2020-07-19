@@ -3,7 +3,10 @@ const expect = require("chai").expect;
 const sinon = require("sinon");
 const EventEmitter = require("events");
 const { GameState } = require("../entities/GameState");
-const { createPlayer, setupMockDice } = require("./testutils");
+const { createPlayer } = require("./testutils");
+const mockUIFactory = require("./mocks/UI");
+const Dice = require("../entities/Components/Dice");
+const PlayerActions = require("../entities/PlayerActions");
 
 function gwt(strings) {
   const statements = strings.raw[0].split(" | ");
@@ -16,8 +19,8 @@ function gwt(strings) {
 describe("main", () => {
   describe("feature: starts", () => {
     let gameState;
-    let mockUI;
-    let eventBusEmitter;
+    let userInterface;
+    let eventBus;
     // mock?
     // spy on functions?
     beforeEach(() => {
@@ -26,27 +29,8 @@ describe("main", () => {
         createPlayer({ name: "player1" }),
         createPlayer({ name: "player2" }),
       ];
-      mockUI = {
-        startGame: () => true,
-        startTurn: (player) => false,
-        displayAvailableActions: (actions) => false,
-        prompt: () => true,
-        endTurn: () => true,
-        rollingDice: () => true,
-        rollDiceDisplay: (shouldDisplay) => true,
-        payFineDisplay: (shouldDisplay) => true,
-        endTurnDisplay: (shouldDisplay) => true,
-        diceRollResults: (roll1, roll2) => true,
-        rollNormalDice: () => true,
-        rollJailDice: () => true,
-        caughtSpeeding: () => true,
-        playerMovement: (position) => true,
-        payFine: () => true,
-        passGo: () => true,
-        jail: () => true,
-        unknownAction: () => true
-      };
-      eventBusEmitter = new EventEmitter();
+      userInterface = mockUIFactory();
+      eventBus = new EventEmitter();
     });
 
     afterEach(() => {
@@ -57,33 +41,27 @@ describe("main", () => {
     it(
       gwt`cold start | game is loaded | first player rolls dice and ends turn`,
       () => {
-        require("../entities/Game")(eventBusEmitter, mockUI, gameState);
-
         // arrange
-        const startGameSpy = sinon.spy();
-        const promptStub = sinon.stub();
+        const promptStub = sinon.stub(PlayerActions, "prompt");
         promptStub.onCall(0).returns("ROLL_DICE");
         promptStub.onCall(1).returns("ROLL_DICE");
         promptStub.onCall(2).returns("END_TURN");
-        mockUI.startGame = startGameSpy;
-        mockUI.prompt = promptStub;
+        const startGameSpy = sinon.spy();
+        userInterface.startGame = startGameSpy;
+        userInterface.prompt = promptStub;
 
-        // TODO: refactor to be cleaner
-        sinon.stub(gameState._allPlayerActions.ROLL_DICE, "execute").callsFake(
-          setupMockDice(
-            [
-              [1, 1],
-              [1, 2],
-            ],
-            eventBusEmitter
-          )
-        );
+        const diceStub = sinon.stub(Dice, "roll");
+        diceStub.onCall(0).returns([1, 1]);
+        diceStub.onCall(1).returns([1, 2]);
 
-        eventBusEmitter.emit("START_GAME");
+        require("../entities/Game")({ eventBus, userInterface, gameState });
 
         expect(startGameSpy.callCount).to.equal(1, "Game did not start");
         expect(gameState.turn).equal(1, "Incorrect turn value");
-        expect(gameState.players[0].position).not.to.equal(0, "Player #1 did not move");
+        expect(gameState.players[0].position).to.equal(
+          5,
+          "Player #1 did not move"
+        );
         expect(gameState.players[1].position).to.equal(0, "Player #2 moved");
       }
     );

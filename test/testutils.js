@@ -10,6 +10,7 @@ module.exports = {
       properties: [],
     };
   },
+  // TODO: DEPRECATE
   setupMockDice: function (rolls, eventBus) {
     const diceGenerator = function* _diceGenerator() {
       for ([roll1, roll2] of rolls) {
