@@ -53,4 +53,9 @@ module.exports = {
         },
         ({ notify }) => notify("CONTINUE_TURN")
     ],
+    "END_TURN": [
+        ({ UI }) => UI.endTurn(),
+        (_, gameState) => gameState.turn++,
+        ({ notify }) => notify("START_TURN")
+    ],
 };
