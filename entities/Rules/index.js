@@ -13,9 +13,13 @@ module.exports = {
         ({ notify }) => notify("START_TURN"), // require('./playerTurnsStart')
     ],
     "START_TURN": [
-        require('./resetTurnAssociatedValues')({ //(require('./Defaults/turnValues')),
+        ({ notify }, gameState) => { 
+            require('./resetTurnAssociatedValues')
+            ({ //(require('./Defaults/turnValues')),
             speedingCounter: 0
-        }),
+            })(gameState);
+            notify("TURN_VALUES_RESET");
+        },
         ({ UI }, gameState) => UI.startTurn(gameState.currentPlayer),
         ({ notify }) => notify("CONTINUE_TURN"),
     ],
@@ -32,11 +36,13 @@ module.exports = {
     ],
     "ROLL_DICE": [
         ({ UI }) => UI.rollingDice(),
-        // TODO: Switch to Adapter Pattern; migrate logic back to rollDice
-        require('./updateTurnValues')((dice = require('../Components/Dice')) => 
-            ({ roll: dice.roll({ quantity: 2 }) })
-        ),
-        // require('./rollDice'),
+        ({ notify }, gameState) => { 
+            require('./updateTurnValues')
+            ({
+                roll: require('../Components/Dice').roll({ quantity: 2 })
+            })(gameState);
+            notify("TURN_VALUES_UPDATED");
+        },
         ({ UI }, { turnValues }) => UI.diceRollResults(turnValues.roll[0], turnValues.roll[1]),
         function conditionalEventsOnDiceRolled ({ notify }, gameState) {
             if (gameState.currentPlayer.jailed >= 0) {
