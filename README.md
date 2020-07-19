@@ -68,6 +68,7 @@
 - Game
   - glue, configuration, start/continue
 - main
+- TODO: One-Pager Architecture Write-up :: Keegan
 
 
 ### CODE
@@ -78,7 +79,7 @@
 - TODO: linter
 - TODO: prettier
 - TODO: [add check for if there are formatting changes outstanding on build](https://github.com/yyx990803/yorkie)
-- TODO: look into removing gameState from PlayerActions#execute by passing it in
+- ~~TODO: look into removing gameState from PlayerActions#execute by passing it in~~
 - TODO: continue gamestate (check PropService?)
 - TODO: validate GameState
 - TODO: use inquirer for prompts instead

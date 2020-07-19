@@ -6,6 +6,7 @@
  * For example: node.js uses `EventEmitter` and browser uses `window` for the {eventBus},
  *   so we can continue games between different platforms.
 */
+const { forIn } = require('lodash');
 module.exports = function _capitalismAhoyGame({ eventBus, userInterface, gameState }) {
     const Rules = require("./Rules");
     /// Helpers
@@ -15,15 +16,20 @@ module.exports = function _capitalismAhoyGame({ eventBus, userInterface, gameSta
 
     // Wrapper for subscribing one-to-many functions to an event
     const when = (eventName, ...handlers) => {
+        console.log(eventName);
+        console.dir(handlers);
         handlers.forEach(handler =>
             on(eventName, handler.bind(null, { notify, UI: userInterface }, gameState))
         );
     };
 
     // Wire all the game rules
-    Rules.forEach(({ condition, rules }) =>
+    forIn(Rules, (rules, condition) =>
         when(condition, ...rules)
     );
+    // Rules.forEach(({ condition, rules }) =>
+    //     when(condition, ...rules)
+    // );
 
     // Start the game
     notify("START_GAME");
