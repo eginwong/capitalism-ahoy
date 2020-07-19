@@ -5,10 +5,10 @@
 // const turn = require('../Components/Turn'); // Interface ?
 const { merge } = require('lodash')
 module.exports = function _updateTurnValues (template) {
-    return function updateTurnValues ({ notify }, gameState) {
+    return function updateTurnValues (gameState) {
         merge(gameState, {
-            turnValues: typeof template === 'function' ? template() : template
+            turnValues: template
+            // turnValues: typeof template === 'function' ? template() : template
         });
-        notify("TURN_VALUES_UPDATED");
     }
 };

@@ -22,28 +22,4 @@ describe("GameState", () => {
     gameState.turn++;
     expect(gameState.currentPlayer.name).to.equal("player1", `Incorrect current player ${gameState.currentPlayer.name}`);
   });
-  it("should get and set player actions", () => {
-    const mockPlayerActions = {
-      ROLL_DICE: { execute: () => true },
-      PAY_FINE: { execute: () => false }
-    }; 
-    gameState.allPlayerActions = mockPlayerActions;
-    expect(mockPlayerActions).to.deep.equal(gameState.allPlayerActions, "Incorrectly set all player actions");
-
-    const actions = gameState.allPlayerActions;
-    delete actions["ROLL_DICE"];
-    expect(mockPlayerActions).not.to.deep.equal(actions, "All player action was not deleted");
-  });
-  it("should get and set current player actions", () => {
-    const mockPlayerActions = {
-      ROLL_DICE: { execute: () => true },
-      PAY_FINE: { execute: () => false }
-    }; 
-    gameState.currentPlayerActions = mockPlayerActions;
-    expect(mockPlayerActions).to.deep.equal(gameState.currentPlayerActions, "Incorrectly set current player actions");
-
-    const actions = gameState.currentPlayerActions;
-    delete actions["ROLL_DICE"];
-    expect(gameState.currentPlayerActions).to.deep.equal(actions, "Current player action was not deleted");
-  });
 });

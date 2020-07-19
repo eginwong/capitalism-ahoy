@@ -4,10 +4,9 @@
  */
 // const turn = require('../Components/Turn'); // Interface ?
 module.exports = function _resetTurnAssociatedValues (template) {
-    return function resetTurnAssociatedValues ({ notify }, gameState) {
+    return function resetTurnAssociatedValues (gameState) {
         Object.assign(gameState, {
             turnValues: template
         });
-        notify("TURN_VALUES_RESET");
     }
 };
