@@ -53,6 +53,26 @@ module.exports = {
         },
         ({ notify }) => notify("CONTINUE_TURN")
     ],
+    "MOVE_ROLL": [
+        ({ UI }) => UI.rollNormalDice(),
+        ({ notify }, gameState) => { 
+            const [roll1, roll2] = gameState.turnValues.roll; 
+            const isDoubles = roll1 === roll2;
+            require('./updateTurnValues')
+            ({
+                // reset to 0 because refresh actions checks speeding counter
+                speedingCounter: isDoubles ? gameState.turnValues.speedingCounter + 1 : 0
+            })(gameState);
+            notify("TURN_VALUES_UPDATED");
+        },
+        function conditionalEventsOnSpeeding ({ notify }, gameState) {
+            if (gameState.turnValues.speedingCounter > 2) {
+                notify("SPEEDING");
+            } else {
+                notify("MOVE_PLAYER");
+            }
+        },
+    ],
     "JAIL_ROLL": [
         ({ UI }) => UI.rollJailDice(),
         (_, gameState) => {
