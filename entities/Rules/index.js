@@ -53,6 +53,24 @@ module.exports = {
         },
         ({ notify }) => notify("CONTINUE_TURN")
     ],
+    "JAIL_ROLL": [
+        ({ UI }) => UI.rollJailDice(),
+        (_, gameState) => {
+            const [roll1, roll2] = gameState.turnValues.roll; 
+            const isDoubles = roll1 === roll2;
+            gameState.currentPlayer.jailed = isDoubles ? -1 : gameState.currentPlayer.jailed + 1;
+        },
+        ({ notify }, gameState) => {
+            if(gameState.currentPlayer.jailed > 2) {
+                notify("PAY_FINE");
+            }
+        },
+        ({ notify }, gameState) => {
+            if(gameState.currentPlayer.jailed === -1) {
+                notify("MOVE_PLAYER");
+            }
+        },
+    ],
     "END_TURN": [
         ({ UI }) => UI.endTurn(),
         (_, gameState) => gameState.turn++,
