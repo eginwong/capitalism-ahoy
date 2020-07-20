@@ -96,4 +96,31 @@ module.exports = {
         (_, gameState) => gameState.turn++,
         ({ notify }) => notify("START_TURN")
     ],
+    "PAY_FINE": [
+        ({ UI }) => UI.payFine(),
+        // TODO: WealthService
+        (_, gameState) => {
+            const FINE = 50;
+            gameState.currentPlayer.cash -= FINE;
+            gameState.currentPlayer.jailed = -1;
+            // TODO: investigate using setter for bankruptcy logic
+        },
+        function conditionalEventsOnLostWealth ({ notify }, gameState) {
+            // REVISIT: NETWORTH
+            // if (gameState.currentPlayer.cash < 0 && gameState.currentPlayer.netWorth < Math.abs(gameState.currentPlayer.cash)) {
+            if (gameState.currentPlayer.netWorth < Math.abs(gameState.currentPlayer.cash)) {
+                notify("BANKRUPTCY");
+            } else if (gameState.currentPlayer.cash < 0) {
+            // UI: show liquidation menu
+            // TODO: KENTINUE
+                notify("LIQUIDATION");
+            }
+            // UI: disable action
+        },
+        ({ notify }) => notify("CONTINUE_TURN")
+    ],
+    //   BUY_PROPERTY: () => {},
+    //   PAY_RENT,
+    //   BANKRUPTCY: bankruptcy,
+    //   // potentially Chance/Community Cards
 };
