@@ -119,8 +119,27 @@ module.exports = {
         },
         ({ notify }) => notify("CONTINUE_TURN")
     ],
+    "SPEEDING": [
+        ({ UI }) => UI.caughtSpeeding(),
+        ({ notify }) => notify("JAIL")
+    ],
+    "PASS_GO": [
+        ({ UI }) => UI.passGo(),
+        (_, gameState) => gameState.currentPlayer.cash += 200,
+        ({ notify }) => notify("JAIL")
+    ],
+    "JAIL": [
+        ({ UI }) => UI.jail(),
+        (_, gameState) => {
+            gameState.currentPlayer.jailed = 0;
+            // gameState.currentPlayer.position = PropertyService.properties.find(
+            //     (prop) => prop.id === "jail"
+            // ).position;
+        },
+        ({ notify }) => notify("END_TURN")
+    ],
     //   BUY_PROPERTY: () => {},
     //   PAY_RENT,
-    //   BANKRUPTCY: bankruptcy,
+    //   BANKRUPTCY: () => gameState.currentPlayerActions["END_TURN"].execute(),
     //   // potentially Chance/Community Cards
 };
