@@ -7,6 +7,7 @@ const { createPlayer } = require("./testutils");
 const mockUIFactory = require("./mocks/UI");
 const Dice = require("../entities/Components/Dice");
 const PlayerActions = require("../entities/PlayerActions");
+const config = require("../config/monopolyConfiguration");
 
 function gwt(strings) {
   const statements = strings.raw[0].split(" | ");
@@ -29,6 +30,7 @@ describe("main", () => {
         createPlayer({ name: "player1" }),
         createPlayer({ name: "player2" }),
       ];
+      gameState.config = config;
       userInterface = mockUIFactory();
       eventBus = new EventEmitter();
     });
@@ -46,6 +48,7 @@ describe("main", () => {
         promptStub.onCall(0).returns("ROLL_DICE");
         promptStub.onCall(1).returns("ROLL_DICE");
         promptStub.onCall(2).returns("END_TURN");
+        promptStub.onCall(3).returns("END_GAME");
         const startGameSpy = sinon.spy();
         userInterface.startGame = startGameSpy;
         userInterface.prompt = promptStub;

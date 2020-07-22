@@ -1,4 +1,10 @@
 {
+  "passGoAmount": 200,
+  "fineAmount": 50,
+  "propertyConfig": {
+    "count": 40,
+    "houses": 32,
+    "hotels": 12,
     "properties": [
       {
         "name": "Mediterranean Avenue",
@@ -349,7 +355,7 @@
       {
         "name": "Income Tax",
         "id": "incometax",
-        "position": 4, 
+        "position": 4,
         "group": "Special"
       },
       {
@@ -412,8 +418,10 @@
         "position": 38,
         "group": "Special"
       }
-    ],
-    "chance": [
+    ]
+  },
+  "chanceConfig": {
+    "availableCards": [
       {
         "title": "Advance to Go (Collect $200)",
         "action": "move",
@@ -492,8 +500,10 @@
         "action": "addfunds",
         "amount": 50
       }
-    ],
-    "communitychest": [
+    ]
+  },
+  "communityChestConfig": {
+    "availableCards": [
       {
         "title": "Advance to Go (Collect $200)",
         "action": "move",
@@ -577,3 +587,4 @@
       }
     ]
   }
+}

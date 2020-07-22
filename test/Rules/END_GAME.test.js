@@ -5,9 +5,8 @@ const mockUIFactory = require("../mocks/UI");
 
 const { GameState } = require("../../entities/GameState");
 const { createPlayer } = require("../testutils");
-const config = require("../../config/monopolyConfiguration");
 
-describe("Rules -> JAIL", () => {
+describe("Rules -> END_GAME", () => {
   let gameState;
   let userInterface;
   let eventBus;
@@ -17,8 +16,7 @@ describe("Rules -> JAIL", () => {
     gameState = new GameState();
     eventBus = new EventEmitter();
     userInterface = mockUIFactory();
-    gameState.players = [createPlayer({ name: "player1" })];
-    gameState.config = config;
+    gameState.players = [createPlayer({ name: "player1" }), createPlayer({ name: "player2" }), createPlayer({ name: "player3" })];
   });
 
   afterEach(() => {
@@ -26,10 +24,8 @@ describe("Rules -> JAIL", () => {
     sinon.restore();
   });
 
-  describe("jail", () => {
-    const inputEvent = "JAIL";
-    let endTurnEvent = "END_TURN";
-    let endTurnSpy;
+  describe("endGame", () => {
+    const inputEvent = "END_GAME";
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -41,30 +37,26 @@ describe("Rules -> JAIL", () => {
           handler.bind(null, { notify, UI: userInterface }, gameState)
         )
       );
-      endTurnSpy = sinon.spy();
-      eventBus.on(endTurnEvent, endTurnSpy);
     });
 
-    it("should make a call to the UI#jail", () => {
+    it("should make a call to the UI#gameOver", () => {
       const uiSpy = sinon.spy();
-      userInterface.jail = uiSpy;
+      userInterface.gameOver = uiSpy;
       eventBus.emit(inputEvent);
       expect(uiSpy.calledOnce).to.equal(
         true,
-        `Initial UI method for ${inputEvent} was not called`
+        `UI method for ${inputEvent} was not called`
       );
     });
-    it("should set jailed counter", () => {
+    it("should pass highest net worth player to the UI#gameOver", () => {
+      gameState.players[0].netWorth = 1700;
+      const uiSpy = sinon.spy();
+      userInterface.gameOver = uiSpy;
       eventBus.emit(inputEvent);
-      expect(gameState.currentPlayer.jailed).to.equal(0, "Jail counter was not set to 0");
+      expect(uiSpy.calledOnceWithExactly("player1", 1700)).to.equal(
+        true,
+        `UI method for ${inputEvent} was not called with correct parameters`
+      );
     });
-    it("should update player's position to jail", () => {
-      eventBus.emit(inputEvent);
-      expect(gameState.currentPlayer.position).to.equal(10);
-    });
-    it(`the ${ endTurnEvent } event should be called`, () => {
-      eventBus.emit(inputEvent);
-      expect(endTurnSpy.callCount).to.equal(1, `${ endTurnEvent } was not called`);
-    })
   });
 });

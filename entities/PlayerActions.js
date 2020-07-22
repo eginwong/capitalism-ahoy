@@ -9,6 +9,7 @@ const ACTIONS = {
   // USE_GET_OUT_OF_JAIL_CARD,
   PAY_FINE: (gameState) => gameState.currentPlayer.jailed >= 0,
   END_TURN: (gameState) => !!gameState.turnValues.roll && (gameState.turnValues.speedingCounter === 0),
+  END_GAME: () => true, 
   // MANAGE_BUILDINGS,
   // LIQUIDATE,
   // INITIATE_TRADE

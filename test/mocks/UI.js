@@ -19,5 +19,6 @@ module.exports = function mockUIFactory () {
         passGo: () => true,
         jail: () => true,
         unknownAction: () => true,
+        gameOver: () => true,
     };
 };

@@ -1,28 +1,71 @@
 const expect = require("chai").expect;
-const sinon = require("sinon");
-const { cloneDeep } = require("lodash");
-const { PropertyService } = require("../entities/PropertyService");
+const PropertyService = require("../entities/PropertyService");
+const { GameState } = require("../entities/GameState");
+const { createPlayer } = require("./testutils");
+const config = require("../config/monopolyConfiguration");
 
 describe("PropertyService", () => {
-  const properties = cloneDeep(PropertyService.properties);
+  let gameState;
+
   beforeEach(() => {
-    PropertyService.properties = properties;
+    gameState = new GameState();
+    gameState.players = [createPlayer({ name: "player1" })];
+    gameState.config = config;
   });
-  it("should load contain 40 properties by default", () => {
-    expect(PropertyService.properties.length).to.equal(40);
+
+  describe("findProperty", () => {
+    it("should return property if id is found", () => {
+      expect(PropertyService.findProperty(gameState, "jail")).to.deep.equal(
+        {
+          name: "Jail / Just Visiting",
+          id: "jail",
+          position: 10,
+          group: "Special",
+        },
+        "Incorrect property retrieved from findProperty"
+      );
+    });
+    it("should return undefined if id is not found in properties", () => {
+      expect(PropertyService.findProperty(gameState, "nonsense")).to.be
+        .undefined;
+    });
   });
-  it("should set properties and handle no properties", () => {
-    PropertyService.properties = undefined;
-    expect(PropertyService.properties).to.deep.equal([]);
+  describe("findBoardPosition", () => {
+    it("should return current player position if not wrapping around the board", () => {
+      gameState.currentPlayer.position = 3;
+      expect(PropertyService.findBoardPosition(gameState)).to.equal(
+        3,
+        "Incorrectly lowers current player's position"
+      );
+    });
+    it("should return current player position modded if over length of properties", () => {
+      gameState.currentPlayer.position = 42;
+      expect(PropertyService.findBoardPosition(gameState)).to.equal(
+        2,
+        "Incorrectly overflows current player's position"
+      );
+    });
   });
-  it("should load on a position and trigger its property effects", () => {
-    const propertySpy = sinon.spy();
-    const fakePosition = 8;
-    const landedOnProperty = PropertyService.properties.find(
-      (prop) => prop.position === fakePosition
-    );
-    landedOnProperty.land = propertySpy;
-    PropertyService.landOn(fakePosition);
-    expect(propertySpy.calledOnce).to.equal(true);
+  describe("getCurrentBoardProperty", () => {
+    it("should retrieve board property of current player", () => {
+      gameState.currentPlayer.position = 3;
+      const boardPosition = PropertyService.getCurrentBoardProperty(gameState);
+      expect(boardPosition).to.deep.equal(
+        {
+          name: "Baltic Avenue",
+          id: "balticave",
+          position: 3,
+          price: 60,
+          rent: 4,
+          multpliedrent: [20, 60, 180, 320, 450],
+          housecost: 50,
+          group: "Purple",
+          ownedby: -1,
+          buildings: 0,
+          mortgaged: false,
+        },
+        `Incorrect board property returned from current player's position`
+      );
+    });
   });
 });
