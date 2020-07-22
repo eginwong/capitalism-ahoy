@@ -29,13 +29,19 @@
 - TODO: remaining
   - ~~startTurn~~
   - ~~PropertyService~~
-  - PAY_RENT
+  - MoveService?
+    - gameState must have extra configuration
+  - PropertyLookupService? (retrieves position / tile meta to determine auction/buy/no-op/rent)
+  - PAY_RENT (determines rent / monopoly)
+    - RentService?
   - USE_GET_OUT_OF_JAIL_CARD
+    - CardService
   - CONSTRUCT_HOUSE,
   - DECONSTRUCT_HOUSE,
   - CONSTRUCT_HOTEL,
   - DECONSTRUCT_HOTEL,
   - MORTGAGE_PROPERTY,
+    - MortgageService?
   - Players
   - BONUS:
     - liquidity

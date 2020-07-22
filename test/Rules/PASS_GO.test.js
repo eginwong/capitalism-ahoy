@@ -5,6 +5,7 @@ const mockUIFactory = require("../mocks/UI");
 
 const { GameState } = require("../../entities/GameState");
 const { createPlayer } = require("../testutils");
+const config = require("../../config/monopolyConfiguration");
 
 describe("Rules -> PASS_GO", () => {
   let gameState;
@@ -17,6 +18,7 @@ describe("Rules -> PASS_GO", () => {
     eventBus = new EventEmitter();
     userInterface = mockUIFactory();
     gameState.players = [createPlayer({ name: "player1" })];
+    gameState.config = config;
   });
 
   afterEach(() => {
