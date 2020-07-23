@@ -45,17 +45,23 @@ describe("main", () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, "prompt");
-        promptStub.onCall(0).returns("ROLL_DICE");
-        promptStub.onCall(1).returns("ROLL_DICE");
-        promptStub.onCall(2).returns("END_TURN");
-        promptStub.onCall(3).returns("END_GAME");
+        // highest rolling player
+        promptStub.onCall(0).returns("");
+        promptStub.onCall(1).returns("");
+        promptStub.onCall(2).returns("ROLL_DICE");
+        promptStub.onCall(3).returns("ROLL_DICE");
+        promptStub.onCall(4).returns("END_TURN");
+        promptStub.onCall(5).returns("END_GAME");
         const startGameSpy = sinon.spy();
         userInterface.startGame = startGameSpy;
         userInterface.prompt = promptStub;
 
         const diceStub = sinon.stub(Dice, "roll");
-        diceStub.onCall(0).returns([1, 1]);
-        diceStub.onCall(1).returns([1, 2]);
+        // highest rolling player
+        diceStub.onCall(0).returns([6]);
+        diceStub.onCall(1).returns([1]);
+        diceStub.onCall(2).returns([1, 1]);
+        diceStub.onCall(3).returns([1, 2]);
 
         require("../entities/Game")({ eventBus, userInterface, gameState });
 
