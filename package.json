@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node main.js",
     "test": "mocha --recursive -w",
-    "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
+    "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov --disable=gcov",
     "coverage": "nyc --reporter=text --reporter=html mocha --recursive"
   },
   "devDependencies": {
