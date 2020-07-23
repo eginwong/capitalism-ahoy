@@ -3,12 +3,11 @@
  * Rule: Highest Rolling Player Goes First
  * Effect: Reorder PlayerList Component based on Contest with Dice Component
  */
-const dice = require('../Components/Dice');
 module.exports = function highestRollingPlayerGoesFirst ({ UI }, { players }) {
     // TODO: UI.prompt -> UI.anyKey
     let rolls = players.map(({ name }) => {
         UI.prompt(`${ name } roll dice - `);
-        let roll = dice.roll()[0];
+        let roll = require("../Components/Dice").roll()[0];
         console.log(`\t\t   `, roll);
         return roll;
     });
