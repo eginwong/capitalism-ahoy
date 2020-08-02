@@ -17,7 +17,7 @@
 ### FUNCTIONALITY
 - ~~TODO: Complete a turn~~
 - ~~TODO: VALIDATION, do not allow user to end turn without rolling dice~~
-- TODO: add end game function to stop execution?
+- ~~TODO: add end game function to stop execution?~~
 - TODO: UI implementation for frontend 
   - material-ui to make things look nice
   - display properties
@@ -26,34 +26,33 @@
   - read: emoji manifesto
 - TODO: enforce global house limits (32), hotel limits (12)
 - TODO: game log
+- TODO: continue game
 - TODO: remaining
   - ~~startTurn~~
   - ~~PropertyService~~
-  - MoveService?
-    - gameState must have extra configuration
-  - PropertyLookupService? (retrieves position / tile meta to determine auction/buy/no-op/rent)
-  - PAY_RENT (determines rent / monopoly)
-    - RentService?
-  - USE_GET_OUT_OF_JAIL_CARD
-    - CardService
-  - CONSTRUCT_HOUSE,
-  - DECONSTRUCT_HOUSE,
-  - CONSTRUCT_HOTEL,
-  - DECONSTRUCT_HOTEL,
-  - MORTGAGE_PROPERTY,
-    - MortgageService?
-  - Players
-  - BONUS:
+  - ~~MoveService?~~
+    - ~~gameState must have extra configuration~~
+  - ~~PropertyLookupService? (retrieves position / tile meta to determine auction/buy/no-op/rent)~~
+  - WealthService
     - liquidity
-      - cannot trade with other players
     - bankruptcy
-    - interactivity
-      - trade
-      - sell
-      - auction
-- TODO: Pass in options to set fine/go parameters/max houses
-- TODO: House service to manage property purchasing/global maximums
-- Q: does gamestate have dependency on house service (so that it knows how to set playeractions for buy house if available)? Or should that be on the property service?
+  - CardService
+    - USE_GET_OUT_OF_JAIL_CARD
+  - PropertyManagementService
+    - service to manage property purchasing/global maximums
+    - CONSTRUCT_HOUSE,
+    - DECONSTRUCT_HOUSE,
+    - CONSTRUCT_HOTEL,
+    - DECONSTRUCT_HOTEL,
+    - MORTGAGE_PROPERTY,
+      - MortgageService?
+    - AUCTION
+    - BUY
+    - RENT value
+      - PAY_RENT (determines rent / monopoly)
+  - BONUS:
+    - Players
+- ~~TODO: Pass in options to set fine/go parameters/max houses~~
 
 ### ARCHITECTURE
 - Services
@@ -82,14 +81,13 @@
 - ~~TODO: TDD/BDD (given when then), integration testing framework~~
 - ~~TODO: chalk for console UI + testing~~
 - ~~TODO: set up travis ci for test coverage check~~
+- ~~TODO: look into removing gameState from PlayerActions#execute by passing it in~~
+- ~~TODO: Investigate using Mocha's reporter flag for NYC~~
 - TODO: linter
 - TODO: prettier
 - TODO: [add check for if there are formatting changes outstanding on build](https://github.com/yyx990803/yorkie)
-- ~~TODO: look into removing gameState from PlayerActions#execute by passing it in~~
-- TODO: continue gamestate (check PropService?)
 - TODO: validate GameState
-- TODO: use inquirer for prompts instead
-- TODO: Investigate using Mocha's reporter flag for NYC
+- TODO: use inquirer for [console selection](https://medium.com/@zorrodg/integration-tests-on-node-js-cli-part-2-testing-interaction-user-input-6f345d4b713a) and [tests](https://glebbahmutov.com/blog/unit-testing-cli-programs/)
 - TODO: Refactor Mocha-bloat (not a Mocha-Float); leverage modules
 
 ### REFLECTIONS

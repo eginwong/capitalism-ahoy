@@ -106,13 +106,13 @@ module.exports = {
         (acc, val) => acc + val,
         0
       );
-      const boardPosition = require("../PropertyService").findBoardPosition(
+      const currentPlayerBoardPosition = require("../PropertyService").findPlayerBoardPosition(
         gameState
       );
-      if (gameState.currentPlayer.position > boardPosition) {
+      if (gameState.currentPlayer.position > currentPlayerBoardPosition) {
         notify("PASS_GO");
       }
-      gameState.currentPlayer.position = boardPosition;
+      gameState.currentPlayer.position = currentPlayerBoardPosition;
     },
     ({ UI }, gameState) => UI.playerMovement(gameState.currentPlayer.position),
     (_, gameState) => {

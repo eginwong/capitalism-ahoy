@@ -30,17 +30,17 @@ describe("PropertyService", () => {
         .undefined;
     });
   });
-  describe("findBoardPosition", () => {
+  describe("findPlayerBoardPosition", () => {
     it("should return current player position if not wrapping around the board", () => {
       gameState.currentPlayer.position = 3;
-      expect(PropertyService.findBoardPosition(gameState)).to.equal(
+      expect(PropertyService.findPlayerBoardPosition(gameState)).to.equal(
         3,
         "Incorrectly lowers current player's position"
       );
     });
     it("should return current player position modded if over length of properties", () => {
       gameState.currentPlayer.position = 42;
-      expect(PropertyService.findBoardPosition(gameState)).to.equal(
+      expect(PropertyService.findPlayerBoardPosition(gameState)).to.equal(
         2,
         "Incorrectly overflows current player's position"
       );
