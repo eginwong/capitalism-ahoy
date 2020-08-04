@@ -60,7 +60,8 @@ describe("Rules -> JAIL", () => {
     });
     it("should update player's position to jail", () => {
       eventBus.emit(inputEvent);
-      expect(gameState.currentPlayer.position).to.equal(10);
+      const jailPosition = gameState.config.propertyConfig.properties.find(p => p.id === 'jail').position;
+      expect(gameState.currentPlayer.position).to.equal(jailPosition, "Current player is not in jail");
     });
     it(`the ${ endTurnEvent } event should be called`, () => {
       eventBus.emit(inputEvent);

@@ -48,6 +48,7 @@ describe("main", () => {
         // highest rolling player
         promptStub.onCall(0).returns("");
         promptStub.onCall(1).returns("");
+        // player turn
         promptStub.onCall(2).returns("ROLL_DICE");
         promptStub.onCall(3).returns("ROLL_DICE");
         promptStub.onCall(4).returns("END_TURN");
@@ -60,6 +61,8 @@ describe("main", () => {
         // highest rolling player
         diceStub.onCall(0).returns([6]);
         diceStub.onCall(1).returns([1]);
+
+        // player turn
         diceStub.onCall(2).returns([1, 1]);
         diceStub.onCall(3).returns([1, 2]);
 
