@@ -51,7 +51,7 @@ describe("Rules -> CONTINUE_TURN", () => {
 
     it(`should emit desired ${rollDiceEvent} event`, () => {
       const promptStub = sinon.stub(PlayerActions, "prompt");
-      promptStub.onCall(0).returns("ROLL_DICE");
+      promptStub.onCall(0).returns(rollDiceEvent);
       eventBus.emit(inputEvent);
       expect(rollDiceSpy.callCount).to.equal(
         1,
@@ -64,7 +64,7 @@ describe("Rules -> CONTINUE_TURN", () => {
 
       const promptStub = sinon.stub(PlayerActions, "prompt");
       promptStub.onCall(0).returns(undefined);
-      promptStub.onCall(1).returns("ROLL_DICE");
+      promptStub.onCall(1).returns(rollDiceEvent);
       eventBus.emit(inputEvent);
       expect(uiSpy.calledOnce).to.equal(
         true,
