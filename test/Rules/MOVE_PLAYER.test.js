@@ -1,23 +1,23 @@
-const expect = require("chai").expect;
-const EventEmitter = require("events");
-const sinon = require("sinon");
-const mockUIFactory = require("../mocks/UI");
+const expect = require('chai').expect;
+const EventEmitter = require('events');
+const sinon = require('sinon');
+const mockUIFactory = require('../mocks/UI');
 
-const { GameState } = require("../../entities/GameState");
-const { createPlayer } = require("../testutils");
-const config = require("../../config/monopolyConfiguration");
+const { GameState } = require('../../entities/GameState');
+const { createPlayer } = require('../testutils');
+const config = require('../../config/monopolyConfiguration');
 
-describe("Rules -> MOVE_PLAYER", () => {
+describe('Rules -> MOVE_PLAYER', () => {
   let gameState;
   let userInterface;
   let eventBus;
-  const RULES = require("../../entities/Rules");
+  const RULES = require('../../entities/Rules');
 
   beforeEach(() => {
     gameState = new GameState();
     eventBus = new EventEmitter();
     userInterface = mockUIFactory();
-    gameState.players = [createPlayer({ name: "player1" })];
+    gameState.players = [createPlayer({ name: 'player1' })];
     gameState.config = config;
   });
 
@@ -26,9 +26,9 @@ describe("Rules -> MOVE_PLAYER", () => {
     sinon.restore();
   });
 
-  describe("movePlayer", () => {
-    const inputEvent = "MOVE_PLAYER";
-    const passGoEvent = "PASS_GO";
+  describe('movePlayer', () => {
+    const inputEvent = 'MOVE_PLAYER';
+    const passGoEvent = 'PASS_GO';
 
     let passGoSpy;
 
@@ -50,7 +50,7 @@ describe("Rules -> MOVE_PLAYER", () => {
       eventBus.on(passGoEvent, passGoSpy);
     });
 
-    it("should make a call to the UI#playerMovement", () => {
+    it('should make a call to the UI#playerMovement', () => {
       gameState.currentPlayer.position = 10;
       const uiSpy = sinon.spy();
       userInterface.playerMovement = uiSpy;
@@ -60,28 +60,28 @@ describe("Rules -> MOVE_PLAYER", () => {
         `UI method for ${inputEvent} was not called`
       );
     });
-    it("should emit pass go when player wraps around board", () => {
+    it('should emit pass go when player wraps around board', () => {
       gameState.currentPlayer.position = 39;
       eventBus.emit(inputEvent);
       expect(gameState.currentPlayer.position).to.equal(
         2,
-        "Current Player position was not updated"
+        'Current Player position was not updated'
       );
       expect(passGoSpy.callCount).to.equal(
         1,
-        "Move Player did not wrap around the board"
+        'Move Player did not wrap around the board'
       );
     });
-    it("should not emit pass go if player does not wrap around board", () => {
+    it('should not emit pass go if player does not wrap around board', () => {
       gameState.currentPlayer.position = 36;
       eventBus.emit(inputEvent);
       expect(gameState.currentPlayer.position).to.equal(
         39,
-        "Current Player position was not updated"
+        'Current Player position was not updated'
       );
       expect(passGoSpy.callCount).to.equal(
         0,
-        "Move Player emitted pass go event without wrapping around the board"
+        'Move Player emitted pass go event without wrapping around the board'
       );
     });
   });

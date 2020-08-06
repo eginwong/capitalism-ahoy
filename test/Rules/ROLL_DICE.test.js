@@ -1,23 +1,23 @@
-const expect = require("chai").expect;
-const EventEmitter = require("events");
-const sinon = require("sinon");
-const mockUIFactory = require("../mocks/UI");
+const expect = require('chai').expect;
+const EventEmitter = require('events');
+const sinon = require('sinon');
+const mockUIFactory = require('../mocks/UI');
 
-const { GameState } = require("../../entities/GameState");
-const { createPlayer } = require("../testutils");
-const Dice = require("../../entities/Components/Dice");
+const { GameState } = require('../../entities/GameState');
+const { createPlayer } = require('../testutils');
+const Dice = require('../../entities/Components/Dice');
 
-describe("Rules -> ROLL_DICE", () => {
+describe('Rules -> ROLL_DICE', () => {
   let gameState;
   let userInterface;
   let eventBus;
-  const RULES = require("../../entities/Rules");
+  const RULES = require('../../entities/Rules');
 
   beforeEach(() => {
     gameState = new GameState();
     eventBus = new EventEmitter();
     userInterface = mockUIFactory();
-    gameState.players = [createPlayer({ name: "player1" })];
+    gameState.players = [createPlayer({ name: 'player1' })];
   });
 
   afterEach(() => {
@@ -25,12 +25,12 @@ describe("Rules -> ROLL_DICE", () => {
     sinon.restore();
   });
 
-  describe("rollDice", () => {
-    const inputEvent = "ROLL_DICE";
-    const moveRollEvent = "MOVE_ROLL";
-    const jailRollEvent = "JAIL_ROLL";
-    const turnValuesUpdatedEvent = "TURN_VALUES_UPDATED";
-    const continueTurnEvent = "CONTINUE_TURN";
+  describe('rollDice', () => {
+    const inputEvent = 'ROLL_DICE';
+    const moveRollEvent = 'MOVE_ROLL';
+    const jailRollEvent = 'JAIL_ROLL';
+    const turnValuesUpdatedEvent = 'TURN_VALUES_UPDATED';
+    const continueTurnEvent = 'CONTINUE_TURN';
 
     let continueTurnSpy;
     let turnValuesUpdatedSpy;
@@ -58,7 +58,7 @@ describe("Rules -> ROLL_DICE", () => {
       eventBus.on(jailRollEvent, jailRollSpy);
     });
 
-    it("should make a call to the UI#rollingDice", () => {
+    it('should make a call to the UI#rollingDice', () => {
       const uiSpy = sinon.spy();
       userInterface.rollingDice = uiSpy;
       eventBus.emit(inputEvent);
@@ -69,16 +69,16 @@ describe("Rules -> ROLL_DICE", () => {
     });
     it(`should update gameState with dice roll`, () => {
       const fakeRollResults = [1, 2];
-      const diceStub = sinon.stub(Dice, "roll");
+      const diceStub = sinon.stub(Dice, 'roll');
       diceStub.returns(fakeRollResults);
       eventBus.emit(inputEvent);
       expect(gameState.turnValues.roll).to.deep.equal(
         fakeRollResults,
-        "GameState turnValue should be updated with roll results"
+        'GameState turnValue should be updated with roll results'
       );
     });
     it(`should emit ${turnValuesUpdatedEvent} event after dice roll`, () => {
-      const diceStub = sinon.stub(Dice, "roll");
+      const diceStub = sinon.stub(Dice, 'roll');
       diceStub.returns([1, 2]);
       eventBus.emit(inputEvent);
       expect(turnValuesUpdatedSpy.calledOnce).to.equal(
@@ -86,10 +86,10 @@ describe("Rules -> ROLL_DICE", () => {
         `${turnValuesUpdatedEvent} event was not called`
       );
     });
-    it("should make a call to the UI#rollingDice", () => {
+    it('should make a call to the UI#rollingDice', () => {
       const uiSpy = sinon.spy();
       userInterface.diceRollResults = uiSpy;
-      const diceStub = sinon.stub(Dice, "roll");
+      const diceStub = sinon.stub(Dice, 'roll');
       diceStub.returns([1, 2]);
 
       eventBus.emit(inputEvent);

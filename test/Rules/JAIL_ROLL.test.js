@@ -1,22 +1,22 @@
-const expect = require("chai").expect;
-const EventEmitter = require("events");
-const sinon = require("sinon");
-const mockUIFactory = require("../mocks/UI");
+const expect = require('chai').expect;
+const EventEmitter = require('events');
+const sinon = require('sinon');
+const mockUIFactory = require('../mocks/UI');
 
-const { GameState } = require("../../entities/GameState");
-const { createPlayer } = require("../testutils");
+const { GameState } = require('../../entities/GameState');
+const { createPlayer } = require('../testutils');
 
-describe("Rules -> JAIL_ROLL", () => {
+describe('Rules -> JAIL_ROLL', () => {
   let gameState;
   let userInterface;
   let eventBus;
-  const RULES = require("../../entities/Rules");
+  const RULES = require('../../entities/Rules');
 
   beforeEach(() => {
     gameState = new GameState();
     eventBus = new EventEmitter();
     userInterface = mockUIFactory();
-    gameState.players = [createPlayer({ name: "player1" })];
+    gameState.players = [createPlayer({ name: 'player1' })];
   });
 
   afterEach(() => {
@@ -24,10 +24,10 @@ describe("Rules -> JAIL_ROLL", () => {
     sinon.restore();
   });
 
-  describe("jailRoll", () => {
-    const inputEvent = "JAIL_ROLL";
-    const movePlayerEvent = "MOVE_PLAYER";
-    const payFineEvent = "PAY_FINE";
+  describe('jailRoll', () => {
+    const inputEvent = 'JAIL_ROLL';
+    const movePlayerEvent = 'MOVE_PLAYER';
+    const payFineEvent = 'PAY_FINE';
 
     let payFineSpy;
     let movePlayerSpy;
@@ -43,8 +43,8 @@ describe("Rules -> JAIL_ROLL", () => {
         )
       );
       gameState.currentPlayer.jailed = 0;
-      gameState.turnValues = { 
-        roll: [1, 2]
+      gameState.turnValues = {
+        roll: [1, 2],
       };
       payFineSpy = sinon.spy();
       movePlayerSpy = sinon.spy();
@@ -53,7 +53,7 @@ describe("Rules -> JAIL_ROLL", () => {
       eventBus.on(movePlayerEvent, movePlayerSpy);
     });
 
-    it("should make a call to the UI#rollJailDice", () => {
+    it('should make a call to the UI#rollJailDice', () => {
       const uiSpy = sinon.spy();
       userInterface.rollJailDice = uiSpy;
       eventBus.emit(inputEvent);
@@ -64,33 +64,40 @@ describe("Rules -> JAIL_ROLL", () => {
     });
     it(`should increase jailed counter if roll is not doubles`, () => {
       eventBus.emit(inputEvent);
-      expect(gameState.currentPlayer.jailed).to.equal(1, "Player's jail count did not increase");
+      expect(gameState.currentPlayer.jailed).to.equal(
+        1,
+        "Player's jail count did not increase"
+      );
     });
-    it("should reset jailed counter to -1 if roll is doubles", () => {
-      gameState.turnValues = { 
-        roll: [1, 1]
+    it('should reset jailed counter to -1 if roll is doubles', () => {
+      gameState.turnValues = {
+        roll: [1, 1],
       };
       eventBus.emit(inputEvent);
-      expect(gameState.currentPlayer.jailed).to.equal(-1,
-        "Jailed counter was not reset");
+      expect(gameState.currentPlayer.jailed).to.equal(
+        -1,
+        'Jailed counter was not reset'
+      );
     });
-    it("should emit enforce pay fine if jailed counter is over 2", () => {
+    it('should emit enforce pay fine if jailed counter is over 2', () => {
       gameState.currentPlayer.jailed = 2;
       eventBus.emit(inputEvent);
-      expect(payFineSpy.callCount).to.equal(1,
+      expect(payFineSpy.callCount).to.equal(
+        1,
         `${payFineEvent} event was not called`
       );
     });
-    it("should not emit enforce pay fine if jailed counter is less than or equal to 2", () => {
+    it('should not emit enforce pay fine if jailed counter is less than or equal to 2', () => {
       gameState.currentPlayer.jailed = 1;
       eventBus.emit(inputEvent);
-      expect(payFineSpy.callCount).to.equal(0,
+      expect(payFineSpy.callCount).to.equal(
+        0,
         `${payFineEvent} event was called`
       );
     });
     it(`should emit ${movePlayerEvent} event if player is not in jail`, () => {
-      gameState.turnValues = { 
-        roll: [1, 1]
+      gameState.turnValues = {
+        roll: [1, 1],
       };
       eventBus.emit(inputEvent);
       expect(movePlayerSpy.callCount).to.equal(

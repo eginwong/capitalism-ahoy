@@ -1,22 +1,22 @@
-const expect = require("chai").expect;
-const EventEmitter = require("events");
-const sinon = require("sinon");
-const mockUIFactory = require("../mocks/UI");
+const expect = require('chai').expect;
+const EventEmitter = require('events');
+const sinon = require('sinon');
+const mockUIFactory = require('../mocks/UI');
 
-const { GameState } = require("../../entities/GameState");
-const { createPlayer } = require("../testutils");
+const { GameState } = require('../../entities/GameState');
+const { createPlayer } = require('../testutils');
 
-describe("Rules -> MOVE_ROLL", () => {
+describe('Rules -> MOVE_ROLL', () => {
   let gameState;
   let userInterface;
   let eventBus;
-  const RULES = require("../../entities/Rules");
+  const RULES = require('../../entities/Rules');
 
   beforeEach(() => {
     gameState = new GameState();
     eventBus = new EventEmitter();
     userInterface = mockUIFactory();
-    gameState.players = [createPlayer({ name: "player1" })];
+    gameState.players = [createPlayer({ name: 'player1' })];
   });
 
   afterEach(() => {
@@ -24,11 +24,11 @@ describe("Rules -> MOVE_ROLL", () => {
     sinon.restore();
   });
 
-  describe("moveRoll", () => {
-    const inputEvent = "MOVE_ROLL";
-    const turnValuesUpdatedEvent = "TURN_VALUES_UPDATED";
-    const movePlayerEvent = "MOVE_PLAYER";
-    const speedingEvent = "SPEEDING";
+  describe('moveRoll', () => {
+    const inputEvent = 'MOVE_ROLL';
+    const turnValuesUpdatedEvent = 'TURN_VALUES_UPDATED';
+    const movePlayerEvent = 'MOVE_PLAYER';
+    const speedingEvent = 'SPEEDING';
 
     let speedingSpy;
     let movePlayerSpy;
@@ -44,9 +44,9 @@ describe("Rules -> MOVE_ROLL", () => {
           handler.bind(null, { notify, UI: userInterface }, gameState)
         )
       );
-      gameState.turnValues = { 
+      gameState.turnValues = {
         roll: [1, 2],
-        speedingCounter: 0
+        speedingCounter: 0,
       };
 
       speedingSpy = sinon.spy();
@@ -58,7 +58,7 @@ describe("Rules -> MOVE_ROLL", () => {
       eventBus.on(movePlayerEvent, movePlayerSpy);
     });
 
-    it("should make a call to the UI#rollNormalDice", () => {
+    it('should make a call to the UI#rollNormalDice', () => {
       const uiSpy = sinon.spy();
       userInterface.rollNormalDice = uiSpy;
       eventBus.emit(inputEvent);
@@ -68,24 +68,24 @@ describe("Rules -> MOVE_ROLL", () => {
       );
     });
     it(`should update speedingCounter to 0 if no doubles rolled`, () => {
-      gameState.turnValues = { 
-        roll: [1, 2]
+      gameState.turnValues = {
+        roll: [1, 2],
       };
       eventBus.emit(inputEvent);
       expect(gameState.turnValues.speedingCounter).to.equal(
         0,
-        "GameState speedingCounter should be 0 with roll results"
+        'GameState speedingCounter should be 0 with roll results'
       );
     });
     it(`should update speedingCounter to +1 if doubles rolled`, () => {
-      gameState.turnValues = { 
+      gameState.turnValues = {
         roll: [1, 1],
-        speedingCounter: 0
+        speedingCounter: 0,
       };
       eventBus.emit(inputEvent);
       expect(gameState.turnValues.speedingCounter).to.equal(
         1,
-        "GameState speedingCounter should be +1 with roll results"
+        'GameState speedingCounter should be +1 with roll results'
       );
     });
     it(`should emit ${turnValuesUpdatedEvent} event after dice roll`, () => {
@@ -96,9 +96,9 @@ describe("Rules -> MOVE_ROLL", () => {
       );
     });
     it(`should emit ${speedingEvent} event if speeding counter is greater than 2`, () => {
-      gameState.turnValues = { 
+      gameState.turnValues = {
         roll: [1, 1],
-        speedingCounter: 2
+        speedingCounter: 2,
       };
       eventBus.emit(inputEvent);
       expect(speedingSpy.callCount).to.equal(
@@ -107,9 +107,9 @@ describe("Rules -> MOVE_ROLL", () => {
       );
     });
     it(`should not emit ${speedingEvent} event if speeding counter is less than 2`, () => {
-      gameState.turnValues = { 
+      gameState.turnValues = {
         roll: [1, 1],
-        speedingCounter: 1
+        speedingCounter: 1,
       };
       eventBus.emit(inputEvent);
       expect(speedingSpy.callCount).to.equal(
@@ -125,9 +125,9 @@ describe("Rules -> MOVE_ROLL", () => {
       );
     });
     it(`should not emit ${movePlayerEvent} event if player is caught speeding`, () => {
-      gameState.turnValues = { 
+      gameState.turnValues = {
         roll: [1, 1],
-        speedingCounter: 2
+        speedingCounter: 2,
       };
       eventBus.emit(inputEvent);
       expect(movePlayerSpy.callCount).to.equal(
