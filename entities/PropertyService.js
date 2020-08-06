@@ -221,15 +221,15 @@ module.exports = class PropertyService {
   }
 
   // NOTE: could see this in board service, but requires property count :/
-  static findPlayerBoardPosition (gameState) {
-    return gameState.currentPlayer.position % gameState.config.propertyConfig.count;
+  static findPlayerBoardPosition(gameState) {
+    return (
+      gameState.currentPlayer.position % gameState.config.propertyConfig.count
+    );
   }
 
   static getCurrentBoardProperty(gameState) {
     const position = this.findPlayerBoardPosition(gameState);
     const properties = gameState.config.propertyConfig.properties;
-    return properties.find(
-      (prop) => prop.position === position
-    );
+    return properties.find((prop) => prop.position === position);
   }
 };

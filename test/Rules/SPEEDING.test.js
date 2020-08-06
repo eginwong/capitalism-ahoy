@@ -1,22 +1,22 @@
-const expect = require("chai").expect;
-const EventEmitter = require("events");
-const sinon = require("sinon");
-const mockUIFactory = require("../mocks/UI");
+const expect = require('chai').expect;
+const EventEmitter = require('events');
+const sinon = require('sinon');
+const mockUIFactory = require('../mocks/UI');
 
-const { GameState } = require("../../entities/GameState");
-const { createPlayer } = require("../testutils");
+const { GameState } = require('../../entities/GameState');
+const { createPlayer } = require('../testutils');
 
-describe("Rules -> SPEEDING", () => {
+describe('Rules -> SPEEDING', () => {
   let gameState;
   let userInterface;
   let eventBus;
-  const RULES = require("../../entities/Rules");
+  const RULES = require('../../entities/Rules');
 
   beforeEach(() => {
     gameState = new GameState();
     eventBus = new EventEmitter();
     userInterface = mockUIFactory();
-    gameState.players = [createPlayer({ name: "player1" })];
+    gameState.players = [createPlayer({ name: 'player1' })];
   });
 
   afterEach(() => {
@@ -24,9 +24,9 @@ describe("Rules -> SPEEDING", () => {
     sinon.restore();
   });
 
-  describe("speeding", () => {
-    const inputEvent = "SPEEDING";
-    const jailEvent = "JAIL";
+  describe('speeding', () => {
+    const inputEvent = 'SPEEDING';
+    const jailEvent = 'JAIL';
 
     let jailSpy;
 
@@ -45,7 +45,7 @@ describe("Rules -> SPEEDING", () => {
       eventBus.on(jailEvent, jailSpy);
     });
 
-    it("should make a call to the UI#caughtSpeeding", () => {
+    it('should make a call to the UI#caughtSpeeding', () => {
       const uiSpy = sinon.spy();
       userInterface.caughtSpeeding = uiSpy;
       eventBus.emit(inputEvent);
@@ -54,9 +54,9 @@ describe("Rules -> SPEEDING", () => {
         `Initial UI method for ${inputEvent} was not called`
       );
     });
-    it(`the ${ jailEvent } event should be called`, () => {
+    it(`the ${jailEvent} event should be called`, () => {
       eventBus.emit(inputEvent);
-      expect(jailSpy.callCount).to.equal(1, `${ jailEvent } was not called`);
-    })
+      expect(jailSpy.callCount).to.equal(1, `${jailEvent} was not called`);
+    });
   });
 });

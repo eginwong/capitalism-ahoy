@@ -1,8 +1,9 @@
 # Scratch Notes
+
 Developed property = houses, hotels
 
-
 - Game Features
+
   - Community Chest / Chance cards
     - Random community chest / chance cards
     - Use get-out-of-jail-free cards
@@ -23,7 +24,7 @@ Developed property = houses, hotels
     - Selling developed property is paid out at 50% of the cost of the development (e.g., a house cost $300 to build. Resale value is $150).
     - A property cannot be sold/traded to another player if there is developed property on it.
   - Auction ability
-    - If a user lands on an unbought property, they can choose not to purchase it. If they do not, an auction occurs between all players starting at any price starting at the lowest price of any property ($60). 
+    - If a user lands on an unbought property, they can choose not to purchase it. If they do not, an auction occurs between all players starting at any price starting at the lowest price of any property (\$60).
   - Doubles
     - When a player rolls doubles, they can go again.
   - Allow Speeding when a player rolls doubles three consecutive times. This sends the player to jail.
@@ -35,6 +36,7 @@ Developed property = houses, hotels
   - Finite hotels available
 
 - Application Features
+
   - Activity Log
   - Rotate the board
   - Advanced Statistics (turns in jail, times caught speeding, net-worth over time)
@@ -46,35 +48,41 @@ Developed property = houses, hotels
 
 - Entities:
 - Player
+
   - Figurines / Player Token (car, iron, dog)
   - Position + Player ID
-  - Jail* (shorthand as Boolean, else us Position as Rule)
+  - Jail\* (shorthand as Boolean, else us Position as Rule)
   - Cash
   - List of Property ID
 
 - (JimmyEat)World
+
   - Properties (Global Properties) (is also board -- plot twist !)
   - Hotels
   - Houses
 
 - Functions / Thoughts:
+
   - takeTurn currentPlayer gamestate = doTurnActions
 
 - turnActions
+
   - bag of actions
   - Dice roll -> automove player position
 
 - Game Loop
+
   - Rules for what happens
-  - game [] _ = promptToGetPlayers
-  - game _ () = selectBoard
+  - game [] \_ = promptToGetPlayers
+  - game \_ () = selectBoard
   - game listOfPlayers board = start
 
 - !! Cannon Fodder
-```js 
+
+```js
 function gameLoop () {
     // gameState.turn
-    const currentPlayer = getCurrentPlayer; 
+    const currentPlayer = getCurrentPlayer;
 
     await takeTurn(currentPlayer, gameState);
 
@@ -82,23 +90,22 @@ function gameLoop () {
 
 function takeTurn(player, state) {
 
-    let action; 
+    let action;
     do {
 
     } while (action != ACTION.END_TURN);
-    return 
+    return
 }
 ```
 
 ```js
-
 class Console extends UI {}
 
 class UI {}
-
 ```
 
 integration test framework
+
 ```json
 [
     {
@@ -137,27 +144,30 @@ integration test framework
 # Architecture rework
 
 ## The Keegan Approach
+
 ### Step 1: Burn the Orphanarium
+
 - Game is the glue
 - Game imports all the components (f: tokens)
-    - Services
-    - Cards? 
-    - PlayerActions
-    - Events
-    - GameState?
+  - Services
+  - Cards?
+  - PlayerActions
+  - Events
+  - GameState?
 - Game hooks tokens via rules
-    - "When card is drawn, do this"
-    - e.g., game signals player turn
-    - throw out the UI stuff for the player,
-    - rule: tell the player what they can do
-    - player can choose one of the things they can do
-    - game receives signal associated with a rule
-    - rule: do the thing
+  - "When card is drawn, do this"
+  - e.g., game signals player turn
+  - throw out the UI stuff for the player,
+  - rule: tell the player what they can do
+  - player can choose one of the things they can do
+  - game receives signal associated with a rule
+  - rule: do the thing
 - Game is event bus / coordination
 - event emitting should be in the game instead
 - GRIPE: rule is embedded in other rules
 
 - gameState manipulation should happen outside
+
 ```
 func when(signal, response) {
     eventEmitter.on('signal', response);
@@ -177,18 +187,19 @@ when('PLAYER_MOVED', displayUI);
 when('PLAYER_MOVED', showAnimation);
 
 ```
-E: 
+
+E:
 game | middle | ruleEvaluation
 
 **service** | middle | game | ruleEvaluation
-deck        | translate card into rules | game | ruleEvaluation
+deck | translate card into rules | game | ruleEvaluation
 dice
-turn        | translate to current player | game | ruleEvaluation
+turn | translate to current player | game | ruleEvaluation
 playerAction | (IO) -> translate to options | game | ruleEvaluation
 playerAction (IO) -> | translate to options | game | ruleEvaluation
 
 namespace Service {
-    Class Service {
+Class Service {
 
     }
 
@@ -196,6 +207,7 @@ namespace Service {
         getDice();
 
     }
+
 }
 
 ServiceAdapter(Service, getDice)
@@ -210,17 +222,18 @@ when('DICE_ROLLED', (diceRoll) => DiceAdapter.format(diceRoll))
 - Services: pure input/output
 
 - like this because simple to grok:
-Game object
-composed of 
-PlayerActions/Events
+  Game object
+  composed of
+  PlayerActions/Events
 
-- don't like this because of overly explicit: 
-dice roll
-dice roll resolve
+- don't like this because of overly explicit:
+  dice roll
+  dice roll resolve
 
 ## Tenets
 
 // services are features/components of the Game
+
 - diceService
 - turnService
 - movementService // boardService?

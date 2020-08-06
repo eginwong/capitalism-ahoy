@@ -1,7 +1,7 @@
 /**
- * Responsibility: 
+ * Responsibility:
  *   Defines state of a game world.
-*/
+ */
 class GameState {
   turn = 0;
   players = [];

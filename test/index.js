@@ -9,15 +9,15 @@
  *              don't belong as any of the above; "default" case
  */
 module.exports = {
-    /**
-     * Given-When-Then
-     * Formatting function. Not a Util because it doesn't affect the test,
-     *      just the naming convention. This is an opinion-based or semantic-
-     *      providing function for readability.
-     * @param {String} strings - A string of the format: "Given clause | When clause | Then clause"
-     */
-    gwt (strings) {
-        const statements = strings.raw[0].split(" | ");
-        return `GIVEN ${statements[0]} WHEN ${statements[1]} THEN ${statements[2]}`;
-    },
+  /**
+   * Given-When-Then
+   * Formatting function. Not a Util because it doesn't affect the test,
+   *      just the naming convention. This is an opinion-based or semantic-
+   *      providing function for readability.
+   * @param {String} strings - A string of the format: "Given clause | When clause | Then clause"
+   */
+  gwt(strings) {
+    const statements = strings.raw[0].split(' | ');
+    return `GIVEN ${statements[0]} WHEN ${statements[1]} THEN ${statements[2]}`;
+  },
 };
