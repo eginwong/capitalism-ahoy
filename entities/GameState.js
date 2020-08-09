@@ -5,6 +5,7 @@
 class GameState {
   turn = 0;
   players = [];
+  currentBoardProperty = {};
   config;
 
   get currentPlayer() {

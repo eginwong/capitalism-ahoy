@@ -13,7 +13,6 @@ const ACTIONS = {
     !!gameState.turnValues.roll && gameState.turnValues.speedingCounter === 0,
   END_GAME: () => true,
   // MANAGE_BUILDINGS,
-  // LIQUIDATE,
   // INITIATE_TRADE
 };
 
@@ -28,10 +27,11 @@ module.exports = class PlayerActions {
     );
   }
 
-  static prompt({ UI }, gameState) {
-    const actions = this.refresh(gameState);
+  static prompt({ UI }, gameState, actions = []) {
+    if (actions.length === 0) actions = this.refresh(gameState);
     UI.displayAvailableActions(actions);
 
+    // TODO: inquirer
     // TODO: UI.prompt -> UI.selectFrom(actions: [String], msg: String) : String | String `el` <actions>
     const answer = UI.prompt(`Which action would you like to take?\n\n`);
     return actions.find((action) => action === String(answer).toUpperCase());

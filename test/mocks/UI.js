@@ -15,6 +15,7 @@ module.exports = function mockUIFactory() {
     rollJailDice: () => true,
     caughtSpeeding: () => true,
     playerMovement: (position) => true,
+    playerDetails: () => true,
     payFine: () => true,
     passGo: () => true,
     jail: () => true,

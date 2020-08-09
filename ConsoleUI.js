@@ -36,10 +36,13 @@ const consoleUI = (function (readline) {
     rollNormalDice: () => console.log('EVENT: NORMAL 🎲🎲🎲'),
     rollJailDice: () => console.log('JAIL 🎲🎲🎲'),
     caughtSpeeding: () => console.log('CAUGHT SPEEDING'),
-    playerMovement: (position) =>
+    playerMovement: (boardProperty) =>
       console.log(
-        chalk.bgBlack.whiteBright(`MOVING PLAYER to square ${position}`)
+        chalk.bgBlack.whiteBright(
+          `Landed on ${boardProperty.name} (${boardProperty.group})`
+        )
       ),
+    playerDetails: (player) => console.dir(player),
     payFine: () => console.log(`PAYING FINE 💸💸💸`),
     passGo: () => console.log(`PASSING GO!`),
     jail: () => console.log(`IN JAIL 🤩🤩🤩🤩🤩`),

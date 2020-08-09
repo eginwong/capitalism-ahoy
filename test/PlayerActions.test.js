@@ -97,13 +97,24 @@ describe('PlayerActions', function () {
   });
 
   describe('prompt', () => {
-    it('displays available player actions', () => {
+    it('displays available player actions if no action are passed', () => {
       const UI = mockUIFactory();
       const displayAvailableActionsUISpy = sinon.spy();
       UI.displayAvailableActions = displayAvailableActionsUISpy;
       const actions = PlayerActions.refresh(gameState);
 
       PlayerActions.prompt({ UI }, gameState);
+      expect(
+        displayAvailableActionsUISpy.calledOnceWithExactly(actions)
+      ).to.equal(true, 'Display Available Actions is not called');
+    });
+    it('displays input actions when parameter is passed', () => {
+      const UI = mockUIFactory();
+      const displayAvailableActionsUISpy = sinon.spy();
+      UI.displayAvailableActions = displayAvailableActionsUISpy;
+      const actions = ['FAKE ACTION', 'SECOND ACTION'];
+
+      PlayerActions.prompt({ UI }, gameState, actions);
       expect(
         displayAvailableActionsUISpy.calledOnceWithExactly(actions)
       ).to.equal(true, 'Display Available Actions is not called');

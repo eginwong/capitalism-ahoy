@@ -23,6 +23,11 @@ module.exports = {
       notify('TURN_VALUES_RESET');
     },
     ({ UI }, gameState) => UI.startTurn(gameState.currentPlayer),
+    (_, gameState) =>
+      (gameState.currentBoardProperty = require('../PropertyService').getCurrentBoardProperty(
+        gameState
+      )),
+    ({ UI }, gameState) => UI.playerDetails(gameState.currentPlayer),
     ({ notify }) => notify('CONTINUE_TURN'),
   ],
   CONTINUE_TURN: [
@@ -106,6 +111,7 @@ module.exports = {
         (acc, val) => acc + val,
         0
       );
+
       const currentPlayerBoardPosition = require('../PropertyService').findPlayerBoardPosition(
         gameState
       );
@@ -114,16 +120,11 @@ module.exports = {
       }
       gameState.currentPlayer.position = currentPlayerBoardPosition;
     },
-    ({ UI }, gameState) => UI.playerMovement(gameState.currentPlayer.position),
-    (_, gameState) => {
-      const property = require('../PropertyService').getCurrentBoardProperty(
+    (_, gameState) =>
+      (gameState.currentBoardProperty = require('../PropertyService').getCurrentBoardProperty(
         gameState
-      );
-      // TODO: something with the property
-      console.dir(property);
-      // based on tile type, can either [RESOLUTION PHASE] (refresh actions)
-      //   BUY, AUCTION, LIQUIDATE, PAY_RENT
-    },
+      )),
+    ({ UI }, gameState) => UI.playerMovement(gameState.currentBoardProperty),
   ],
   END_TURN: [
     ({ UI }) => UI.endTurn(),
