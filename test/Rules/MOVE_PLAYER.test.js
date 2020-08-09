@@ -50,12 +50,48 @@ describe('Rules -> MOVE_PLAYER', () => {
       eventBus.on(passGoEvent, passGoSpy);
     });
 
+    it('should set gameState current board property', () => {
+      gameState.currentPlayer.position = 10;
+      const uiSpy = sinon.spy();
+      userInterface.playerMovement = uiSpy;
+      eventBus.emit(inputEvent);
+      const expectedBoardProperty = {
+        name: 'States Avenue',
+        id: 'statesave',
+        position: 13,
+        price: 140,
+        rent: 10,
+        multipliedRent: [50, 150, 450, 625, 750],
+        houseCost: 100,
+        group: 'Violet',
+        ownedBy: -1,
+        buildings: 0,
+        mortgaged: false,
+      };
+      expect(gameState.currentBoardProperty).to.deep.equal(
+        expectedBoardProperty,
+        `GameState currentBoardProperty is not set`
+      );
+    });
     it('should make a call to the UI#playerMovement', () => {
       gameState.currentPlayer.position = 10;
       const uiSpy = sinon.spy();
       userInterface.playerMovement = uiSpy;
       eventBus.emit(inputEvent);
-      expect(uiSpy.calledOnceWithExactly(13)).to.equal(
+      const expectedBoardProperty = {
+        name: 'States Avenue',
+        id: 'statesave',
+        position: 13,
+        price: 140,
+        rent: 10,
+        multipliedRent: [50, 150, 450, 625, 750],
+        houseCost: 100,
+        group: 'Violet',
+        ownedBy: -1,
+        buildings: 0,
+        mortgaged: false,
+      };
+      expect(uiSpy.calledOnceWithExactly(expectedBoardProperty)).to.equal(
         true,
         `UI method for ${inputEvent} was not called`
       );

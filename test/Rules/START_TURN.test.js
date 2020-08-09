@@ -5,6 +5,7 @@ const mockUIFactory = require('../mocks/UI');
 
 const { GameState } = require('../../entities/GameState');
 const { createPlayer } = require('../testutils');
+const config = require('../../config/monopolyConfiguration');
 
 describe('Rules -> START_TURN', () => {
   let gameState;
@@ -17,6 +18,7 @@ describe('Rules -> START_TURN', () => {
     eventBus = new EventEmitter();
     userInterface = mockUIFactory();
     gameState.players = [createPlayer({ name: 'player1' })];
+    gameState.config = config;
   });
 
   afterEach(() => {
@@ -69,13 +71,36 @@ describe('Rules -> START_TURN', () => {
         `${turnValuesResetEvent} event was not called`
       );
     });
-    it('should make a call to the UI#startTurn', () => {
+    it('should call UI#startTurn', () => {
       const uiSpy = sinon.spy();
       userInterface.startTurn = uiSpy;
       eventBus.emit(inputEvent);
       expect(uiSpy.calledOnceWithExactly(gameState.currentPlayer)).to.equal(
         true,
-        `UI method for ${inputEvent} was not called`
+        `UI method #startTurn for ${inputEvent} was not called`
+      );
+    });
+    it('should set gameState current board property', () => {
+      gameState.currentPlayer.position = 10;
+      eventBus.emit(inputEvent);
+      const expectedBoardProperty = {
+        name: 'Jail / Just Visiting',
+        id: 'jail',
+        position: 10,
+        group: 'Special',
+      };
+      expect(gameState.currentBoardProperty).to.deep.equal(
+        expectedBoardProperty,
+        `GameState currentBoardProperty is not set`
+      );
+    });
+    it('should call UI#playerDetails', () => {
+      const uiSpy = sinon.spy();
+      userInterface.playerDetails = uiSpy;
+      eventBus.emit(inputEvent);
+      expect(uiSpy.calledOnceWithExactly(gameState.currentPlayer)).to.equal(
+        true,
+        `UI method #playerDetails for ${inputEvent} was not called`
       );
     });
   });

@@ -43,7 +43,7 @@
     "ignorePatterns": [
       ".prettierignore",
       ".gitignore",
-      "package.json",
+      "*.json",
       "*.lock"
     ],
     "parser": "babel-eslint",
