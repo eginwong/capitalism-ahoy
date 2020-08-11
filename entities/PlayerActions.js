@@ -27,8 +27,7 @@ module.exports = class PlayerActions {
     );
   }
 
-  static prompt({ UI }, gameState, actions = []) {
-    if (actions.length === 0) actions = this.refresh(gameState);
+  static prompt({ UI }, gameState, actions = this.refresh(gameState)) {
     UI.displayAvailableActions(actions);
 
     // TODO: inquirer
