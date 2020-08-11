@@ -50,11 +50,12 @@ describe('Rules -> PASS_GO', () => {
         `Initial UI method for ${inputEvent} was not called`
       );
     });
-    it('should increase player cash by 200', () => {
+    it('should increase player cash by config passGoAmount', () => {
+      const startingCash = gameState.currentPlayer.cash;
       eventBus.emit(inputEvent);
       expect(gameState.currentPlayer.cash).to.equal(
-        1700,
-        'Player passed GO and did not collect $200'
+        startingCash + config.passGoAmount,
+        `Player passed GO and did not collect $${config.passGoAmount}}`
       );
     });
   });

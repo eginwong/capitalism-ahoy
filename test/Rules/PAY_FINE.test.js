@@ -71,12 +71,13 @@ describe('Rules -> PAY_FINE', () => {
         'Player is still in jail after paying fine'
       );
     });
-    it(`the current player should lose $50`, () => {
-      gameState.currentPlayer.cash = 50;
+    it(`the current player should lose config fineAmount`, () => {
+      const startingCash = 50;
+      gameState.currentPlayer.cash = startingCash;
       eventBus.emit(inputEvent);
       expect(gameState.currentPlayer.cash).to.equal(
-        0,
-        'Player did not lose $50'
+        startingCash - config.fineAmount,
+        `Player did not lose $${config.fineAmount}`
       );
     });
     it(`should set player free from jail`, () => {
@@ -87,7 +88,6 @@ describe('Rules -> PAY_FINE', () => {
       );
     });
     it(`the ${bankruptcyEvent} event should be called if player has negative net-worth`, () => {
-      gameState.currentPlayer.netWorth = 0;
       gameState.currentPlayer.cash = 0;
       eventBus.emit(inputEvent);
       expect(bankruptcySpy.callCount).to.equal(
@@ -96,7 +96,7 @@ describe('Rules -> PAY_FINE', () => {
       );
     });
     it(`the ${liquidationEvent} event should be called if current player has no more cash but positive net-worth`, () => {
-      gameState.currentPlayer.netWorth = 200;
+      gameState.currentPlayer.assets = 200;
       gameState.currentPlayer.cash = 0;
       eventBus.emit(inputEvent);
       expect(liquidationSpy.callCount).to.equal(
