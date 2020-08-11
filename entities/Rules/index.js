@@ -133,26 +133,23 @@ module.exports = {
   ],
   PAY_FINE: [
     ({ UI }) => UI.payFine(),
-    // TODO: WealthService
     (_, gameState) => {
-      gameState.currentPlayer.cash -= gameState.config.fineAmount;
+      require('../WealthService').decrement(
+        gameState.currentPlayer,
+        gameState.config.fineAmount
+      );
       gameState.currentPlayer.jailed = -1;
-      // TODO: investigate using setter for bankruptcy logic
     },
     function conditionalEventsOnLostWealth({ notify }, gameState) {
-      // REVISIT: NETWORTH
-      // if (gameState.currentPlayer.cash < 0 && gameState.currentPlayer.netWorth < Math.abs(gameState.currentPlayer.cash)) {
       if (
-        gameState.currentPlayer.netWorth <
+        require('../WealthService').calculateNetWorth(gameState.currentPlayer) <
         Math.abs(gameState.currentPlayer.cash)
       ) {
         notify('BANKRUPTCY');
       } else if (gameState.currentPlayer.cash < 0) {
         // UI: show liquidation menu
-        // TODO: KENTINUE
         notify('LIQUIDATION');
       }
-      // UI: disable action
     },
     ({ notify }) => notify('CONTINUE_TURN'),
   ],
@@ -160,7 +157,10 @@ module.exports = {
   PASS_GO: [
     ({ UI }) => UI.passGo(),
     (_, gameState) =>
-      (gameState.currentPlayer.cash += gameState.config.passGoAmount),
+      require('../WealthService').increment(
+        gameState.currentPlayer,
+        gameState.config.passGoAmount
+      ),
     ({ notify }) => notify('JAIL'),
   ],
   JAIL: [
@@ -176,10 +176,17 @@ module.exports = {
   ],
   END_GAME: [
     ({ UI }, gameState) => {
-      const { name, netWorth } = gameState.players.reduce((acc, val) => {
-        if (!!acc.netWorth && acc.netWorth > val.netWorth) return acc;
-        return val;
-      }, {});
+      const calcNetWorth = require('../WealthService').calculateNetWorth;
+
+      const { name, netWorth } = gameState.players
+        .map((player) => ({
+          name: player.name,
+          netWorth: calcNetWorth(player),
+        }))
+        .reduce((acc, val) => {
+          if (!!acc.netWorth && acc.netWorth > val.netWorth) return acc;
+          return val;
+        }, {});
       UI.gameOver(name, netWorth);
     },
   ],

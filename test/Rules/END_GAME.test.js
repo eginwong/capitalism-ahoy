@@ -53,7 +53,8 @@ describe('Rules -> END_GAME', () => {
       );
     });
     it('should pass highest net worth player to the UI#gameOver', () => {
-      gameState.players[0].netWorth = 1700;
+      gameState.players[0].cash = 1300;
+      gameState.players[0].assets = 400;
       const uiSpy = sinon.spy();
       userInterface.gameOver = uiSpy;
       eventBus.emit(inputEvent);

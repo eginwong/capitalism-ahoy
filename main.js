@@ -35,7 +35,7 @@ function createPlayer({ name }) {
     position: 0,
     jailed: -1,
     cash: 1500,
-    netWorth: 1500,
+    assets: 0, // liquidAssets are 1/2 assets
     getOutOfJailFreeCards: 0,
     properties: [],
   };
