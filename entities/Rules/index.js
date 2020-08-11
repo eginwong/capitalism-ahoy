@@ -134,6 +134,7 @@ module.exports = {
   PAY_FINE: [
     ({ UI }) => UI.payFine(),
     (_, gameState) => {
+      // potentially entering negative wealth here, will be resolved in subsequent rule
       require('../WealthService').decrement(
         gameState.currentPlayer,
         gameState.config.fineAmount
