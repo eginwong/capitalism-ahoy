@@ -7,6 +7,11 @@ module.exports = class WealthService {
     player.cash -= amount;
   }
 
+  /**
+   * Reminder that a net worth check should be performed before calling this function
+   * @param {*} player
+   * @param {*} assetPrice
+   */
   static buyAsset(player, assetPrice) {
     this.decrement(player, assetPrice);
     player.assets += assetPrice;
