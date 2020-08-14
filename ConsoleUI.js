@@ -16,6 +16,7 @@ const consoleUI = (function (readline) {
         chalk.magenta(`AVAILABLE ACTIONS: `) +
           chalk.cyan(`${actions.join(', ')}`)
       ),
+    displayPropertyDetails: (boardProperty) => console.dir(boardProperty),
     prompt: readline.question,
     endTurn: () => console.log(chalk.bold.red('ENDING TURN')),
     rollingDice: () => console.log('🎲ROLLING🎲'),
@@ -51,6 +52,7 @@ const consoleUI = (function (readline) {
       console.log(
         `Game ended. Winner is: 🎉${name}🎉 with a net worth of: ${netWorth}`
       ),
+    propertyBought: () => console.log('Property bought! 🎉🎉'),
   };
 })(require('readline-sync'));
 

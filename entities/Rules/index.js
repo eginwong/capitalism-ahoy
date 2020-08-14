@@ -61,7 +61,6 @@ module.exports = {
         notify('MOVE_ROLL');
       }
     },
-    ({ notify }) => notify('CONTINUE_TURN'),
   ],
   MOVE_ROLL: [
     ({ UI }) => UI.rollNormalDice(),
@@ -100,6 +99,8 @@ module.exports = {
     },
     ({ notify }, gameState) => {
       if (gameState.currentPlayer.jailed === -1) {
+        // TODO: make sure no next movement if doubles out of jail
+        // TODO: but can move twice if paid fine/used card
         notify('MOVE_PLAYER');
       }
     },
@@ -125,6 +126,15 @@ module.exports = {
         gameState
       )),
     ({ UI }, gameState) => UI.playerMovement(gameState.currentBoardProperty),
+    ({ notify }, gameState) => {
+      const boardProperty = gameState.currentBoardProperty;
+
+      // if has property owned, means property can be purchased
+      if (boardProperty.ownedBy === -1) {
+        notify('RESOLVE_NEW_PROPERTY');
+      }
+    },
+    ({ notify }) => notify('CONTINUE_TURN'),
   ],
   END_TURN: [
     ({ UI }) => UI.endTurn(),
@@ -162,7 +172,6 @@ module.exports = {
         gameState.currentPlayer,
         gameState.config.passGoAmount
       ),
-    ({ notify }) => notify('JAIL'),
   ],
   JAIL: [
     ({ UI }) => UI.jail(),
@@ -191,8 +200,60 @@ module.exports = {
       UI.gameOver(name, netWorth);
     },
   ],
-  //   BUY_PROPERTY: () => {},
-  //   PAY_RENT,
+  RESOLVE_NEW_PROPERTY: [
+    ({ UI }, gameState) => {
+      UI.displayPropertyDetails(gameState.currentBoardProperty);
+    },
+    ({ notify, UI }, gameState) => {
+      const boardProperty = gameState.currentBoardProperty;
+
+      // TODO
+      const playerBuyingPower = require('../WealthService').calculateLiquidity(
+        gameState
+      );
+
+      if (playerBuyingPower < boardProperty.price) {
+        notify('BEGIN_AUCTION');
+      } else {
+        const action = require('../PlayerActions').prompt(
+          { notify, UI },
+          gameState,
+          ['BUY_PROPERTY', 'BEGIN_AUCTION']
+        );
+
+        if (action) {
+          notify(action);
+        } else {
+          UI.unknownAction();
+          notify('RESOLVE_NEW_PROPERTY');
+        }
+      }
+    },
+  ],
+  BUY_PROPERTY: [
+    ({ UI }, gameState) => {
+      const boardProperty = gameState.currentBoardProperty;
+
+      // checking buying power first in case we have a cancel option in the future
+      // TODO
+      // const playerBuyingPower = require('../WealthService').calculateLiquidity(
+      //   gameState.currentPlayer
+      // );
+
+      // if (playerBuyingPower < boardProperty.price) {
+      //   require('../LiquidateService').liquidate(UI, gameState);
+      // }
+
+      require('../WealthService').buyAsset(
+        gameState.currentPlayer,
+        boardProperty.price
+      );
+
+      // TODO: propertyManagementService: set the owned by
+      boardProperty.ownedBy = gameState.currentPlayer.id;
+    },
+    ({ UI }) => UI.propertyBought(),
+  ],
   //   TRADE,
   //   PROPERTY_DEVELOPMENT,
   //   AUCTION,

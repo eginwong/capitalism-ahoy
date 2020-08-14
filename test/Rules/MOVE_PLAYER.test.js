@@ -29,8 +29,10 @@ describe('Rules -> MOVE_PLAYER', () => {
   describe('movePlayer', () => {
     const inputEvent = 'MOVE_PLAYER';
     const passGoEvent = 'PASS_GO';
+    const continueTurnEvent = 'CONTINUE_TURN';
 
     let passGoSpy;
+    let continueTurnSpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -47,7 +49,10 @@ describe('Rules -> MOVE_PLAYER', () => {
       };
 
       passGoSpy = sinon.spy();
+      continueTurnSpy = sinon.spy();
+
       eventBus.on(passGoEvent, passGoSpy);
+      eventBus.on(continueTurnEvent, continueTurnSpy);
     });
 
     it('should set gameState current board property', () => {
@@ -118,6 +123,13 @@ describe('Rules -> MOVE_PLAYER', () => {
       expect(passGoSpy.callCount).to.equal(
         0,
         'Move Player emitted pass go event without wrapping around the board'
+      );
+    });
+    it(`should emit ${continueTurnEvent} event`, () => {
+      eventBus.emit(inputEvent);
+      expect(continueTurnSpy.callCount).to.equal(
+        1,
+        `${continueTurnEvent} event was not called`
       );
     });
   });

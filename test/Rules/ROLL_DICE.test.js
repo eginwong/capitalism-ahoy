@@ -30,9 +30,7 @@ describe('Rules -> ROLL_DICE', () => {
     const moveRollEvent = 'MOVE_ROLL';
     const jailRollEvent = 'JAIL_ROLL';
     const turnValuesUpdatedEvent = 'TURN_VALUES_UPDATED';
-    const continueTurnEvent = 'CONTINUE_TURN';
 
-    let continueTurnSpy;
     let turnValuesUpdatedSpy;
     let moveRollSpy;
     let jailRollSpy;
@@ -47,12 +45,10 @@ describe('Rules -> ROLL_DICE', () => {
           handler.bind(null, { notify, UI: userInterface }, gameState)
         )
       );
-      continueTurnSpy = sinon.spy();
       turnValuesUpdatedSpy = sinon.spy();
       moveRollSpy = sinon.spy();
       jailRollSpy = sinon.spy();
 
-      eventBus.on(continueTurnEvent, continueTurnSpy);
       eventBus.on(turnValuesUpdatedEvent, turnValuesUpdatedSpy);
       eventBus.on(moveRollEvent, moveRollSpy);
       eventBus.on(jailRollEvent, jailRollSpy);
@@ -96,13 +92,6 @@ describe('Rules -> ROLL_DICE', () => {
       expect(uiSpy.calledOnceWithExactly(1, 2)).to.equal(
         true,
         `UI method for display roll results of ${inputEvent} was not called`
-      );
-    });
-    it(`should emit ${continueTurnEvent} event`, () => {
-      eventBus.emit(inputEvent);
-      expect(continueTurnSpy.callCount).to.equal(
-        1,
-        `${continueTurnEvent} event was not called`
       );
     });
     it(`should emit ${moveRollEvent} event if player is not in jail`, () => {
