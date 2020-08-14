@@ -18,6 +18,10 @@ gameState.players = [
   createPlayer({ name: 'player1' }),
   createPlayer({ name: 'player2' }),
 ];
+// set id of players
+for (let id = 0; id < gameState.players.length; id++)
+  gameState.players[id].id = id;
+
 gameState.config = require('./config/monopolyConfiguration');
 
 const eventBus = new EventEmitter();
@@ -32,6 +36,7 @@ require('./entities/Game')({ eventBus, userInterface, gameState });
 function createPlayer({ name }) {
   return {
     name,
+    id: 0,
     position: 0,
     jailed: -1,
     cash: 1500,

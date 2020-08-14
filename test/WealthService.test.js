@@ -98,4 +98,9 @@ describe('WealthService', () => {
       );
     });
   });
+  describe('calculateLiquidity', () => {
+    it('should calculate with mortgaged assets');
+    it('should calculate with constructed houses/hotels');
+    it('should calculate with no owned properties');
+  });
 });

@@ -6,7 +6,7 @@ const { GameState } = require('../entities/GameState');
 const { createPlayer } = require('./testutils');
 const PlayerActions = require('../entities/PlayerActions');
 
-describe('PlayerActions', function () {
+describe('PlayerActions', () => {
   let gameState;
 
   beforeEach(() => {

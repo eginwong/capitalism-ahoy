@@ -2,6 +2,7 @@ module.exports = {
   createPlayer: function ({ name }) {
     return {
       name,
+      id: 0,
       position: 0,
       jailed: -1,
       cash: 1500,

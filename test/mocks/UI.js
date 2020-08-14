@@ -21,5 +21,7 @@ module.exports = function mockUIFactory() {
     jail: () => true,
     unknownAction: () => true,
     gameOver: () => true,
+    displayPropertyDetails: () => true,
+    propertyBought: () => true,
   };
 };

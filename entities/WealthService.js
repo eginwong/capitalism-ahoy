@@ -31,4 +31,17 @@ module.exports = class WealthService {
   static calculateNetWorth(player) {
     return player.cash + player.assets;
   }
+
+  /**
+   * Determine a player's available funds
+   * @param {*} gameState
+   * @param {*} player
+   */
+  static calculateLiquidity(gameState, player = gameState.currentPlayer) {
+    // TODO: do not divide by 2 any assets that are mortgaged;
+
+    // const hasMonopoly = gameState.config.propertyConfig.properties.filter(p => p.group === boardProperty.group)
+    // .every(p => p.ownedBy === player.id);
+    return player.assets / 2 + player.cash;
+  }
 };
