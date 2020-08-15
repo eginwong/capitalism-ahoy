@@ -94,14 +94,18 @@ module.exports = {
     },
     ({ notify }, gameState) => {
       if (gameState.currentPlayer.jailed > 2) {
+        require('./updateTurnValues')({
+          forcedPayFine: true,
+        })(gameState);
+        notify('TURN_VALUES_UPDATED');
         notify('PAY_FINE');
       }
     },
     ({ notify }, gameState) => {
       if (gameState.currentPlayer.jailed === -1) {
-        // TODO: make sure no next movement if doubles out of jail
-        // TODO: but can move twice if paid fine/used card
         notify('MOVE_PLAYER');
+      } else {
+        notify('CONTINUE_TURN');
       }
     },
   ],
@@ -162,7 +166,12 @@ module.exports = {
         notify('LIQUIDATION');
       }
     },
-    ({ notify }) => notify('CONTINUE_TURN'),
+    ({ notify }, { turnValues }) => {
+      // allow continue turn as normal if pre-emptive paying of fine
+      if (!turnValues.forcedPayFine) {
+        notify('CONTINUE_TURN');
+      }
+    },
   ],
   SPEEDING: [({ UI }) => UI.caughtSpeeding(), ({ notify }) => notify('JAIL')],
   PASS_GO: [
