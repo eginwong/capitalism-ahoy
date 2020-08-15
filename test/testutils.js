@@ -11,4 +11,11 @@ module.exports = {
       properties: [],
     };
   },
+
+  fillStub: function (stub, stubValues) {
+    for (let [index, value] of stubValues.entries()) {
+      stub.onCall(index).returns(value);
+    }
+    return stub;
+  },
 };

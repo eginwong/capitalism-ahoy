@@ -46,6 +46,11 @@ describe('Rules -> PAY_FINE', () => {
           handler.bind(null, { notify, UI: userInterface }, gameState)
         )
       );
+      gameState.turnValues = {
+        roll: [1, 2],
+        speedingCounter: 0,
+      };
+
       bankruptcySpy = sinon.spy();
       liquidationSpy = sinon.spy();
       continueTurnSpy = sinon.spy();
@@ -109,6 +114,14 @@ describe('Rules -> PAY_FINE', () => {
       expect(continueTurnSpy.callCount).to.equal(
         1,
         `${continueTurnEvent} was not called`
+      );
+    });
+    it(`the ${continueTurnEvent} event should not be called if forced to pay fine`, () => {
+      gameState.turnValues.forcedPayFine = true;
+      eventBus.emit(inputEvent);
+      expect(continueTurnSpy.callCount).to.equal(
+        0,
+        `${continueTurnEvent} was called`
       );
     });
   });

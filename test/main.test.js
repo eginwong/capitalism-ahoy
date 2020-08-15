@@ -3,7 +3,7 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 const EventEmitter = require('events');
 const { GameState } = require('../entities/GameState');
-const { createPlayer } = require('./testutils');
+const { createPlayer, fillStub } = require('./testutils');
 const mockUIFactory = require('./mocks/UI');
 const Dice = require('../entities/Components/Dice');
 const PlayerActions = require('../entities/PlayerActions');
@@ -45,28 +45,25 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
-        // highest rolling player
-        promptStub.onCall(0).returns('');
-        promptStub.onCall(1).returns('');
-        // player turn
-        promptStub.onCall(2).returns('ROLL_DICE');
-        promptStub.onCall(3).returns('BUY_PROPERTY');
-        promptStub.onCall(4).returns('ROLL_DICE');
-        promptStub.onCall(5).returns('BUY_PROPERTY');
-        promptStub.onCall(6).returns('END_TURN');
-        promptStub.onCall(7).returns('END_GAME');
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+          'ROLL_DICE',
+          'BUY_PROPERTY',
+          'ROLL_DICE',
+          'BUY_PROPERTY',
+          'END_TURN',
+          'END_GAME',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [[6], [1], [3, 3], [1, 2]];
+        fillStub(diceStub, diceStubValues);
+
         const startGameSpy = sinon.spy();
         userInterface.startGame = startGameSpy;
         userInterface.prompt = promptStub;
-
-        const diceStub = sinon.stub(Dice, 'roll');
-        // highest rolling player
-        diceStub.onCall(0).returns([6]);
-        diceStub.onCall(1).returns([1]);
-
-        // player turn
-        diceStub.onCall(2).returns([3, 3]);
-        diceStub.onCall(3).returns([1, 2]);
 
         require('../entities/Game')({
           eventBus,
@@ -93,20 +90,298 @@ describe('main', () => {
     );
 
     it(gwt`cold start | game is loaded | player caught speeding`, () => {
-      // continue or start
+      // arrange
+      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStubValues = [
+        '', // highest rolling player
+        '',
+        'ROLL_DICE',
+        'ROLL_DICE',
+        'ROLL_DICE',
+        'END_GAME',
+      ];
+      userInterface.prompt = fillStub(promptStub, promptStubValues);
+
+      const diceStub = sinon.stub(Dice, 'roll');
+      const diceStubValues = [
+        [6],
+        [1],
+        [1, 1], // p1: community chest
+        [1, 1], // p1: income tax
+        [4, 4], // p1: speeding
+      ];
+      fillStub(diceStub, diceStubValues);
+
+      require('../entities/Game')({
+        eventBus,
+        userInterface,
+        gameState,
+      });
+
+      expect(gameState.turn).equal(1, 'Incorrect turn value');
+      expect(gameState.players[0].position).to.equal(
+        10,
+        'Player #1 did not correctly go to jail for speeding'
+      );
+      expect(gameState.players[0].jailed).to.equal(
+        0,
+        "Player #1's jail status was not correctly set"
+      );
+      expect(gameState.players[1].position).to.equal(0, 'Player #2 moved');
     });
 
     it(
-      gwt`cold start | game is loaded | player paying fine to get out of jail`,
+      gwt`cold start | game is loaded | player pays fine to get out of jail, can roll doubles and continue turn`,
       () => {
-        // continue or start
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+          'ROLL_DICE',
+          'ROLL_DICE',
+          'ROLL_DICE',
+          'ROLL_DICE', // p2
+          'END_TURN',
+          'PAY_FINE', // p1
+          'ROLL_DICE',
+          'BUY_PROPERTY',
+          'ROLL_DICE',
+          'END_GAME',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [
+          [6],
+          [1],
+          [1, 1], // p1: community chest
+          [1, 1], // p1: income tax
+          [4, 4], // p1: speeding
+          [1, 3], // p2: income tax
+          [3, 3], // p1: st james place
+          [4, 2], // p1: chance
+        ];
+        fillStub(diceStub, diceStubValues);
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        const expectedFinalBoardProperty = {
+          position: 22,
+          price: 180,
+        };
+        expect(gameState.turn).equal(2, 'Incorrect turn value');
+        expect(gameState.players[0].position).to.equal(
+          expectedFinalBoardProperty.position,
+          'Player #1 did not correctly move to expected location after rolling doubles'
+        );
+        expect(gameState.players[0].cash).to.equal(
+          1500 - config.fineAmount - expectedFinalBoardProperty.price,
+          "Player #1's cash does not account for fine and property purchase"
+        );
       }
     );
 
     it(
-      gwt`cold start | game is loaded | player paying fine to get out of jail after exhausting three turns`,
+      gwt`cold start | game is loaded | player pays fine to get out of jail after exhausting three turns`,
       () => {
-        // continue or start
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+          'ROLL_DICE',
+          'ROLL_DICE',
+          'ROLL_DICE',
+          'ROLL_DICE', // p2
+          'END_TURN',
+          'ROLL_DICE', // p1
+          'END_TURN',
+          'ROLL_DICE', // p2
+          'END_TURN',
+          'ROLL_DICE', // p1
+          'END_TURN',
+          'ROLL_DICE', // p2
+          'END_TURN',
+          'ROLL_DICE', // p1
+          'END_GAME',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [
+          [6],
+          [1],
+          [1, 1], // p1: community chest
+          [1, 1], // p1: income tax
+          [4, 4], // p1: speeding
+          [1, 3], // p2: income tax
+          [1, 2], // p1: jail 1
+          [1, 2], // p2: chance
+          [1, 2], // p1: jail 2
+          [1, 2], // p2: visiting jail
+          [3, 4], // p2: jail 3, community chest
+        ];
+        fillStub(diceStub, diceStubValues);
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        expect(gameState.turn).equal(6, 'Incorrect turn value');
+        expect(gameState.players[0].cash).to.equal(
+          1500 - config.fineAmount,
+          "Player #1's cash does not account for fine"
+        );
+      }
+    );
+
+    it(
+      gwt`cold start | game is loaded | player rolls doubles, gets out of jail, and does not continue turn`,
+      () => {
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+          'ROLL_DICE',
+          'ROLL_DICE',
+          'ROLL_DICE',
+          'ROLL_DICE', // p2
+          'END_TURN',
+          'ROLL_DICE', // p1
+          'BUY_PROPERTY',
+          'END_TURN',
+          'END_GAME',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [
+          [6],
+          [1],
+          [1, 1], // p1: community chest
+          [1, 1], // p1: income tax
+          [4, 4], // p1: speeding
+          [1, 3], // p2: income tax
+          [1, 1], // p1: jail 1
+        ];
+        fillStub(diceStub, diceStubValues);
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        expect(gameState.turn).equal(3, 'Incorrect turn value');
+        expect(gameState.players[0].cash).to.equal(
+          1350,
+          "Player #1's cash was incorrectly fined"
+        );
+        expect(gameState.players[0].position).to.equal(
+          12,
+          "Player #1's position is incorrect"
+        );
+      }
+    );
+
+    it(
+      gwt`cold start | game is loaded | player does not get GO money when going to jail`,
+      () => {
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+          'ROLL_DICE',
+          'ROLL_DICE',
+          'ROLL_DICE',
+          'END_GAME',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [
+          [6],
+          [1],
+          [1, 1], // p1: chance
+          [1, 1], // p1: luxury tax
+          [4, 4], // p1: speeding
+        ];
+        fillStub(diceStub, diceStubValues);
+
+        // TODO: replace with continue state
+        // begin player1 partway through the board
+        gameState.players[0].position = 34;
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        expect(gameState.turn).equal(1, 'Incorrect turn value');
+        expect(gameState.players[0].position).to.equal(
+          10,
+          'Player #1 did not correctly go to jail for speeding'
+        );
+        expect(gameState.players[0].jailed).to.equal(
+          0,
+          "Player #1's jail status was not correctly set"
+        );
+        expect(gameState.players[0].cash).to.equal(
+          1500,
+          "Player #1's incorrectly received GO money while getting caught for speeding"
+        );
+      }
+    );
+
+    it(
+      gwt`cold start | game is loaded | player gains money when passing GO`,
+      () => {
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        // highest rolling player
+        promptStub.onCall(0).returns('');
+        promptStub.onCall(1).returns('');
+        // // player turn
+        promptStub.onCall(2).returns('ROLL_DICE');
+        promptStub.onCall(3).returns('END_GAME');
+        userInterface.prompt = promptStub;
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        // highest rolling player
+        diceStub.onCall(0).returns([6]);
+        diceStub.onCall(1).returns([1]);
+
+        // TODO: replace with continue state
+        // begin player1 partway through the board
+        gameState.players[0].position = 29;
+        // player turn
+        diceStub.onCall(2).returns([6, 5]); // p1: chance
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        expect(gameState.turn).equal(0, 'Incorrect turn value');
+        expect(gameState.players[0].cash).to.equal(
+          1700,
+          "Player #1's did not receive GO money when going around the board"
+        );
       }
     );
   });
