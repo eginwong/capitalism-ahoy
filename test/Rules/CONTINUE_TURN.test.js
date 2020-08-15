@@ -4,7 +4,7 @@ const sinon = require('sinon');
 const mockUIFactory = require('../mocks/UI');
 
 const { GameState } = require('../../entities/GameState');
-const { createPlayer } = require('../testutils');
+const { createPlayerFactory } = require('../testutils');
 const PlayerActions = require('../../entities/PlayerActions');
 
 describe('Rules -> CONTINUE_TURN', () => {
@@ -17,6 +17,7 @@ describe('Rules -> CONTINUE_TURN', () => {
     gameState = new GameState();
     eventBus = new EventEmitter();
     userInterface = mockUIFactory();
+    let createPlayer = createPlayerFactory();
     gameState.players = [createPlayer({ name: 'player1' })];
   });
 

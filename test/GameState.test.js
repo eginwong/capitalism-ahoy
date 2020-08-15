@@ -1,6 +1,6 @@
 const expect = require('chai').expect;
 const { GameState } = require('../entities/GameState');
-const { createPlayer } = require('./testutils');
+const { createPlayerFactory } = require('./testutils');
 
 describe('GameState', () => {
   let gameState;
@@ -11,6 +11,7 @@ describe('GameState', () => {
     expect(gameState.currentPlayer).to.equal(undefined);
   });
   it('should retrieve current player', () => {
+    let createPlayer = createPlayerFactory();
     gameState.players = [
       createPlayer({ name: 'player1' }),
       createPlayer({ name: 'player2' }),

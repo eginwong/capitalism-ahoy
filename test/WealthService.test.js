@@ -1,19 +1,18 @@
 const expect = require('chai').expect;
 const WealthService = require('../entities/WealthService');
 const { GameState } = require('../entities/GameState');
-const { createPlayer } = require('./testutils');
+const { createPlayerFactory } = require('./testutils');
 
 describe('WealthService', () => {
   let gameState;
 
   beforeEach(() => {
     gameState = new GameState();
+    let createPlayer = createPlayerFactory();
     gameState.players = [
       createPlayer({ name: 'player1' }),
       createPlayer({ name: 'player2' }),
     ];
-    for (let id = 0; id < gameState.players.length; id++)
-      gameState.players[id].id = id;
     gameState.config = { propertyConfig: { properties: [] } };
   });
 

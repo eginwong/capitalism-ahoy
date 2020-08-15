@@ -2,13 +2,14 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 const highestRollingPlayerGoesFirst = require('../../entities/Rules/highestRollingPlayerGoesFirst');
 const Dice = require('../../entities/Components/Dice');
-const { createPlayer } = require('../testutils');
+const { createPlayerFactory } = require('../testutils');
 const mockUIFactory = require('../mocks/UI');
 
 describe('Rules -> highestRollingPlayerGoesFirst', () => {
   let userInterface;
   let input;
   let diceStub;
+  let createPlayer = createPlayerFactory();
 
   beforeEach(() => {
     userInterface = mockUIFactory();

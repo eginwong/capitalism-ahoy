@@ -1,7 +1,7 @@
 const expect = require('chai').expect;
 const PropertyService = require('../entities/PropertyService');
 const { GameState } = require('../entities/GameState');
-const { createPlayer } = require('./testutils');
+const { createPlayerFactory } = require('./testutils');
 const config = require('../config/monopolyConfiguration');
 
 describe('PropertyService', () => {
@@ -9,6 +9,7 @@ describe('PropertyService', () => {
 
   beforeEach(() => {
     gameState = new GameState();
+    let createPlayer = createPlayerFactory();
     gameState.players = [createPlayer({ name: 'player1' })];
     gameState.config = config;
   });

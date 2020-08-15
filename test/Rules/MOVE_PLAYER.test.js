@@ -4,7 +4,7 @@ const sinon = require('sinon');
 const mockUIFactory = require('../mocks/UI');
 
 const { GameState } = require('../../entities/GameState');
-const { createPlayer } = require('../testutils');
+const { createPlayerFactory } = require('../testutils');
 const config = require('../../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
 
@@ -18,6 +18,7 @@ describe('Rules -> MOVE_PLAYER', () => {
     gameState = new GameState();
     eventBus = new EventEmitter();
     userInterface = mockUIFactory();
+    let createPlayer = createPlayerFactory();
     gameState.players = [createPlayer({ name: 'player1' })];
     gameState.config = cloneDeep(config);
   });

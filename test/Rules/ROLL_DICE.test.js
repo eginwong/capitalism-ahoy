@@ -4,7 +4,7 @@ const sinon = require('sinon');
 const mockUIFactory = require('../mocks/UI');
 
 const { GameState } = require('../../entities/GameState');
-const { createPlayer } = require('../testutils');
+const { createPlayerFactory } = require('../testutils');
 const Dice = require('../../entities/Components/Dice');
 
 describe('Rules -> ROLL_DICE', () => {
@@ -17,6 +17,7 @@ describe('Rules -> ROLL_DICE', () => {
     gameState = new GameState();
     eventBus = new EventEmitter();
     userInterface = mockUIFactory();
+    let createPlayer = createPlayerFactory();
     gameState.players = [createPlayer({ name: 'player1' })];
   });
 
