@@ -133,7 +133,6 @@ module.exports = {
     ({ notify }, gameState) => {
       const boardProperty = gameState.currentBoardProperty;
 
-      // if has property owned, means property can be purchased
       if (boardProperty.ownedBy === -1) {
         notify('RESOLVE_NEW_PROPERTY');
       }
