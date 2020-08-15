@@ -6,6 +6,7 @@ const mockUIFactory = require('../mocks/UI');
 const { GameState } = require('../../entities/GameState');
 const { createPlayer } = require('../testutils');
 const config = require('../../config/monopolyConfiguration');
+const { cloneDeep } = require('lodash');
 
 describe('Rules -> MOVE_PLAYER', () => {
   let gameState;
@@ -18,7 +19,7 @@ describe('Rules -> MOVE_PLAYER', () => {
     eventBus = new EventEmitter();
     userInterface = mockUIFactory();
     gameState.players = [createPlayer({ name: 'player1' })];
-    gameState.config = config;
+    gameState.config = cloneDeep(config);
   });
 
   afterEach(() => {
@@ -30,9 +31,11 @@ describe('Rules -> MOVE_PLAYER', () => {
     const inputEvent = 'MOVE_PLAYER';
     const passGoEvent = 'PASS_GO';
     const continueTurnEvent = 'CONTINUE_TURN';
+    const resolveNewPropertyEvent = 'RESOLVE_NEW_PROPERTY';
 
     let passGoSpy;
     let continueTurnSpy;
+    let resolveNewPropertySpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -50,9 +53,11 @@ describe('Rules -> MOVE_PLAYER', () => {
 
       passGoSpy = sinon.spy();
       continueTurnSpy = sinon.spy();
+      resolveNewPropertySpy = sinon.spy();
 
       eventBus.on(passGoEvent, passGoSpy);
       eventBus.on(continueTurnEvent, continueTurnSpy);
+      eventBus.on(resolveNewPropertyEvent, resolveNewPropertySpy);
     });
 
     it('should set gameState current board property', () => {
@@ -123,6 +128,21 @@ describe('Rules -> MOVE_PLAYER', () => {
       expect(passGoSpy.callCount).to.equal(
         0,
         'Move Player emitted pass go event without wrapping around the board'
+      );
+    });
+    it(`should emit ${resolveNewPropertyEvent} event if property is not owned`, () => {
+      eventBus.emit(inputEvent);
+      expect(resolveNewPropertySpy.callCount).to.equal(
+        1,
+        `${resolveNewPropertyEvent} event was not called`
+      );
+    });
+    it(`should not emit ${resolveNewPropertyEvent} event if property is owned`, () => {
+      gameState.config.propertyConfig.properties[1].ownedBy = 0;
+      eventBus.emit(inputEvent);
+      expect(resolveNewPropertySpy.callCount).to.equal(
+        0,
+        `${resolveNewPropertyEvent} event was called`
       );
     });
     it(`should emit ${continueTurnEvent} event`, () => {
