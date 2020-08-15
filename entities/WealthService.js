@@ -38,10 +38,17 @@ module.exports = class WealthService {
    * @param {*} player
    */
   static calculateLiquidity(gameState, player = gameState.currentPlayer) {
-    // TODO: do not divide by 2 any assets that are mortgaged;
-
-    // const hasMonopoly = gameState.config.propertyConfig.properties.filter(p => p.group === boardProperty.group)
-    // .every(p => p.ownedBy === player.id);
-    return player.assets / 2 + player.cash;
+    const ownedProperties = gameState.config.propertyConfig.properties.filter(
+      (p) => p.ownedBy === player.id
+    );
+    const totalLiquidAssets = ownedProperties
+      .filter((p) => !p.mortgaged)
+      .map((p) =>
+        p.houseCost && p.buildings
+          ? p.houseCost * p.buildings + p.price
+          : p.price
+      )
+      .reduce((acc, val) => acc + val, 0);
+    return totalLiquidAssets / 2 + player.cash;
   }
 };

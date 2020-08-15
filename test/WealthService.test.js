@@ -3,6 +3,7 @@ const WealthService = require('../entities/WealthService');
 const { GameState } = require('../entities/GameState');
 const { createPlayer } = require('./testutils');
 const config = require('../config/monopolyConfiguration');
+const { cloneDeep } = require('lodash');
 
 describe('WealthService', () => {
   let gameState;
@@ -13,7 +14,9 @@ describe('WealthService', () => {
       createPlayer({ name: 'player1' }),
       createPlayer({ name: 'player2' }),
     ];
-    gameState.config = config;
+    for (let id = 0; id < gameState.players.length; id++)
+      gameState.players[id].id = id;
+    gameState.config = cloneDeep(config);
   });
 
   describe('increment', () => {
@@ -99,8 +102,54 @@ describe('WealthService', () => {
     });
   });
   describe('calculateLiquidity', () => {
-    it('should calculate with mortgaged assets');
-    it('should calculate with constructed houses/hotels');
-    it('should calculate with no owned properties');
+    it('should calculate with mortgaged assets', () => {
+      let properties = gameState.config.propertyConfig.properties;
+      properties[0].ownedBy = 0; // price: 60
+      properties[1].ownedBy = 0; // price: 60
+      properties[1].mortgaged = true;
+
+      expect(WealthService.calculateLiquidity(gameState)).to.equal(
+        1530,
+        `Liquidity value does not match properties with mortgaged assets`
+      );
+    });
+    it('should calculate with constructed houses/hotels', () => {
+      let properties = gameState.config.propertyConfig.properties;
+      properties[0].ownedBy = 0; // price: 60
+      properties[1].ownedBy = 0; // price: 60
+      properties[1].buildings = 5; // houseCost: 50
+
+      expect(WealthService.calculateLiquidity(gameState)).to.equal(
+        1685,
+        `Liquidity value does not match properties with assets and buildings`
+      );
+    });
+    it('should calculate with no owned properties', () => {
+      expect(WealthService.calculateLiquidity(gameState)).to.equal(
+        1500,
+        `Liquidity value does not match properties with no assets`
+      );
+    });
+    it('should calculate with special properties', () => {
+      let properties = gameState.config.propertyConfig.properties;
+      properties[23].ownedBy = 0; // price: 150
+      properties[25].ownedBy = 0; // price: 200
+      properties[0].ownedBy = 0; // price: 60
+
+      expect(WealthService.calculateLiquidity(gameState)).to.equal(
+        1705,
+        `Liquidity value does not match properties with special assets`
+      );
+    });
+    it('should calculate specific player', () => {
+      let properties = gameState.config.propertyConfig.properties;
+      properties[23].ownedBy = 1; // price: 150
+      properties[25].ownedBy = 1; // price: 200
+      properties[0].ownedBy = 1; // price: 60
+
+      expect(
+        WealthService.calculateLiquidity(gameState, gameState.players[1])
+      ).to.equal(1705, `Liquidity value does not match specified player`);
+    });
   });
 });

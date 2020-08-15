@@ -244,9 +244,8 @@ module.exports = {
       const boardProperty = gameState.currentBoardProperty;
 
       // checking buying power first in case we have a cancel option in the future
-      // TODO
       // const playerBuyingPower = require('../WealthService').calculateLiquidity(
-      //   gameState.currentPlayer
+      //   gameState
       // );
 
       // if (playerBuyingPower < boardProperty.price) {
