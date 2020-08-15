@@ -3,7 +3,7 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 const EventEmitter = require('events');
 const { GameState } = require('../entities/GameState');
-const { createPlayer, fillStub } = require('./testutils');
+const { createPlayerFactory, fillStub } = require('./testutils');
 const mockUIFactory = require('./mocks/UI');
 const Dice = require('../entities/Components/Dice');
 const PlayerActions = require('../entities/PlayerActions');
@@ -26,6 +26,7 @@ describe('main', () => {
 
     beforeEach(() => {
       gameState = new GameState();
+      let createPlayer = createPlayerFactory();
       gameState.players = [
         createPlayer({ name: 'player1' }),
         createPlayer({ name: 'player2' }),

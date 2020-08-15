@@ -14,14 +14,11 @@ const { consoleUI } = require('./ConsoleUI');
 const { GameState } = require('./entities/GameState');
 
 let gameState = new GameState(); // or loads gameState
+let createPlayer = createPlayerFactory();
 gameState.players = [
   createPlayer({ name: 'player1' }),
   createPlayer({ name: 'player2' }),
 ];
-// set id of players
-gameState.players.forEach((player, index) => {
-  player.id = index;
-});
 gameState.config = require('./config/monopolyConfiguration');
 
 const eventBus = new EventEmitter();
@@ -33,15 +30,21 @@ require('./entities/Game')({ eventBus, userInterface, gameState });
 // ------------------------------- //
 
 // TODO: replace with class
-function createPlayer({ name }) {
-  return {
-    name,
-    id: 0,
-    position: 0,
-    jailed: -1,
-    cash: 1500,
-    assets: 0, // liquidAssets are 1/2 assets
-    getOutOfJailFreeCards: 0,
-    properties: [],
-  };
+function createPlayerFactory() {
+  let id = -1;
+  function createPlayer({ name }) {
+    id++;
+    return {
+      name,
+      id,
+      position: 0,
+      jailed: -1,
+      cash: 1500,
+      assets: 0,
+      getOutOfJailFreeCards: 0,
+      properties: [],
+    };
+  }
+
+  return createPlayer;
 }

@@ -3,7 +3,7 @@ const sinon = require('sinon');
 const mockUIFactory = require('./mocks/UI');
 
 const { GameState } = require('../entities/GameState');
-const { createPlayer } = require('./testutils');
+const { createPlayerFactory } = require('./testutils');
 const PlayerActions = require('../entities/PlayerActions');
 
 describe('PlayerActions', () => {
@@ -11,6 +11,7 @@ describe('PlayerActions', () => {
 
   beforeEach(() => {
     gameState = new GameState();
+    let createPlayer = createPlayerFactory();
     gameState.players = [createPlayer({ name: 'player1' })];
     // simulate start of a turn
     require('../entities/Rules/resetTurnAssociatedValues')({
