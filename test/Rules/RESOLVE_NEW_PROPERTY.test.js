@@ -13,7 +13,7 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
   let userInterface;
   let eventBus;
   const RULES = require('../../entities/Rules');
-  const ORIENTAL_AVENUE_PROPERTY = 2;
+  const TEST_PROPERTY = 2;
 
   beforeEach(() => {
     gameState = new GameState();
@@ -57,7 +57,7 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
       const uiSpy = sinon.spy();
       userInterface.displayPropertyDetails = uiSpy;
       const property =
-        gameState.config.propertyConfig.properties[ORIENTAL_AVENUE_PROPERTY];
+        gameState.config.propertyConfig.properties[TEST_PROPERTY];
       gameState.currentBoardProperty = property;
 
       const playerActionsStub = sinon.stub(PlayerActions, 'prompt');
@@ -73,7 +73,7 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
     });
     it('should automatically begin auction if player does not have enough liquidity', () => {
       const property =
-        gameState.config.propertyConfig.properties[ORIENTAL_AVENUE_PROPERTY];
+        gameState.config.propertyConfig.properties[TEST_PROPERTY];
       gameState.currentBoardProperty = property;
       gameState.players[0].cash = 80;
 
@@ -95,7 +95,7 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
     });
     it('should prompt if player can buy or auction', () => {
       const property =
-        gameState.config.propertyConfig.properties[ORIENTAL_AVENUE_PROPERTY];
+        gameState.config.propertyConfig.properties[TEST_PROPERTY];
       gameState.currentBoardProperty = property;
 
       const playerActionsStub = sinon.stub(PlayerActions, 'prompt');
@@ -109,7 +109,7 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
     });
     it('should re-run rule if prompt input is not understood', () => {
       const property =
-        gameState.config.propertyConfig.properties[ORIENTAL_AVENUE_PROPERTY];
+        gameState.config.propertyConfig.properties[TEST_PROPERTY];
       gameState.currentBoardProperty = property;
 
       const playerActionsStub = sinon.stub(PlayerActions, 'prompt');

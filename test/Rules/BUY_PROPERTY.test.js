@@ -14,7 +14,7 @@ describe('Rules -> BUY_PROPERTY', () => {
   let userInterface;
   let eventBus;
   const RULES = require('../../entities/Rules');
-  const ORIENTAL_AVENUE_PROPERTY = 2;
+  const TEST_PROPERTY = 2;
 
   beforeEach(() => {
     gameState = new GameState();
@@ -55,7 +55,7 @@ describe('Rules -> BUY_PROPERTY', () => {
     });
     it('should buy asset and adjust player stats', () => {
       const property =
-        gameState.config.propertyConfig.properties[ORIENTAL_AVENUE_PROPERTY];
+        gameState.config.propertyConfig.properties[TEST_PROPERTY];
       gameState.currentBoardProperty = property;
 
       const wealthServiceStub = sinon.stub(WealthService, 'buyAsset');
@@ -71,7 +71,7 @@ describe('Rules -> BUY_PROPERTY', () => {
     });
     it('should update the ownership of the purchased asset', () => {
       const property =
-        gameState.config.propertyConfig.properties[ORIENTAL_AVENUE_PROPERTY];
+        gameState.config.propertyConfig.properties[TEST_PROPERTY];
       gameState.currentBoardProperty = property;
 
       eventBus.emit(inputEvent);

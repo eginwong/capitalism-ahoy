@@ -1,6 +1,7 @@
-// TODO: TEST
 /**
  * Rule: Highest Rolling Player Goes First
+ *   Based on the highest rolling player and then beginning clockwise from there to set the
+ *   player order.
  * Effect: Reorder PlayerList Component based on Contest with Dice Component
  */
 module.exports = function highestRollingPlayerGoesFirst({ UI }, { players }) {
@@ -11,15 +12,12 @@ module.exports = function highestRollingPlayerGoesFirst({ UI }, { players }) {
     console.log(`\t\t   `, roll);
     return roll;
   });
-  let { hIndex: highest } = rolls.reduce(
+  let { hIndex: shiftValue } = rolls.reduce(
     ({ hValue = 0, hIndex = 0 }, roll, index) =>
       roll > hValue ? { hValue: roll, hIndex: index } : { hValue, hIndex },
     {}
   );
-  // TODO: Handle Ties
-  let shiftValue = (players.length - highest) % players.length;
-  for (; shiftValue > 0; --shiftValue) players.push(players.shift());
 
-  // add ids to players
-  for (let id = 0; id < players.length; id++) players[id].id = id;
+  // TODO: Handle Ties
+  for (; shiftValue > 0; --shiftValue) players.push(players.shift());
 };

@@ -17,7 +17,7 @@
 
 ## TODO
 
-### FUNCTIONALITY
+### FEATURES
 
 - TODO
 
