@@ -28,8 +28,6 @@ describe('Rules -> JAIL', () => {
 
   describe('jail', () => {
     const inputEvent = 'JAIL';
-    let endTurnEvent = 'END_TURN';
-    let endTurnSpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -41,8 +39,6 @@ describe('Rules -> JAIL', () => {
           handler.bind(null, { notify, UI: userInterface }, gameState)
         )
       );
-      endTurnSpy = sinon.spy();
-      eventBus.on(endTurnEvent, endTurnSpy);
     });
 
     it('should make a call to the UI#jail', () => {
@@ -69,13 +65,6 @@ describe('Rules -> JAIL', () => {
       expect(gameState.currentPlayer.position).to.equal(
         jailPosition,
         'Current player is not in jail'
-      );
-    });
-    it(`the ${endTurnEvent} event should be called`, () => {
-      eventBus.emit(inputEvent);
-      expect(endTurnSpy.callCount).to.equal(
-        1,
-        `${endTurnEvent} was not called`
       );
     });
   });
