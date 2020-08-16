@@ -12,12 +12,11 @@ module.exports = {
       require('./highestRollingPlayerGoesFirst')({ notify, UI }, gameState);
       notify('PLAYER_ORDER_CHANGED');
     },
-    ({ notify }) => notify('START_TURN'), // require('./playerTurnsStart')
+    ({ notify }) => notify('START_TURN'),
   ],
   START_TURN: [
     ({ notify }, gameState) => {
       require('./resetTurnAssociatedValues')({
-        // (require('./Defaults/turnValues')),
         speedingCounter: 0,
       })(gameState);
       notify('TURN_VALUES_RESET');
@@ -214,8 +213,6 @@ module.exports = {
     },
     ({ notify, UI }, gameState) => {
       const boardProperty = gameState.currentBoardProperty;
-
-      // TODO
       const playerBuyingPower = require('../WealthService').calculateLiquidity(
         gameState
       );

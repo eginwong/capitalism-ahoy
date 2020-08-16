@@ -2,8 +2,6 @@ const expect = require('chai').expect;
 const WealthService = require('../entities/WealthService');
 const { GameState } = require('../entities/GameState');
 const { createPlayer } = require('./testutils');
-const config = require('../config/monopolyConfiguration');
-const { cloneDeep } = require('lodash');
 
 describe('WealthService', () => {
   let gameState;
@@ -16,7 +14,7 @@ describe('WealthService', () => {
     ];
     for (let id = 0; id < gameState.players.length; id++)
       gameState.players[id].id = id;
-    gameState.config = cloneDeep(config);
+    gameState.config = { propertyConfig: { properties: [] } };
   });
 
   describe('increment', () => {
@@ -103,10 +101,16 @@ describe('WealthService', () => {
   });
   describe('calculateLiquidity', () => {
     it('should calculate with mortgaged assets', () => {
-      let properties = gameState.config.propertyConfig.properties;
-      properties[0].ownedBy = 0; // price: 60
-      properties[1].ownedBy = 0; // price: 60
-      properties[1].mortgaged = true;
+      gameState.config.propertyConfig.properties = [
+        {
+          price: 60,
+          houseCost: 50,
+          buildings: 0,
+          mortgaged: false,
+          ownedBy: 0,
+        },
+        { price: 60, houseCost: 50, buildings: 0, mortgaged: true, ownedBy: 0 },
+      ];
 
       expect(WealthService.calculateLiquidity(gameState)).to.equal(
         1530,
@@ -114,10 +118,22 @@ describe('WealthService', () => {
       );
     });
     it('should calculate with constructed houses/hotels', () => {
-      let properties = gameState.config.propertyConfig.properties;
-      properties[0].ownedBy = 0; // price: 60
-      properties[1].ownedBy = 0; // price: 60
-      properties[1].buildings = 5; // houseCost: 50
+      gameState.config.propertyConfig.properties = [
+        {
+          price: 60,
+          houseCost: 50,
+          buildings: 0,
+          mortgaged: false,
+          ownedBy: 0,
+        },
+        {
+          price: 60,
+          houseCost: 50,
+          buildings: 5,
+          mortgaged: false,
+          ownedBy: 0,
+        },
+      ];
 
       expect(WealthService.calculateLiquidity(gameState)).to.equal(
         1685,
@@ -131,10 +147,17 @@ describe('WealthService', () => {
       );
     });
     it('should calculate with special properties', () => {
-      let properties = gameState.config.propertyConfig.properties;
-      properties[23].ownedBy = 0; // price: 150
-      properties[25].ownedBy = 0; // price: 200
-      properties[0].ownedBy = 0; // price: 60
+      gameState.config.propertyConfig.properties = [
+        {
+          price: 60,
+          houseCost: 50,
+          buildings: 0,
+          mortgaged: false,
+          ownedBy: 0,
+        },
+        { price: 150, mortgaged: false, ownedBy: 0 },
+        { price: 200, mortgaged: false, ownedBy: 0 },
+      ];
 
       expect(WealthService.calculateLiquidity(gameState)).to.equal(
         1705,
@@ -142,10 +165,17 @@ describe('WealthService', () => {
       );
     });
     it('should calculate specific player', () => {
-      let properties = gameState.config.propertyConfig.properties;
-      properties[23].ownedBy = 1; // price: 150
-      properties[25].ownedBy = 1; // price: 200
-      properties[0].ownedBy = 1; // price: 60
+      gameState.config.propertyConfig.properties = [
+        {
+          price: 60,
+          houseCost: 50,
+          buildings: 0,
+          mortgaged: false,
+          ownedBy: 1,
+        },
+        { price: 150, mortgaged: false, ownedBy: 1 },
+        { price: 200, mortgaged: false, ownedBy: 1 },
+      ];
 
       expect(
         WealthService.calculateLiquidity(gameState, gameState.players[1])

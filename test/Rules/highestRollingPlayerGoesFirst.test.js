@@ -24,16 +24,6 @@ describe('Rules -> highestRollingPlayerGoesFirst', () => {
     sinon.restore();
   });
 
-  it(`should assign indices to each player`, () => {
-    highestRollingPlayerGoesFirst({ UI: userInterface }, input);
-    for (let index = 0; index < input.players.length; index++) {
-      expect(
-        input.players[index].id === index,
-        `Player index of ${index} does not match player position`
-      );
-    }
-  });
-
   it('should make a call to the UI#prompt', () => {
     const uiSpy = sinon.spy();
     userInterface.prompt = uiSpy;
@@ -43,7 +33,7 @@ describe('Rules -> highestRollingPlayerGoesFirst', () => {
       `UI method for highestRollingPlayerGoesFirst was not called`
     );
   });
-  xit(`should reorder players based on random dice rolls if required`, () => {
+  it(`should reorder players based on random dice rolls if required starting clockwise from largest`, () => {
     diceStub = sinon.stub(Dice, 'roll');
     input.players.push(createPlayer({ name: 'Player3' }));
     input.players.push(createPlayer({ name: 'Player4' }));
@@ -56,25 +46,10 @@ describe('Rules -> highestRollingPlayerGoesFirst', () => {
     diceStub.onCall(4).returns([6]);
 
     highestRollingPlayerGoesFirst({ UI: userInterface }, input);
-    expect(input.players[4].name).to.equal(
-      'Player1',
-      'Unexpected player in order 4'
-    );
-    expect(input.players[3].name).to.equal(
-      'Player2',
-      'Unexpected player in order 3'
-    );
-    expect(input.players[2].name).to.equal(
-      'Player3',
-      'Unexpected player in order 2'
-    );
-    expect(input.players[1].name).to.equal(
-      'Player4',
-      'Unexpected player in order 1'
-    );
-    expect(input.players[0].name).to.equal(
-      'Player5',
-      'Unexpected player in order 0'
+    const reorderedNames = input.players.map((p) => p.name);
+    expect(reorderedNames).to.deep.equal(
+      ['Player5', 'Player1', 'Player2', 'Player3', 'Player4'],
+      'Unexpected player order, not following Clockwise from highest player roll'
     );
   });
   it(`should not reorder players based on random dice rolls if not required`, () => {

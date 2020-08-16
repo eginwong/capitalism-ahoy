@@ -19,9 +19,9 @@ gameState.players = [
   createPlayer({ name: 'player2' }),
 ];
 // set id of players
-for (let id = 0; id < gameState.players.length; id++)
-  gameState.players[id].id = id;
-
+gameState.players.forEach((player, index) => {
+  player.id = index;
+});
 gameState.config = require('./config/monopolyConfiguration');
 
 const eventBus = new EventEmitter();
