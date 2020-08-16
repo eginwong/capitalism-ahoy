@@ -28,11 +28,9 @@ describe('Rules -> JAIL_ROLL', () => {
     const inputEvent = 'JAIL_ROLL';
     const movePlayerEvent = 'MOVE_PLAYER';
     const payFineEvent = 'PAY_FINE';
-    const continueTurnEvent = 'CONTINUE_TURN';
 
     let payFineSpy;
     let movePlayerSpy;
-    let continueTurnSpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -50,11 +48,9 @@ describe('Rules -> JAIL_ROLL', () => {
       };
       payFineSpy = sinon.spy();
       movePlayerSpy = sinon.spy();
-      continueTurnSpy = sinon.spy();
 
       eventBus.on(payFineEvent, payFineSpy);
       eventBus.on(movePlayerEvent, movePlayerSpy);
-      eventBus.on(continueTurnEvent, continueTurnSpy);
     });
 
     it('should make a call to the UI#rollJailDice', () => {
@@ -83,18 +79,6 @@ describe('Rules -> JAIL_ROLL', () => {
         'Jailed counter was not reset'
       );
     });
-    it('should emit enforce pay fine if jailed counter is over 2', () => {
-      gameState.currentPlayer.jailed = 2;
-      eventBus.emit(inputEvent);
-      expect(payFineSpy.callCount).to.equal(
-        1,
-        `${payFineEvent} event was not called`
-      );
-      expect(gameState.turnValues.forcedPayFine).to.equal(
-        true,
-        `enforcePayFine should be set to true on gameState`
-      );
-    });
     it('should not emit enforce pay fine if jailed counter is less than or equal to 2', () => {
       gameState.currentPlayer.jailed = 1;
       eventBus.emit(inputEvent);
@@ -111,13 +95,6 @@ describe('Rules -> JAIL_ROLL', () => {
       expect(movePlayerSpy.callCount).to.equal(
         1,
         `${movePlayerEvent} event was not called`
-      );
-    });
-    it(`should not emit ${continueTurnEvent} event if player is in jail`, () => {
-      eventBus.emit(inputEvent);
-      expect(continueTurnSpy.callCount).to.equal(
-        1,
-        `${continueTurnEvent} event was not called when player is in jail`
       );
     });
   });

@@ -30,11 +30,9 @@ describe('Rules -> PAY_FINE', () => {
     const inputEvent = 'PAY_FINE';
     const bankruptcyEvent = 'BANKRUPTCY';
     const liquidationEvent = 'LIQUIDATION';
-    const continueTurnEvent = 'CONTINUE_TURN';
 
     let bankruptcySpy;
     let liquidationSpy;
-    let continueTurnSpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -53,11 +51,9 @@ describe('Rules -> PAY_FINE', () => {
 
       bankruptcySpy = sinon.spy();
       liquidationSpy = sinon.spy();
-      continueTurnSpy = sinon.spy();
 
       eventBus.on(bankruptcyEvent, bankruptcySpy);
       eventBus.on(liquidationEvent, liquidationSpy);
-      eventBus.on(continueTurnEvent, continueTurnSpy);
     });
 
     it('should make a call to the UI#payFine', () => {
@@ -107,21 +103,6 @@ describe('Rules -> PAY_FINE', () => {
       expect(liquidationSpy.callCount).to.equal(
         1,
         `${liquidationEvent} was not called`
-      );
-    });
-    it(`the ${continueTurnEvent} event should be called`, () => {
-      eventBus.emit(inputEvent);
-      expect(continueTurnSpy.callCount).to.equal(
-        1,
-        `${continueTurnEvent} was not called`
-      );
-    });
-    it(`the ${continueTurnEvent} event should not be called if forced to pay fine`, () => {
-      gameState.turnValues.forcedPayFine = true;
-      eventBus.emit(inputEvent);
-      expect(continueTurnSpy.callCount).to.equal(
-        0,
-        `${continueTurnEvent} was called`
       );
     });
   });

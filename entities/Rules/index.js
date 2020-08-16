@@ -39,6 +39,14 @@ module.exports = {
         notify(action);
       } else {
         UI.unknownAction();
+      }
+
+      // check if we can end turn or continue turn here
+      const newlyInJail =
+        gameState.turnValues.roll && gameState.currentPlayer.jailed === 0;
+      if (newlyInJail) {
+        notify('END_TURN');
+      } else if (action !== 'END_TURN' && action !== 'END_GAME') {
         notify('CONTINUE_TURN');
       }
     },
@@ -93,18 +101,12 @@ module.exports = {
     },
     ({ notify }, gameState) => {
       if (gameState.currentPlayer.jailed > 2) {
-        require('./updateTurnValues')({
-          forcedPayFine: true,
-        })(gameState);
-        notify('TURN_VALUES_UPDATED');
         notify('PAY_FINE');
       }
     },
     ({ notify }, gameState) => {
       if (gameState.currentPlayer.jailed === -1) {
         notify('MOVE_PLAYER');
-      } else {
-        notify('CONTINUE_TURN');
       }
     },
   ],
@@ -136,7 +138,6 @@ module.exports = {
         notify('RESOLVE_NEW_PROPERTY');
       }
     },
-    ({ notify }) => notify('CONTINUE_TURN'),
   ],
   END_TURN: [
     ({ UI }) => UI.endTurn(),
@@ -164,12 +165,6 @@ module.exports = {
         notify('LIQUIDATION');
       }
     },
-    ({ notify }, { turnValues }) => {
-      // allow continue turn as normal if pre-emptive paying of fine
-      if (!turnValues.forcedPayFine) {
-        notify('CONTINUE_TURN');
-      }
-    },
   ],
   SPEEDING: [({ UI }) => UI.caughtSpeeding(), ({ notify }) => notify('JAIL')],
   PASS_GO: [
@@ -189,7 +184,6 @@ module.exports = {
         'jail'
       ).position;
     },
-    ({ notify }) => notify('END_TURN'),
   ],
   END_GAME: [
     ({ UI }, gameState) => {

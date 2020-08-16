@@ -30,11 +30,9 @@ describe('Rules -> MOVE_PLAYER', () => {
   describe('movePlayer', () => {
     const inputEvent = 'MOVE_PLAYER';
     const passGoEvent = 'PASS_GO';
-    const continueTurnEvent = 'CONTINUE_TURN';
     const resolveNewPropertyEvent = 'RESOLVE_NEW_PROPERTY';
 
     let passGoSpy;
-    let continueTurnSpy;
     let resolveNewPropertySpy;
 
     beforeEach(() => {
@@ -52,11 +50,9 @@ describe('Rules -> MOVE_PLAYER', () => {
       };
 
       passGoSpy = sinon.spy();
-      continueTurnSpy = sinon.spy();
       resolveNewPropertySpy = sinon.spy();
 
       eventBus.on(passGoEvent, passGoSpy);
-      eventBus.on(continueTurnEvent, continueTurnSpy);
       eventBus.on(resolveNewPropertyEvent, resolveNewPropertySpy);
     });
 
@@ -143,13 +139,6 @@ describe('Rules -> MOVE_PLAYER', () => {
       expect(resolveNewPropertySpy.callCount).to.equal(
         0,
         `${resolveNewPropertyEvent} event was called`
-      );
-    });
-    it(`should emit ${continueTurnEvent} event`, () => {
-      eventBus.emit(inputEvent);
-      expect(continueTurnSpy.callCount).to.equal(
-        1,
-        `${continueTurnEvent} event was not called`
       );
     });
   });
