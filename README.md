@@ -24,7 +24,7 @@
 
 ### ARCHITECTURE
 
-- TODO: one pager here
+[Architecture Documentation](./Architecture.md)
 
 ### REFLECTIONS
 
