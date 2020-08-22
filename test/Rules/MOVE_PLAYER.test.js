@@ -32,9 +32,11 @@ describe('Rules -> MOVE_PLAYER', () => {
     const inputEvent = 'MOVE_PLAYER';
     const passGoEvent = 'PASS_GO';
     const resolveNewPropertyEvent = 'RESOLVE_NEW_PROPERTY';
+    const payRentEvent = 'PAY_RENT';
 
     let passGoSpy;
     let resolveNewPropertySpy;
+    let payRentSpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -52,9 +54,11 @@ describe('Rules -> MOVE_PLAYER', () => {
 
       passGoSpy = sinon.spy();
       resolveNewPropertySpy = sinon.spy();
+      payRentSpy = sinon.spy();
 
       eventBus.on(passGoEvent, passGoSpy);
       eventBus.on(resolveNewPropertyEvent, resolveNewPropertySpy);
+      eventBus.on(payRentEvent, payRentSpy);
     });
 
     it('should set gameState current board property', () => {
@@ -140,6 +144,54 @@ describe('Rules -> MOVE_PLAYER', () => {
       expect(resolveNewPropertySpy.callCount).to.equal(
         0,
         `${resolveNewPropertyEvent} event was called`
+      );
+    });
+    it(`should emit ${payRentEvent} event if property is owned, not mortgaged, and belonging to someone else`, () => {
+      const testProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.position === 3
+      );
+      testProperty.ownedBy = 1;
+      eventBus.emit(inputEvent);
+      expect(payRentSpy.callCount).to.equal(
+        1,
+        `${payRentEvent} event was not called`
+      );
+    });
+    it(`should not emit ${payRentEvent} event if property is owned by current player`, () => {
+      const testProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.position === 3
+      );
+      testProperty.ownedBy = gameState.currentPlayer.id;
+      eventBus.emit(inputEvent);
+      expect(payRentSpy.callCount).to.equal(
+        0,
+        `${payRentEvent} event was called`
+      );
+    });
+    it(`should not emit ${payRentEvent} event if property is mortgaged`, () => {
+      const testProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.position === 3
+      );
+      testProperty.mortgaged = true;
+      eventBus.emit(inputEvent);
+      expect(payRentSpy.callCount).to.equal(
+        0,
+        `${payRentEvent} event was called`
+      );
+    });
+    it(`should not emit ${payRentEvent} event if property is special`, () => {
+      gameState.currentPlayer.position = 1; // to land on space 4, with a roll of 3
+      eventBus.emit(inputEvent);
+      expect(payRentSpy.callCount).to.equal(
+        0,
+        `${payRentEvent} event was called`
+      );
+    });
+    it(`should emit ${continueTurnEvent} event`, () => {
+      eventBus.emit(inputEvent);
+      expect(continueTurnSpy.callCount).to.equal(
+        1,
+        `${continueTurnEvent} event was not called`
       );
     });
   });

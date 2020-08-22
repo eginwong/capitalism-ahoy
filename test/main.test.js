@@ -90,6 +90,49 @@ describe('main', () => {
       }
     );
 
+    it(
+      gwt`cold start | game is loaded | first player buys properties, and second player pays rent`,
+      () => {
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+          'ROLL_DICE',
+          'BUY_PROPERTY',
+          'END_TURN',
+          'ROLL_DICE',
+          'END_TURN',
+          'END_GAME',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [[6], [1], [1, 2], [1, 2]];
+        fillStub(diceStub, diceStubValues);
+
+        const startGameSpy = sinon.spy();
+        userInterface.startGame = startGameSpy;
+        userInterface.prompt = promptStub;
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        expect(gameState.turn).equal(2, 'Incorrect turn value');
+        expect(gameState.players[0].cash).to.equal(
+          1444,
+          "Player #1's cash did not change from purchase and rental income"
+        );
+        expect(gameState.players[1].cash).to.equal(
+          1496,
+          "Player #2's cash did not change from rental payment"
+        );
+      }
+    );
+
     it(gwt`cold start | game is loaded | player caught speeding`, () => {
       // arrange
       const promptStub = sinon.stub(PlayerActions, 'prompt');
