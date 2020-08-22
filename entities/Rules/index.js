@@ -156,12 +156,16 @@ module.exports = {
     ({ UI }) => UI.payFine(),
     (_, gameState) => {
       // potentially entering negative wealth here, will be resolved in subsequent rule
+      // TODO: WEALTHSERVICE: Check Liquidity
+      // what happens if current player doesn't have enough?
+
       require('../WealthService').decrement(
         gameState.currentPlayer,
         gameState.config.fineAmount
       );
       gameState.currentPlayer.jailed = -1;
     },
+    // TODO: see if rule below can be combined above or made modular
     function conditionalEventsOnLostWealth({ notify }, gameState) {
       if (
         require('../WealthService').calculateNetWorth(gameState.currentPlayer) <
@@ -267,20 +271,42 @@ module.exports = {
 
       // TODO: Refactor to PropertyManagementService
       let rentAmount = boardProperty.rent;
+      const playerIndex = owner.id;
 
-      if (boardProperty.buildings > 0) {
-        rentAmount = boardProperty.multipliedRent[boardProperty.buildings - 1];
-      } else {
-        // calculate monopoly
-        const playerIndex = owner.id;
-
-        // TODO: refactor into PropertyManagementService
+      if (boardProperty.group === 'Utilities') {
+        const totalRoll =
+          gameState.turnValues.roll[0] + gameState.turnValues.roll[1];
+        const SINGLE_UTILITY_MULTIPLIER = 4;
+        const DOUBLE_UTILITY_MULTIPLIER = 10;
+        // check number of utilities
         const hasMonopoly = gameState.config.propertyConfig.properties
           .filter((p) => p.group === boardProperty.group)
           .every((p) => p.ownedBy === playerIndex);
+        // multiply by roll
+        rentAmount =
+          totalRoll *
+          (hasMonopoly ? DOUBLE_UTILITY_MULTIPLIER : SINGLE_UTILITY_MULTIPLIER);
+      } else if (boardProperty.group === 'Railroad') {
+        const railroadPricing = [25, 50, 100, 200];
+        const railroadCount = gameState.config.propertyConfig.properties
+          .filter((p) => p.group === boardProperty.group)
+          .filter((p) => p.ownedBy === playerIndex).length;
+        rentAmount = railroadPricing[railroadCount - 1];
+      } else {
+        if (boardProperty.buildings > 0) {
+          rentAmount =
+            boardProperty.multipliedRent[boardProperty.buildings - 1];
+        } else {
+          // calculate monopoly
 
-        if (hasMonopoly) {
-          rentAmount *= 2;
+          // TODO: refactor into PropertyManagementService
+          const hasMonopoly = gameState.config.propertyConfig.properties
+            .filter((p) => p.group === boardProperty.group)
+            .every((p) => p.ownedBy === playerIndex);
+
+          if (hasMonopoly) {
+            rentAmount *= 2;
+          }
         }
       }
 
@@ -297,7 +323,6 @@ module.exports = {
   ],
   //   TRADE,
   //   PROPERTY_DEVELOPMENT,
-  //   AUCTION,
   //   BANKRUPTCY: () => gameState.currentPlayerActions["END_TURN"].execute(),
   //   // potentially Chance/Community Cards
 };
