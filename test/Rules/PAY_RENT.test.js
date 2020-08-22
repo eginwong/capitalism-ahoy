@@ -92,56 +92,142 @@ describe('Rules -> PAY_RENT', () => {
         "Player's cash amount incorrectly decremented in rent exchange"
       );
     });
-    it(`should charge rent based on buildings if built on the property`, () => {
-      const ownerId = 1;
-      const owner = gameState.players.find((p) => p.id === ownerId);
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.position === 3
-      );
-      testProperty.ownedBy = ownerId;
-      testProperty.buildings = 3;
-      gameState.currentBoardProperty = testProperty;
-      const startingOwnerCash = owner.cash;
-      const startingPlayerCash = gameState.currentPlayer.cash;
+    describe('common properties', () => {
+      it(`should charge rent based on buildings if built on the property`, () => {
+        const ownerId = 1;
+        const owner = gameState.players.find((p) => p.id === ownerId);
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.position === 3
+        );
+        testProperty.ownedBy = ownerId;
+        testProperty.buildings = 3;
+        gameState.currentBoardProperty = testProperty;
+        const startingOwnerCash = owner.cash;
+        const startingPlayerCash = gameState.currentPlayer.cash;
 
-      eventBus.emit(inputEvent);
-      expect(owner.cash).to.equal(
-        startingOwnerCash +
-          testProperty.multipliedRent[testProperty.buildings - 1],
-        "Owner's cash amount incorrectly incremented in rent exchange"
-      );
-      expect(gameState.currentPlayer.cash).to.equal(
-        startingPlayerCash -
-          testProperty.multipliedRent[testProperty.buildings - 1],
-        "Player's cash amount incorrectly decremented in rent exchange"
-      );
+        eventBus.emit(inputEvent);
+        expect(owner.cash).to.equal(
+          startingOwnerCash +
+            testProperty.multipliedRent[testProperty.buildings - 1],
+          "Owner's cash amount incorrectly incremented in rent exchange"
+        );
+        expect(gameState.currentPlayer.cash).to.equal(
+          startingPlayerCash -
+            testProperty.multipliedRent[testProperty.buildings - 1],
+          "Player's cash amount incorrectly decremented in rent exchange"
+        );
+      });
+      it(`should charge monopoly if all properties owned in group and no buildings are built`, () => {
+        const ownerId = 1;
+        const owner = gameState.players.find((p) => p.id === ownerId);
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.position === 3
+        );
+        testProperty.ownedBy = ownerId;
+        gameState.currentBoardProperty = testProperty;
+        // set monopoly
+        gameState.config.propertyConfig.properties
+          .filter((p) => p.group === testProperty.group)
+          .forEach((p) => {
+            p.ownedBy = ownerId;
+          });
+        const startingOwnerCash = owner.cash;
+        const startingPlayerCash = gameState.currentPlayer.cash;
+
+        eventBus.emit(inputEvent);
+        expect(owner.cash).to.equal(
+          startingOwnerCash + testProperty.rent * 2,
+          "Owner's cash amount incorrectly incremented in rent exchange"
+        );
+        expect(gameState.currentPlayer.cash).to.equal(
+          startingPlayerCash - testProperty.rent * 2,
+          "Player's cash amount incorrectly decremented in rent exchange"
+        );
+      });
     });
-    it(`should charge monopoly if all properties owned in group and no buildings are built`, () => {
-      const ownerId = 1;
-      const owner = gameState.players.find((p) => p.id === ownerId);
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.position === 3
-      );
-      testProperty.ownedBy = ownerId;
-      gameState.currentBoardProperty = testProperty;
-      // set monopoly
-      gameState.config.propertyConfig.properties
-        .filter((p) => p.group === testProperty.group)
-        .forEach((p) => {
-          p.ownedBy = ownerId;
-        });
-      const startingOwnerCash = owner.cash;
-      const startingPlayerCash = gameState.currentPlayer.cash;
+    describe('railroads', () => {
+      it(`should charge based on railroads owned`, () => {
+        const ownerId = 1;
+        const owner = gameState.players.find((p) => p.id === ownerId);
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.position === 25
+        );
+        testProperty.ownedBy = ownerId;
+        gameState.currentBoardProperty = testProperty;
+        // set monopoly
+        gameState.config.propertyConfig.properties
+          .filter((p) => p.group === testProperty.group)
+          .forEach((p) => {
+            p.ownedBy = ownerId;
+          });
+        const startingOwnerCash = owner.cash;
+        const startingPlayerCash = gameState.currentPlayer.cash;
+        const railroadPricing = [25, 50, 100, 200];
 
-      eventBus.emit(inputEvent);
-      expect(owner.cash).to.equal(
-        startingOwnerCash + testProperty.rent * 2,
-        "Owner's cash amount incorrectly incremented in rent exchange"
-      );
-      expect(gameState.currentPlayer.cash).to.equal(
-        startingPlayerCash - testProperty.rent * 2,
-        "Player's cash amount incorrectly decremented in rent exchange"
-      );
+        eventBus.emit(inputEvent);
+        expect(owner.cash).to.equal(
+          startingOwnerCash + railroadPricing[3],
+          "Owner's cash amount incorrectly incremented in rent exchange"
+        );
+        expect(gameState.currentPlayer.cash).to.equal(
+          startingPlayerCash - railroadPricing[3],
+          "Player's cash amount incorrectly decremented in rent exchange"
+        );
+      });
+    });
+    describe('utilities', () => {
+      it(`should charge based on roll`, () => {
+        const ownerId = 1;
+        const owner = gameState.players.find((p) => p.id === ownerId);
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.position === 12
+        );
+        testProperty.ownedBy = ownerId;
+        gameState.currentBoardProperty = testProperty;
+        const startingOwnerCash = owner.cash;
+        const startingPlayerCash = gameState.currentPlayer.cash;
+        const totalRoll =
+          gameState.turnValues.roll[0] + gameState.turnValues.roll[1];
+
+        eventBus.emit(inputEvent);
+        expect(owner.cash).to.equal(
+          startingOwnerCash + totalRoll * 4,
+          "Owner's cash amount incorrectly incremented in rent exchange"
+        );
+        expect(gameState.currentPlayer.cash).to.equal(
+          startingPlayerCash - totalRoll * 4,
+          "Player's cash amount incorrectly decremented in rent exchange"
+        );
+      });
+      it(`should charge 10x multiplier for both utilities owned`, () => {
+        const ownerId = 1;
+        const owner = gameState.players.find((p) => p.id === ownerId);
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.position === 12
+        );
+        testProperty.ownedBy = ownerId;
+        gameState.currentBoardProperty = testProperty;
+        // set monopoly
+        gameState.config.propertyConfig.properties
+          .filter((p) => p.group === testProperty.group)
+          .forEach((p) => {
+            p.ownedBy = ownerId;
+          });
+        const startingOwnerCash = owner.cash;
+        const startingPlayerCash = gameState.currentPlayer.cash;
+        const totalRoll =
+          gameState.turnValues.roll[0] + gameState.turnValues.roll[1];
+
+        eventBus.emit(inputEvent);
+        expect(owner.cash).to.equal(
+          startingOwnerCash + totalRoll * 10,
+          "Owner's cash amount incorrectly incremented in rent exchange"
+        );
+        expect(gameState.currentPlayer.cash).to.equal(
+          startingPlayerCash - totalRoll * 10,
+          "Player's cash amount incorrectly decremented in rent exchange"
+        );
+      });
     });
   });
 });
