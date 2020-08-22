@@ -133,9 +133,17 @@ module.exports = {
     ({ UI }, gameState) => UI.playerMovement(gameState.currentBoardProperty),
     ({ notify }, gameState) => {
       const boardProperty = gameState.currentBoardProperty;
+      const currentPlayerIndex = gameState.currentPlayer.id;
 
       if (boardProperty.ownedBy === -1) {
         notify('RESOLVE_NEW_PROPERTY');
+      } else if (
+        boardProperty.ownedBy !== -1 &&
+        !boardProperty.mortgaged &&
+        boardProperty.ownedBy !== currentPlayerIndex &&
+        boardProperty.group !== 'Special'
+      ) {
+        notify('PAY_RENT');
       }
     },
   ],
@@ -251,6 +259,41 @@ module.exports = {
       boardProperty.ownedBy = gameState.currentPlayer.id;
     },
     ({ UI }) => UI.propertyBought(),
+  ],
+  PAY_RENT: [
+    ({ UI }, gameState) => {
+      const boardProperty = gameState.currentBoardProperty;
+      const owner = gameState.players[boardProperty.ownedBy];
+
+      // TODO: Refactor to PropertyManagementService
+      let rentAmount = boardProperty.rent;
+
+      if (boardProperty.buildings > 0) {
+        rentAmount = boardProperty.multipliedRent[boardProperty.buildings - 1];
+      } else {
+        // calculate monopoly
+        const playerIndex = owner.id;
+
+        // TODO: refactor into PropertyManagementService
+        const hasMonopoly = gameState.config.propertyConfig.properties
+          .filter((p) => p.group === boardProperty.group)
+          .every((p) => p.ownedBy === playerIndex);
+
+        if (hasMonopoly) {
+          rentAmount *= 2;
+        }
+      }
+
+      // TODO: WEALTHSERVICE: Check Liquidity
+      // what happens if current player doesn't have enough?
+      require('../WealthService').exchange(
+        gameState.currentPlayer,
+        owner,
+        rentAmount
+      );
+
+      UI.payingRent(gameState.currentPlayer, owner, rentAmount);
+    },
   ],
   //   TRADE,
   //   PROPERTY_DEVELOPMENT,

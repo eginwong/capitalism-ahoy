@@ -23,5 +23,6 @@ module.exports = function mockUIFactory() {
     gameOver: () => true,
     displayPropertyDetails: () => true,
     propertyBought: () => true,
+    payingRent: () => true,
   };
 };
