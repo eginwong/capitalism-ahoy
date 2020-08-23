@@ -181,17 +181,11 @@ describe('Rules -> MOVE_PLAYER', () => {
     });
     it(`should not emit ${payRentEvent} event if property is special`, () => {
       gameState.currentPlayer.position = 1; // to land on space 4, with a roll of 3
+      // TODO: Opaque to know that space 4 is a special property
       eventBus.emit(inputEvent);
       expect(payRentSpy.callCount).to.equal(
         0,
         `${payRentEvent} event was called`
-      );
-    });
-    it(`should emit ${continueTurnEvent} event`, () => {
-      eventBus.emit(inputEvent);
-      expect(continueTurnSpy.callCount).to.equal(
-        1,
-        `${continueTurnEvent} event was not called`
       );
     });
   });
