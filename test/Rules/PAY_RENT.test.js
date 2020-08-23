@@ -150,7 +150,7 @@ describe('Rules -> PAY_RENT', () => {
         const ownerId = 1;
         const owner = gameState.players.find((p) => p.id === ownerId);
         const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.position === 25
+          (p) => p.group === 'Railroad'
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;
@@ -180,7 +180,7 @@ describe('Rules -> PAY_RENT', () => {
         const ownerId = 1;
         const owner = gameState.players.find((p) => p.id === ownerId);
         const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.position === 12
+          (p) => p.group === 'Utilities'
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;

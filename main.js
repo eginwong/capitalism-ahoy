@@ -33,10 +33,9 @@ require('./entities/Game')({ eventBus, userInterface, gameState });
 function createPlayerFactory() {
   let id = -1;
   function createPlayer({ name }) {
-    id++;
     return {
       name,
-      id,
+      id: ++id,
       position: 0,
       jailed: -1,
       cash: 1500,
