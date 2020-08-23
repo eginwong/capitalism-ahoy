@@ -57,7 +57,7 @@ An Action is a function with the signature `function ({ UI, notify }, gameState)
 
 The game loop runs on the assumption that named `Events` have a one-to-one association to a `Rule`.
 
-`Rule`s have a name but otherwise are an ordered list of `Action`s that occur to evaluate the `Rule`. Think of it like steps take to follow or enact a rule. For example, a rule for moving a player piece around a board might be:
+`Rule`s are stored in the dictionary (`Rules/index.js`) as a name with an ordered list of `Action`s that occur to evaluate the `Rule`. Think of it like steps take to follow or enact a rule. For example, a rule for moving a player piece around a board might be:
 
 ```javascript
 const Rules = {
