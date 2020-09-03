@@ -291,6 +291,27 @@ module.exports = {
       UI.payingRent(gameState.currentPlayer, owner, rentAmount);
     },
   ],
+  MANAGE_PROPERTIES: [
+    // TODO: potentially refactor this prompt pattern
+    ({ notify, UI }, gameState) => {
+      const action = require('../PlayerActions').prompt(
+        { notify, UI },
+        gameState,
+        require('../PropertyManagementService').getAvailableManagementActions(
+          gameState
+        )
+      );
+      if (action) {
+        notify(action);
+      } else {
+        UI.unknownAction();
+      }
+
+      if (action !== 'CANCEL') {
+        notify('MANAGE_PROPERTIES');
+      }
+    },
+  ],
   //   TRADE,
   //   PROPERTY_DEVELOPMENT,
   //   BANKRUPTCY: () => gameState.currentPlayerActions["END_TURN"].execute(),

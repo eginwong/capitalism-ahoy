@@ -69,23 +69,17 @@ module.exports = class PropertyManagementService {
   }
 
   static renovate(gameState, property) {
-    const buildHouse = property.buildings !== 4;
-    if (buildHouse) {
-      gameState.config.propertyConfig.houses -= 1;
-    } else {
-      gameState.config.propertyConfig.hotels -= 1;
-    }
+    gameState.config.propertyConfig[
+      property.buildings !== 4 ? 'houses' : 'hotels'
+    ] -= 1;
     property.buildings += 1;
     WealthService.decrement(gameState.currentPlayer, property.houseCost);
   }
 
   static demolish(gameState, property) {
-    const destroyHouse = property.buildings !== 5;
-    if (destroyHouse) {
-      gameState.config.propertyConfig.houses += 1;
-    } else {
-      gameState.config.propertyConfig.hotels += 1;
-    }
+    gameState.config.propertyConfig[
+      property.buildings !== 5 ? 'houses' : 'hotels'
+    ] += 1;
     property.buildings -= 1;
     WealthService.increment(gameState.currentPlayer, property.houseCost / 2);
   }
