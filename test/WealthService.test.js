@@ -100,7 +100,7 @@ describe('WealthService', () => {
   });
   describe('calculateLiquidity', () => {
     it('should calculate with mortgaged assets', () => {
-      gameState.config.propertyConfig.properties = [
+      const properties = [
         {
           price: 60,
           houseCost: 50,
@@ -111,13 +111,13 @@ describe('WealthService', () => {
         { price: 60, houseCost: 50, buildings: 0, mortgaged: true, ownedBy: 0 },
       ];
 
-      expect(WealthService.calculateLiquidity(gameState)).to.equal(
+      expect(WealthService.calculateLiquidity(gameState, properties)).to.equal(
         1530,
         `Liquidity value does not match properties with mortgaged assets`
       );
     });
     it('should calculate with constructed houses/hotels', () => {
-      gameState.config.propertyConfig.properties = [
+      const properties = [
         {
           price: 60,
           houseCost: 50,
@@ -134,19 +134,20 @@ describe('WealthService', () => {
         },
       ];
 
-      expect(WealthService.calculateLiquidity(gameState)).to.equal(
+      expect(WealthService.calculateLiquidity(gameState, properties)).to.equal(
         1685,
         `Liquidity value does not match properties with assets and buildings`
       );
     });
     it('should calculate with no owned properties', () => {
-      expect(WealthService.calculateLiquidity(gameState)).to.equal(
+      const properties = [];
+      expect(WealthService.calculateLiquidity(gameState, properties)).to.equal(
         1500,
         `Liquidity value does not match properties with no assets`
       );
     });
     it('should calculate with special properties', () => {
-      gameState.config.propertyConfig.properties = [
+      const properties = [
         {
           price: 60,
           houseCost: 50,
@@ -158,13 +159,13 @@ describe('WealthService', () => {
         { price: 200, mortgaged: false, ownedBy: 0 },
       ];
 
-      expect(WealthService.calculateLiquidity(gameState)).to.equal(
+      expect(WealthService.calculateLiquidity(gameState, properties)).to.equal(
         1705,
         `Liquidity value does not match properties with special assets`
       );
     });
     it('should calculate specific player', () => {
-      gameState.config.propertyConfig.properties = [
+      const properties = [
         {
           price: 60,
           houseCost: 50,
@@ -177,7 +178,11 @@ describe('WealthService', () => {
       ];
 
       expect(
-        WealthService.calculateLiquidity(gameState, gameState.players[1])
+        WealthService.calculateLiquidity(
+          gameState,
+          properties,
+          gameState.players[1]
+        )
       ).to.equal(1705, `Liquidity value does not match specified player`);
     });
   });

@@ -3,6 +3,7 @@
  *   Player-driven actions that can be executed depending on certain game conditions.
  */
 const { transform } = require('lodash');
+const { getProperties } = require('./PropertyManagementService');
 
 const ACTIONS = {
   ROLL_DICE: (gameState) =>
@@ -12,7 +13,8 @@ const ACTIONS = {
   END_TURN: (gameState) =>
     !!gameState.turnValues.roll && gameState.turnValues.speedingCounter === 0,
   END_GAME: () => true,
-  // MANAGE_BUILDINGS,
+  MANAGE_PROPERTIES: (gameState, player = gameState.currentPlayer) =>
+    getProperties(gameState).some((p) => p.ownedBy === player.id),
   // INITIATE_TRADE
 };
 

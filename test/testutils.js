@@ -1,5 +1,5 @@
 module.exports = {
-  createPlayerFactory: function () {
+  createPlayerFactory: () => {
     let id = -1;
     function createPlayer({ name }) {
       return {
@@ -10,17 +10,24 @@ module.exports = {
         cash: 1500,
         assets: 0,
         getOutOfJailFreeCards: 0,
-        properties: [],
       };
     }
 
     return createPlayer;
   },
 
-  fillStub: function (stub, stubValues) {
+  fillStub: (stub, stubValues) => {
     for (let [index, value] of stubValues.entries()) {
       stub.onCall(index).returns(value);
     }
     return stub;
+  },
+
+  createMonopoly: (gameState, propertyGroup, playerId) => {
+    gameState.config.propertyConfig.properties
+      .filter((p) => p.group === propertyGroup)
+      .forEach((p) => {
+        p.ownedBy = playerId;
+      });
   },
 };
