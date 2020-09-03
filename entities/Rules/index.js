@@ -275,48 +275,10 @@ module.exports = {
       const boardProperty = gameState.currentBoardProperty;
       const owner = gameState.players[boardProperty.ownedBy];
 
-      // TODO: Refactor to PropertyManagementService
-      let rentAmount = boardProperty.rent;
-      const playerIndex = owner.id;
-
-      if (boardProperty.group === 'Utilities') {
-        const totalRoll =
-          gameState.turnValues.roll[0] + gameState.turnValues.roll[1];
-        const SINGLE_UTILITY_MULTIPLIER = 4;
-        const DOUBLE_UTILITY_MULTIPLIER = 10;
-        // check number of utilities
-        const hasMonopoly = require('../PropertyManagementService').hasMonopoly(
-          gameState,
-          boardProperty.group,
-          playerIndex
-        );
-        // multiply by roll
-        rentAmount =
-          totalRoll *
-          (hasMonopoly ? DOUBLE_UTILITY_MULTIPLIER : SINGLE_UTILITY_MULTIPLIER);
-      } else if (boardProperty.group === 'Railroad') {
-        const railroadPricing = [25, 50, 100, 200];
-        const railroadCount = require('../PropertyManagementService')
-          .getProperties(gameState)
-          .filter((p) => p.group === boardProperty.group)
-          .filter((p) => p.ownedBy === playerIndex).length;
-        rentAmount = railroadPricing[railroadCount - 1];
-      } else {
-        if (boardProperty.buildings > 0) {
-          rentAmount =
-            boardProperty.multipliedRent[boardProperty.buildings - 1];
-        } else {
-          const hasMonopoly = require('../PropertyManagementService').hasMonopoly(
-            gameState,
-            boardProperty.group,
-            playerIndex
-          );
-
-          if (hasMonopoly) {
-            rentAmount *= 2;
-          }
-        }
-      }
+      const rentAmount = require('../PropertyManagementService').calculateRent(
+        gameState,
+        boardProperty
+      );
 
       // TODO: WEALTHSERVICE: Check Liquidity
       // what happens if current player doesn't have enough?

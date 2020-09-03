@@ -21,6 +21,49 @@ module.exports = class PropertyManagementService {
     );
   }
 
+  static calculateRent(gameState, boardProperty) {
+    let rentAmount = boardProperty.rent;
+    const playerIndex = gameState.players[boardProperty.ownedBy].id;
+
+    if (boardProperty.group === 'Utilities') {
+      const totalRoll =
+        gameState.turnValues.roll[0] + gameState.turnValues.roll[1];
+      const SINGLE_UTILITY_MULTIPLIER = 4;
+      const DOUBLE_UTILITY_MULTIPLIER = 10;
+      // check number of utilities
+      const hasMonopoly = this.hasMonopoly(
+        gameState,
+        boardProperty.group,
+        playerIndex
+      );
+      // multiply by roll
+      rentAmount =
+        totalRoll *
+        (hasMonopoly ? DOUBLE_UTILITY_MULTIPLIER : SINGLE_UTILITY_MULTIPLIER);
+    } else if (boardProperty.group === 'Railroad') {
+      const railroadPricing = [25, 50, 100, 200];
+      const railroadCount = this.getProperties(gameState)
+        .filter((p) => p.group === boardProperty.group)
+        .filter((p) => p.ownedBy === playerIndex).length;
+      rentAmount = railroadPricing[railroadCount - 1];
+    } else {
+      if (boardProperty.buildings > 0) {
+        rentAmount = boardProperty.multipliedRent[boardProperty.buildings - 1];
+      } else {
+        const hasMonopoly = this.hasMonopoly(
+          gameState,
+          boardProperty.group,
+          playerIndex
+        );
+
+        if (hasMonopoly) {
+          rentAmount *= 2;
+        }
+      }
+    }
+    return rentAmount;
+  }
+
   static changeOwner(boardProperty, playerId) {
     boardProperty.ownedBy = playerId;
   }
