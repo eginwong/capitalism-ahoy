@@ -4,7 +4,7 @@ const sinon = require('sinon');
 const mockUIFactory = require('../mocks/UI');
 
 const { GameState } = require('../../entities/GameState');
-const { createPlayerFactory } = require('../testutils');
+const { createPlayerFactory, createMonopoly } = require('../testutils');
 const config = require('../../config/monopolyConfiguration.json');
 const { cloneDeep } = require('lodash');
 
@@ -125,12 +125,7 @@ describe('Rules -> PAY_RENT', () => {
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;
-        // set monopoly
-        gameState.config.propertyConfig.properties
-          .filter((p) => p.group === testProperty.group)
-          .forEach((p) => {
-            p.ownedBy = ownerId;
-          });
+        createMonopoly(gameState, testProperty.group, ownerId);
         const startingOwnerCash = owner.cash;
         const startingPlayerCash = gameState.currentPlayer.cash;
 
@@ -154,12 +149,7 @@ describe('Rules -> PAY_RENT', () => {
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;
-        // set monopoly
-        gameState.config.propertyConfig.properties
-          .filter((p) => p.group === testProperty.group)
-          .forEach((p) => {
-            p.ownedBy = ownerId;
-          });
+        createMonopoly(gameState, testProperty.group, ownerId);
         const startingOwnerCash = owner.cash;
         const startingPlayerCash = gameState.currentPlayer.cash;
         const railroadPricing = [25, 50, 100, 200];
@@ -207,12 +197,7 @@ describe('Rules -> PAY_RENT', () => {
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;
-        // set monopoly
-        gameState.config.propertyConfig.properties
-          .filter((p) => p.group === testProperty.group)
-          .forEach((p) => {
-            p.ownedBy = ownerId;
-          });
+        createMonopoly(gameState, testProperty.group, ownerId);
         const startingOwnerCash = owner.cash;
         const startingPlayerCash = gameState.currentPlayer.cash;
         const totalRoll =

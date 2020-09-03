@@ -16,6 +16,10 @@ describe('PropertyManagementService', () => {
       createPlayer({ name: 'player2' }),
     ];
     gameState.config = cloneDeep(config);
+    gameState.turnValues = {
+      roll: [1, 2],
+      speedingCounter: 0,
+    };
   });
 
   describe('findProperty', () => {
@@ -68,6 +72,92 @@ describe('PropertyManagementService', () => {
         gameState.config.propertyConfig.properties,
         `Incorrect properties returned from gameState`
       );
+    });
+  });
+  describe('calculateRent', () => {
+    describe('common properties', () => {
+      it(`should charge rent based on buildings if built on the property`, () => {
+        const ownerId = 1;
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.position === 3
+        );
+        testProperty.ownedBy = ownerId;
+        testProperty.buildings = 3;
+        gameState.currentBoardProperty = testProperty;
+
+        expect(
+          PropertyManagementService.calculateRent(gameState, testProperty)
+        ).to.equal(
+          testProperty.multipliedRent[testProperty.buildings - 1],
+          'Rent incorrectly calculated for common properties with buildings'
+        );
+      });
+      it(`should charge monopoly if all properties owned in group and no buildings are built`, () => {
+        const ownerId = 1;
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.position === 3
+        );
+        testProperty.ownedBy = ownerId;
+        gameState.currentBoardProperty = testProperty;
+        createMonopoly(gameState, testProperty.group, ownerId);
+
+        expect(
+          PropertyManagementService.calculateRent(gameState, testProperty)
+        ).to.equal(
+          testProperty.rent * 2,
+          'Rent incorrectly calculated for common properties with monopoly'
+        );
+      });
+    });
+    describe('railroads', () => {
+      it(`should charge based on railroads owned`, () => {
+        const ownerId = 1;
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.group === 'Railroad'
+        );
+        testProperty.ownedBy = ownerId;
+        gameState.currentBoardProperty = testProperty;
+        createMonopoly(gameState, testProperty.group, ownerId);
+        const railroadPricing = [25, 50, 100, 200];
+
+        expect(
+          PropertyManagementService.calculateRent(gameState, testProperty)
+        ).to.equal(
+          railroadPricing[3],
+          'Rent incorrectly calculated for railroad properties'
+        );
+      });
+    });
+    describe('utilities', () => {
+      it(`should charge based on roll`, () => {
+        const ownerId = 1;
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.group === 'Utilities'
+        );
+        testProperty.ownedBy = ownerId;
+        gameState.currentBoardProperty = testProperty;
+        const totalRoll =
+          gameState.turnValues.roll[0] + gameState.turnValues.roll[1];
+
+        expect(
+          PropertyManagementService.calculateRent(gameState, testProperty)
+        ).to.equal(totalRoll * 4, 'Rent incorrectly calculated for utilities');
+      });
+      it(`should charge 10x multiplier for both utilities owned`, () => {
+        const ownerId = 1;
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.position === 12
+        );
+        testProperty.ownedBy = ownerId;
+        gameState.currentBoardProperty = testProperty;
+        createMonopoly(gameState, testProperty.group, ownerId);
+        const totalRoll =
+          gameState.turnValues.roll[0] + gameState.turnValues.roll[1];
+
+        expect(
+          PropertyManagementService.calculateRent(gameState, testProperty)
+        ).to.equal(totalRoll * 10, 'Rent incorrectly calculated for utilities');
+      });
     });
   });
   describe('changeOwner', () => {
