@@ -7,6 +7,7 @@ const { GameState } = require('../../entities/GameState');
 const { createPlayerFactory } = require('../testutils');
 const config = require('../../config/monopolyConfiguration');
 const PlayerActions = require('../../entities/PlayerActions');
+const PropertyManagementService = require('../../entities/PropertyManagementService');
 
 describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
   let gameState;
@@ -14,6 +15,7 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
   let eventBus;
   const RULES = require('../../entities/Rules');
   const TEST_PROPERTY = 2;
+  let propertyManagementServiceStub;
 
   beforeEach(() => {
     gameState = new GameState();
@@ -21,7 +23,11 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
     userInterface = mockUIFactory();
     let createPlayer = createPlayerFactory();
     gameState.players = [createPlayer({ name: 'player1' })];
-    gameState.config = config;
+    propertyManagementServiceStub = sinon.stub(
+      PropertyManagementService,
+      'getProperties'
+    );
+    propertyManagementServiceStub.returns(config.propertyConfig.properties);
   });
 
   afterEach(() => {
@@ -57,8 +63,7 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
     it('should make a call to the UI#displayPropertyDetails', () => {
       const uiSpy = sinon.spy();
       userInterface.displayPropertyDetails = uiSpy;
-      const property =
-        gameState.config.propertyConfig.properties[TEST_PROPERTY];
+      const property = config.propertyConfig.properties[TEST_PROPERTY];
       gameState.currentBoardProperty = property;
 
       const playerActionsStub = sinon.stub(PlayerActions, 'prompt');
@@ -73,8 +78,7 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
       );
     });
     it('should automatically begin auction if player does not have enough liquidity', () => {
-      const property =
-        gameState.config.propertyConfig.properties[TEST_PROPERTY];
+      const property = config.propertyConfig.properties[TEST_PROPERTY];
       gameState.currentBoardProperty = property;
       gameState.players[0].cash = 80;
 
@@ -95,8 +99,7 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
       );
     });
     it('should prompt if player can buy or auction', () => {
-      const property =
-        gameState.config.propertyConfig.properties[TEST_PROPERTY];
+      const property = config.propertyConfig.properties[TEST_PROPERTY];
       gameState.currentBoardProperty = property;
 
       const playerActionsStub = sinon.stub(PlayerActions, 'prompt');
@@ -109,8 +112,7 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
       );
     });
     it('should re-run rule if prompt input is not understood', () => {
-      const property =
-        gameState.config.propertyConfig.properties[TEST_PROPERTY];
+      const property = config.propertyConfig.properties[TEST_PROPERTY];
       gameState.currentBoardProperty = property;
 
       const playerActionsStub = sinon.stub(PlayerActions, 'prompt');

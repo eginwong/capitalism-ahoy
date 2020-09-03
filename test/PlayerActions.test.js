@@ -5,6 +5,8 @@ const mockUIFactory = require('./mocks/UI');
 const { GameState } = require('../entities/GameState');
 const { createPlayerFactory } = require('./testutils');
 const PlayerActions = require('../entities/PlayerActions');
+const config = require('../config/monopolyConfiguration');
+const { cloneDeep } = require('lodash');
 
 describe('PlayerActions', () => {
   let gameState;
@@ -17,6 +19,7 @@ describe('PlayerActions', () => {
     require('../entities/Rules/resetTurnAssociatedValues')({
       speedingCounter: 0,
     })(gameState);
+    gameState.config = cloneDeep(config);
   });
 
   afterEach(() => {
@@ -92,6 +95,22 @@ describe('PlayerActions', () => {
         expect(PlayerActions.refresh(gameState)).not.to.contain(
           'PAY_FINE',
           'Pay Fine action is available'
+        );
+      });
+    });
+    describe('MANAGE_PROPERTIES', () => {
+      it('returns if player owns properties', () => {
+        gameState.config.propertyConfig.properties[0].ownedBy =
+          gameState.currentPlayer.id;
+        expect(PlayerActions.refresh(gameState)).to.contain(
+          'MANAGE_PROPERTIES',
+          'Manage Properties action is unavailable'
+        );
+      });
+      it('does not return if player owns no properties', () => {
+        expect(PlayerActions.refresh(gameState)).not.to.contain(
+          'MANAGE_PROPERTIES',
+          'Manage Properties action is available'
         );
       });
     });

@@ -23,7 +23,7 @@ module.exports = {
     },
     ({ UI }, gameState) => UI.startTurn(gameState.currentPlayer),
     (_, gameState) =>
-      (gameState.currentBoardProperty = require('../PropertyService').getCurrentBoardProperty(
+      (gameState.currentBoardProperty = require('../PropertyManagementService').getCurrentPlayerBoardProperty(
         gameState
       )),
     ({ UI }, gameState) => UI.playerDetails(gameState.currentPlayer),
@@ -118,7 +118,7 @@ module.exports = {
         0
       );
 
-      const currentPlayerBoardPosition = require('../PropertyService').findPlayerBoardPosition(
+      const currentPlayerBoardPosition = require('../BoardService').normalizePlayerBoardPosition(
         gameState
       );
       if (gameState.currentPlayer.position > currentPlayerBoardPosition) {
@@ -127,7 +127,7 @@ module.exports = {
       gameState.currentPlayer.position = currentPlayerBoardPosition;
     },
     (_, gameState) =>
-      (gameState.currentBoardProperty = require('../PropertyService').getCurrentBoardProperty(
+      (gameState.currentBoardProperty = require('../PropertyManagementService').getCurrentPlayerBoardProperty(
         gameState
       )),
     ({ UI }, gameState) => UI.playerMovement(gameState.currentBoardProperty),
@@ -175,6 +175,7 @@ module.exports = {
       } else if (gameState.currentPlayer.cash < 0) {
         // UI: show liquidation menu
         notify('LIQUIDATION');
+        // might need to have cancel here
       }
     },
   ],
@@ -191,13 +192,14 @@ module.exports = {
     ({ UI }) => UI.jail(),
     (_, gameState) => {
       gameState.currentPlayer.jailed = 0;
-      gameState.currentPlayer.position = require('../PropertyService').findProperty(
+      gameState.currentPlayer.position = require('../PropertyManagementService').findProperty(
         gameState,
         'jail'
       ).position;
     },
   ],
   END_GAME: [
+    // TODO: ARE YOU SURE? prompt y/n
     ({ UI }, gameState) => {
       const calcNetWorth = require('../WealthService').calculateNetWorth;
 
@@ -220,7 +222,8 @@ module.exports = {
     ({ notify, UI }, gameState) => {
       const boardProperty = gameState.currentBoardProperty;
       const playerBuyingPower = require('../WealthService').calculateLiquidity(
-        gameState
+        gameState,
+        require('../PropertyManagementService').getProperties(gameState)
       );
 
       if (playerBuyingPower < boardProperty.price) {
@@ -247,7 +250,8 @@ module.exports = {
 
       // checking buying power first in case we have a cancel option in the future
       // const playerBuyingPower = require('../WealthService').calculateLiquidity(
-      //   gameState
+      //   gameState,
+      //   require ...
       // );
 
       // if (playerBuyingPower < boardProperty.price) {
@@ -259,8 +263,10 @@ module.exports = {
         boardProperty.price
       );
 
-      // TODO: propertyManagementService: set the owned by
-      boardProperty.ownedBy = gameState.currentPlayer.id;
+      require('../PropertyManagementService').changeOwner(
+        boardProperty,
+        gameState.currentPlayer.id
+      );
     },
     ({ UI }) => UI.propertyBought(),
   ],
@@ -279,16 +285,19 @@ module.exports = {
         const SINGLE_UTILITY_MULTIPLIER = 4;
         const DOUBLE_UTILITY_MULTIPLIER = 10;
         // check number of utilities
-        const hasMonopoly = gameState.config.propertyConfig.properties
-          .filter((p) => p.group === boardProperty.group)
-          .every((p) => p.ownedBy === playerIndex);
+        const hasMonopoly = require('../PropertyManagementService').hasMonopoly(
+          gameState,
+          boardProperty.group,
+          playerIndex
+        );
         // multiply by roll
         rentAmount =
           totalRoll *
           (hasMonopoly ? DOUBLE_UTILITY_MULTIPLIER : SINGLE_UTILITY_MULTIPLIER);
       } else if (boardProperty.group === 'Railroad') {
         const railroadPricing = [25, 50, 100, 200];
-        const railroadCount = gameState.config.propertyConfig.properties
+        const railroadCount = require('../PropertyManagementService')
+          .getProperties(gameState)
           .filter((p) => p.group === boardProperty.group)
           .filter((p) => p.ownedBy === playerIndex).length;
         rentAmount = railroadPricing[railroadCount - 1];
@@ -297,12 +306,11 @@ module.exports = {
           rentAmount =
             boardProperty.multipliedRent[boardProperty.buildings - 1];
         } else {
-          // calculate monopoly
-
-          // TODO: refactor into PropertyManagementService
-          const hasMonopoly = gameState.config.propertyConfig.properties
-            .filter((p) => p.group === boardProperty.group)
-            .every((p) => p.ownedBy === playerIndex);
+          const hasMonopoly = require('../PropertyManagementService').hasMonopoly(
+            gameState,
+            boardProperty.group,
+            playerIndex
+          );
 
           if (hasMonopoly) {
             rentAmount *= 2;

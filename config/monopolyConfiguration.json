@@ -2,7 +2,6 @@
   "passGoAmount": 200,
   "fineAmount": 50,
   "propertyConfig": {
-    "count": 40,
     "houses": 32,
     "hotels": 12,
     "properties": [

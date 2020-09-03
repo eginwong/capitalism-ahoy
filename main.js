@@ -1,4 +1,3 @@
-// TODO: TEST
 /**
  * Responsibility:
  *   Imports resources and starts game loop for node.js environment.
@@ -41,7 +40,6 @@ function createPlayerFactory() {
       cash: 1500,
       assets: 0,
       getOutOfJailFreeCards: 0,
-      properties: [],
     };
   }
 
