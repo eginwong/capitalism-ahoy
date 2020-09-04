@@ -359,10 +359,45 @@ module.exports = {
       notify('DEMOLISH');
     },
   ],
-  // MORTGAGE: [
-  //   // TODO: prompt
-  //   // calculate liquidity
-  // ]
+  MORTGAGE: [
+    ({ notify, UI }, gameState) => {
+      const player = gameState.currentPlayer;
+
+      const INTEREST_RATE_MULTIPLIER = 1.1;
+      // can only mortgage or unmortgage properties with 0 buildings
+      const mortgageAbleProps = require('../PropertyManagementService')
+        .getProperties(gameState)
+        .filter((p) => p.ownedBy === player.id && p.buildings === 0);
+      const propSelection = require('../PlayerActions').prompt(
+        { notify, UI },
+        gameState,
+        [...mortgageAbleProps.map((p) => p.name), 'CANCEL']
+      );
+
+      if (propSelection === 'CANCEL') return;
+
+      if (propSelection) {
+        const mortgageProp = mortgageAbleProps.find(
+          (p) => p.name === propSelection
+        );
+        if (
+          mortgageProp.mortgaged &&
+          player.cash < (mortgageProp.price / 2) * INTEREST_RATE_MULTIPLIER
+        ) {
+          UI.noCashMustLiquidate();
+        } else {
+          require('../PropertyManagementService').toggleMortgageOnProperty(
+            gameState,
+            mortgageProp
+          );
+        }
+      } else {
+        UI.unknownAction();
+      }
+
+      notify('MORTGAGE');
+    },
+  ],
   //   TRADE,
   //   PROPERTY_DEVELOPMENT,
   //   BANKRUPTCY: () => gameState.currentPlayerActions["END_TURN"].execute(),

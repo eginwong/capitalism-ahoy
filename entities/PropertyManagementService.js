@@ -84,18 +84,20 @@ module.exports = class PropertyManagementService {
     WealthService.increment(gameState.currentPlayer, property.houseCost / 2);
   }
 
-  // TODO: check liquidity before calling this method
-  // TODO: check player owns the property
   static toggleMortgageOnProperty(
     gameState,
     boardProperty,
     player = gameState.currentPlayer
   ) {
     boardProperty.mortgaged = !boardProperty.mortgaged;
-    const mortgageCost = boardProperty.price / 2;
+    const INTEREST_MULTIPLIER = 1.1;
+    const mortgageBaseCost = boardProperty.price / 2;
+
     WealthService[boardProperty.mortgaged ? 'increment' : 'decrement'](
       player,
-      mortgageCost
+      !boardProperty.mortgaged
+        ? mortgageBaseCost * INTEREST_MULTIPLIER
+        : mortgageBaseCost
     );
   }
 

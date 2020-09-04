@@ -178,7 +178,7 @@ describe('PropertyManagementService', () => {
   describe('hasMonopoly', () => {
     it('returns true when player owns all properties in the specified board group', () => {
       const propertyGroup = 'Purple';
-      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      createMonopoly(gameState, propertyGroup);
       expect(
         PropertyManagementService.hasMonopoly(
           gameState,
@@ -237,15 +237,16 @@ describe('PropertyManagementService', () => {
         'Board property mortgaged flag was not toggled to false'
       );
     });
-    it('charges mortgage cost when unmortgaging property', () => {
+    it('charges mortgage cost + interest rate when unmortgaging property', () => {
       testBoardProperty.mortgaged = true;
       const startingCash = gameState.currentPlayer.cash;
+      const INTEREST_MULTIPLIER = 1.1;
       PropertyManagementService.toggleMortgageOnProperty(
         gameState,
         testBoardProperty
       );
       expect(gameState.currentPlayer.cash).to.equal(
-        startingCash - testBoardProperty.price / 2,
+        startingCash - (testBoardProperty.price / 2) * INTEREST_MULTIPLIER,
         "Board property mortgage cost was not correctly charged to the current player's cash"
       );
     });
@@ -410,7 +411,7 @@ describe('PropertyManagementService', () => {
     it('should return demolish if buildings are owned', () => {
       const RENOVATE_ACTION = 'RENOVATE';
       const propertyGroup = 'Purple';
-      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      createMonopoly(gameState, propertyGroup);
 
       expect(
         PropertyManagementService.getAvailableManagementActions(
@@ -424,7 +425,7 @@ describe('PropertyManagementService', () => {
     it('should return renovate if there are renovatable properties', () => {
       const DEMOLISH_ACTION = 'DEMOLISH';
       const propertyGroup = 'Purple';
-      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      createMonopoly(gameState, propertyGroup);
       const purpleProperties = gameState.config.propertyConfig.properties.filter(
         (p) => p.group === propertyGroup
       );
@@ -464,7 +465,7 @@ describe('PropertyManagementService', () => {
     });
     it('should return properties that are owned in a monopoly', () => {
       const propertyGroup = 'Purple';
-      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      createMonopoly(gameState, propertyGroup);
       const expectedProperties = gameState.config.propertyConfig.properties.filter(
         (p) => p.group === propertyGroup
       );
@@ -494,7 +495,7 @@ describe('PropertyManagementService', () => {
     });
     it('should return properties that are not mortgaged', () => {
       const propertyGroup = 'Purple';
-      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      createMonopoly(gameState, propertyGroup);
       const expectedProperties = gameState.config.propertyConfig.properties.filter(
         (p) => p.group === propertyGroup
       );
@@ -509,7 +510,7 @@ describe('PropertyManagementService', () => {
     });
     it('should return all properties when all properties have the same number of buildings in the same property group', () => {
       const propertyGroup = 'Light Green';
-      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      createMonopoly(gameState, propertyGroup);
       const expectedProperties = gameState.config.propertyConfig.properties.filter(
         (p) => p.group === propertyGroup
       );
@@ -526,7 +527,7 @@ describe('PropertyManagementService', () => {
     });
     it('should return 2 properties when 1/3 properties has more buildings than others in the same property group', () => {
       const propertyGroup = 'Light Green';
-      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      createMonopoly(gameState, propertyGroup);
       const lightGreenProperties = gameState.config.propertyConfig.properties.filter(
         (p) => p.group === propertyGroup
       );
@@ -543,7 +544,7 @@ describe('PropertyManagementService', () => {
     });
     it('should return 1 property when 2/3 properties have more buildings than others in the same property group', () => {
       const propertyGroup = 'Light Green';
-      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      createMonopoly(gameState, propertyGroup);
       const lightGreenProperties = gameState.config.propertyConfig.properties.filter(
         (p) => p.group === propertyGroup
       );
@@ -577,7 +578,7 @@ describe('PropertyManagementService', () => {
     });
     it('should not return properties that have 5 buildings', () => {
       const propertyGroup = 'Purple';
-      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      createMonopoly(gameState, propertyGroup);
       const expectedProperties = gameState.config.propertyConfig.properties.filter(
         (p) => p.group === propertyGroup
       );
@@ -594,7 +595,7 @@ describe('PropertyManagementService', () => {
     it('should not return eligible properties for house renovation if no houses are remaining', () => {
       gameState.config.propertyConfig.houses = 0;
       const propertyGroup = 'Purple';
-      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      createMonopoly(gameState, propertyGroup);
 
       expect(
         PropertyManagementService.getRenoProperties(gameState)
@@ -606,7 +607,7 @@ describe('PropertyManagementService', () => {
     it('should not return eligible properties for hotel renovation if no hotels are remaining', () => {
       gameState.config.propertyConfig.hotels = 0;
       const propertyGroup = 'Purple';
-      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      createMonopoly(gameState, propertyGroup);
       gameState.config.propertyConfig.properties
         .filter((p) => p.group === propertyGroup)
         .forEach((p) => {
@@ -632,7 +633,7 @@ describe('PropertyManagementService', () => {
     });
     it('should return all properties when all properties have the same number of buildings in the same property group', () => {
       const propertyGroup = 'Light Green';
-      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      createMonopoly(gameState, propertyGroup);
       const expectedProperties = gameState.config.propertyConfig.properties.filter(
         (p) => p.group === propertyGroup
       );
@@ -649,7 +650,7 @@ describe('PropertyManagementService', () => {
     });
     it('should return 1 property when 2/3 properties have more buildings than others in the same property group', () => {
       const propertyGroup = 'Light Green';
-      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      createMonopoly(gameState, propertyGroup);
       const lightGreenProperties = gameState.config.propertyConfig.properties.filter(
         (p) => p.group === propertyGroup
       );
@@ -666,7 +667,7 @@ describe('PropertyManagementService', () => {
     });
     it('should return 2 properties when 1/3 properties have more buildings than others in the same property group', () => {
       const propertyGroup = 'Light Green';
-      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      createMonopoly(gameState, propertyGroup);
       const lightGreenProperties = gameState.config.propertyConfig.properties.filter(
         (p) => p.group === propertyGroup
       );
@@ -683,7 +684,7 @@ describe('PropertyManagementService', () => {
     });
     it('should not return properties that have 0 buildings', () => {
       const propertyGroup = 'Purple';
-      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      createMonopoly(gameState, propertyGroup);
 
       expect(
         PropertyManagementService.getDemoProperties(gameState)
