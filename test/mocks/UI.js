@@ -24,5 +24,6 @@ module.exports = function mockUIFactory() {
     displayPropertyDetails: () => true,
     propertyBought: () => true,
     payingRent: () => true,
+    noCashMustLiquidate: () => true,
   };
 };

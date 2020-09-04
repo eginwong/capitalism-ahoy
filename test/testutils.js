@@ -23,7 +23,11 @@ module.exports = {
     return stub;
   },
 
-  createMonopoly: (gameState, propertyGroup, playerId) => {
+  createMonopoly: (
+    gameState,
+    propertyGroup,
+    playerId = gameState.currentPlayer.id
+  ) => {
     gameState.config.propertyConfig.properties
       .filter((p) => p.group === propertyGroup)
       .forEach((p) => {

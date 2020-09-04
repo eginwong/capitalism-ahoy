@@ -6,6 +6,7 @@
 ## Rules
 
 - [Reference](https://www.hasbro.com/common/instruct/00009.pdf)
+- [Missed Rules](http://richard_wilding.tripod.com/missedrules.htm#:~:text=If%20you%20are%20the%20new%20owner%2C%20you%20must%20pay%20%24220,%24220%20to%20unmortgage%20the%20property.)
 
 ## Inspiration
 
