@@ -58,6 +58,26 @@ describe('WealthService', () => {
       );
     });
   });
+  describe('sellAsset', () => {
+    it('should deposit cash from player equal to buildingPrice param', () => {
+      const startingCash = gameState.players[0].cash;
+      const buildingPrice = 200;
+      WealthService.sellAsset(gameState.players[0], buildingPrice);
+      expect(gameState.players[0].cash).to.equal(
+        startingCash + buildingPrice,
+        "Incorrectly deposits player's cash"
+      );
+    });
+    it("should decrease a player's assets by buildingPrice", () => {
+      const startingAssets = gameState.players[0].assets;
+      const buildingPrice = 200;
+      WealthService.sellAsset(gameState.players[0], buildingPrice);
+      expect(gameState.players[0].assets).to.equal(
+        startingAssets - buildingPrice,
+        "Incorrectly decreases player's assets"
+      );
+    });
+  });
   describe('calculateNetWorth', () => {
     it('should calculate net worth as cash + assets', () => {
       const cashAmount = 1200;

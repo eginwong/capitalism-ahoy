@@ -274,6 +274,32 @@ describe('PropertyManagementService', () => {
         "Board property mortgage cost was not correctly added to the designated player's cash"
       );
     });
+    it('increase player assets on unmortgage', () => {
+      testBoardProperty.mortgaged = true;
+      const startingAssets = gameState.currentPlayer.assets;
+
+      PropertyManagementService.toggleMortgageOnProperty(
+        gameState,
+        testBoardProperty
+      );
+      expect(gameState.currentPlayer.assets).to.equal(
+        startingAssets + testBoardProperty.price / 2,
+        "Board property mortgage cost was not correctly added to the player's assets"
+      );
+    });
+    it('decrease player assets on mortgage', () => {
+      gameState.currentPlayer.assets = testBoardProperty.price;
+      const startingAssets = gameState.currentPlayer.assets;
+
+      PropertyManagementService.toggleMortgageOnProperty(
+        gameState,
+        testBoardProperty
+      );
+      expect(gameState.currentPlayer.assets).to.equal(
+        startingAssets - testBoardProperty.price / 2,
+        "Board property mortgage cost was not correctly subtracted from the player's assets"
+      );
+    });
   });
   describe('renovate', () => {
     let testBoardProperty;
@@ -329,6 +355,14 @@ describe('PropertyManagementService', () => {
         `Cash should have been decremented by ${testBoardProperty.houseCost}`
       );
     });
+    it('increases player assets when constructing a building', () => {
+      const startingAssets = gameState.currentPlayer.assets;
+      PropertyManagementService.renovate(gameState, testBoardProperty);
+      expect(gameState.currentPlayer.assets).to.equal(
+        startingAssets + testBoardProperty.houseCost,
+        `Assets should have been incremented by ${testBoardProperty.houseCost}`
+      );
+    });
   });
   describe('demolish', () => {
     let testBoardProperty;
@@ -382,6 +416,16 @@ describe('PropertyManagementService', () => {
       expect(gameState.currentPlayer.cash).to.equal(
         startingCash + testBoardProperty.houseCost / 2,
         `Cash should have been incremented by ${
+          testBoardProperty.houseCost / 2
+        }`
+      );
+    });
+    it('decreases player assets when demolishing a building', () => {
+      const startingAssets = gameState.currentPlayer.assets;
+      PropertyManagementService.demolish(gameState, testBoardProperty);
+      expect(gameState.currentPlayer.assets).to.equal(
+        startingAssets - testBoardProperty.houseCost / 2,
+        `Assets should have been decremented by ${
           testBoardProperty.houseCost / 2
         }`
       );
