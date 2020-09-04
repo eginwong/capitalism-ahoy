@@ -312,6 +312,29 @@ module.exports = {
       }
     },
   ],
+  RENOVATE: [
+    ({ notify, UI }, gameState) => {
+      const renoProps = require('../PropertyManagementService').getRenoProperties(
+        gameState
+      );
+      const propSelection = require('../PlayerActions').prompt(
+        { notify, UI },
+        gameState,
+        [...renoProps.map((p) => p.name), 'CANCEL']
+      );
+
+      if (propSelection === 'CANCEL') return;
+
+      if (propSelection) {
+        const propToReno = renoProps.find((p) => p.name === propSelection);
+        require('../PropertyManagementService').renovate(gameState, propToReno);
+      } else {
+        UI.unknownAction();
+      }
+
+      notify('RENOVATE');
+    },
+  ],
   //   TRADE,
   //   PROPERTY_DEVELOPMENT,
   //   BANKRUPTCY: () => gameState.currentPlayerActions["END_TURN"].execute(),
