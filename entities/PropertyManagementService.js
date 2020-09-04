@@ -73,7 +73,7 @@ module.exports = class PropertyManagementService {
       property.buildings !== 4 ? 'houses' : 'hotels'
     ] -= 1;
     property.buildings += 1;
-    WealthService.decrement(gameState.currentPlayer, property.houseCost);
+    WealthService.buyAsset(gameState.currentPlayer, property.houseCost);
   }
 
   static demolish(gameState, property) {
@@ -81,7 +81,7 @@ module.exports = class PropertyManagementService {
       property.buildings !== 5 ? 'houses' : 'hotels'
     ] += 1;
     property.buildings -= 1;
-    WealthService.increment(gameState.currentPlayer, property.houseCost / 2);
+    WealthService.sellAsset(gameState.currentPlayer, property.houseCost / 2);
   }
 
   static toggleMortgageOnProperty(
@@ -90,15 +90,15 @@ module.exports = class PropertyManagementService {
     player = gameState.currentPlayer
   ) {
     boardProperty.mortgaged = !boardProperty.mortgaged;
-    const INTEREST_MULTIPLIER = 1.1;
+    const INTEREST_RATE = 0.1;
     const mortgageBaseCost = boardProperty.price / 2;
 
-    WealthService[boardProperty.mortgaged ? 'increment' : 'decrement'](
-      player,
-      !boardProperty.mortgaged
-        ? mortgageBaseCost * INTEREST_MULTIPLIER
-        : mortgageBaseCost
-    );
+    if (boardProperty.mortgaged) {
+      WealthService.sellAsset(player, mortgageBaseCost);
+    } else {
+      WealthService.decrement(player, mortgageBaseCost * INTEREST_RATE);
+      WealthService.buyAsset(player, mortgageBaseCost);
+    }
   }
 
   static hasMonopoly(gameState, propertyGroup, playerId) {

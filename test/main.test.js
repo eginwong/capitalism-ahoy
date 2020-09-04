@@ -111,8 +111,6 @@ describe('main', () => {
         const diceStubValues = [[6], [1], [1, 2], [1, 2]];
         fillStub(diceStub, diceStubValues);
 
-        const startGameSpy = sinon.spy();
-        userInterface.startGame = startGameSpy;
         userInterface.prompt = promptStub;
 
         require('../entities/Game')({
@@ -131,6 +129,71 @@ describe('main', () => {
           "Player #2's cash did not change from rental payment"
         );
       }
+    );
+
+    // TODO: hot start
+    it(
+      gwt`cold start | game is loaded | first player buys properties, manages properties, and second player pays rent`,
+      () => {
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+          'ROLL_DICE',
+          'BUY_PROPERTY',
+          'ROLL_DICE',
+          'BUY_PROPERTY',
+          'MANAGE_PROPERTIES',
+          'RENOVATE',
+          'Boardwalk',
+          'Park Place',
+          'Boardwalk',
+          'CANCEL',
+          'CANCEL',
+          'END_TURN',
+          'ROLL_DICE',
+          'END_TURN',
+          'END_GAME',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [[6], [1], [2, 2], [1, 1], [2, 3]];
+        fillStub(diceStub, diceStubValues);
+
+        userInterface.prompt = promptStub;
+
+        // preload starting point
+        gameState.players[0].position = 33;
+        gameState.players[1].position = 34;
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        expect(gameState.turn).equal(2, 'Incorrect turn value');
+        expect(gameState.players[0].cash).to.equal(
+          1500 - 350 - 400 - 200 - 200 - 200 + 600,
+          "Player #1's cash did not change from purchase, renovating, and rental income"
+        );
+        expect(gameState.players[0].assets).to.equal(
+          350 + 400 + 200 + 200 + 200,
+          "Player #1's assets did not change from purchase and renovating"
+        );
+        expect(gameState.players[1].cash).to.equal(
+          1500 - 600,
+          "Player #2's cash did not change from rental payment"
+        );
+      }
+    );
+
+    // TODO: mortgage scenario
+    xit(
+      gwt`cold start | game is loaded | player must mortgage property to survive liquidation`,
+      () => {}
     );
 
     it(gwt`cold start | game is loaded | player caught speeding`, () => {
@@ -231,6 +294,7 @@ describe('main', () => {
       }
     );
 
+    // TODO: hot start
     it(
       gwt`cold start | game is loaded | player pays fine to get out of jail after exhausting three turns`,
       () => {
@@ -339,6 +403,7 @@ describe('main', () => {
       }
     );
 
+    // TODO: hot start
     it(
       gwt`cold start | game is loaded | player does not get GO money when going to jail`,
       () => {
@@ -365,7 +430,6 @@ describe('main', () => {
         ];
         fillStub(diceStub, diceStubValues);
 
-        // TODO: replace with continue state
         // begin player1 partway through the board
         gameState.players[0].position = 34;
 
@@ -391,6 +455,7 @@ describe('main', () => {
       }
     );
 
+    // TODO: hot start
     it(
       gwt`cold start | game is loaded | player gains money when passing GO`,
       () => {
@@ -409,7 +474,6 @@ describe('main', () => {
         diceStub.onCall(0).returns([6]);
         diceStub.onCall(1).returns([1]);
 
-        // TODO: replace with continue state
         // begin player1 partway through the board
         gameState.players[0].position = 29;
         // player turn

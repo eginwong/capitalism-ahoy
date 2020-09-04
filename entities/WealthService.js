@@ -18,6 +18,16 @@ module.exports = class WealthService {
   }
 
   /**
+   * This function is only to be called when selling of a house or hotel or mortgaging
+   * @param {*} player
+   * @param {*} buildingPrice, either house or hotel but same buildingCost
+   */
+  static sellAsset(player, buildingPrice) {
+    this.increment(player, buildingPrice);
+    player.assets -= buildingPrice;
+  }
+
+  /**
    * Exchange of cash between two players (i.e., rent)
    * @param {*} sourcePlayer player who is paying money
    * @param {*} targetPlayer player who is gaining money
