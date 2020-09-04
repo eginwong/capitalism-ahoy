@@ -301,15 +301,16 @@ module.exports = {
           gameState
         )
       );
+
+      if (action === 'CANCEL') return;
+
       if (action) {
         notify(action);
       } else {
         UI.unknownAction();
       }
 
-      if (action !== 'CANCEL') {
-        notify('MANAGE_PROPERTIES');
-      }
+      notify('MANAGE_PROPERTIES');
     },
   ],
   RENOVATE: [
@@ -335,6 +336,33 @@ module.exports = {
       notify('RENOVATE');
     },
   ],
+  DEMOLISH: [
+    ({ notify, UI }, gameState) => {
+      const demoProps = require('../PropertyManagementService').getDemoProperties(
+        gameState
+      );
+      const propSelection = require('../PlayerActions').prompt(
+        { notify, UI },
+        gameState,
+        [...demoProps.map((p) => p.name), 'CANCEL']
+      );
+
+      if (propSelection === 'CANCEL') return;
+
+      if (propSelection) {
+        const propToReno = demoProps.find((p) => p.name === propSelection);
+        require('../PropertyManagementService').demolish(gameState, propToReno);
+      } else {
+        UI.unknownAction();
+      }
+
+      notify('DEMOLISH');
+    },
+  ],
+  // MORTGAGE: [
+  //   // TODO: prompt
+  //   // calculate liquidity
+  // ]
   //   TRADE,
   //   PROPERTY_DEVELOPMENT,
   //   BANKRUPTCY: () => gameState.currentPlayerActions["END_TURN"].execute(),

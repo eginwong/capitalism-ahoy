@@ -6,10 +6,11 @@ const mockUIFactory = require('../mocks/UI');
 const { GameState } = require('../../entities/GameState');
 const { createPlayerFactory } = require('../testutils');
 const PlayerActions = require('../../entities/PlayerActions');
+const PropertyManagementService = require('../../entities/PropertyManagementService');
 const config = require('../../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
 
-describe('Rules -> MANAGE_PROPERTIES', () => {
+describe('Rules -> DEMOLISH', () => {
   let gameState;
   let userInterface;
   let eventBus;
@@ -29,17 +30,11 @@ describe('Rules -> MANAGE_PROPERTIES', () => {
     sinon.restore();
   });
 
-  describe('manageProperties', () => {
-    const inputEvent = 'MANAGE_PROPERTIES';
-    const renovateEvent = 'RENOVATE';
-    const demolishEvent = 'DEMOLISH';
-    const mortgageEvent = 'MORTGAGE';
+  describe('demolish', () => {
+    const inputEvent = 'DEMOLISH';
     const cancelEvent = 'CANCEL';
 
-    let managePropertySpy;
-    let renovateSpy;
     let demolishSpy;
-    let mortgageSpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -52,45 +47,52 @@ describe('Rules -> MANAGE_PROPERTIES', () => {
         )
       );
 
-      managePropertySpy = sinon.spy();
-      renovateSpy = sinon.spy();
       demolishSpy = sinon.spy();
-      mortgageSpy = sinon.spy();
-
-      eventBus.on(inputEvent, managePropertySpy);
-      eventBus.on(renovateEvent, renovateSpy);
-      eventBus.on(demolishEvent, demolishSpy);
-      eventBus.on(mortgageEvent, mortgageSpy);
+      eventBus.on(inputEvent, demolishSpy);
     });
 
-    it(`should emit desired ${renovateEvent} event`, () => {
+    it(`should emit desired ${inputEvent} event`, () => {
       const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(renovateEvent);
-      promptStub.onCall(1).returns(cancelEvent);
-      eventBus.emit(inputEvent);
-      expect(renovateSpy.callCount).to.equal(
-        1,
-        `${renovateEvent} was called ${renovateSpy.callCount} times but expected to be 1 times`
-      );
-    });
-    it(`should emit desired ${demolishEvent} event`, () => {
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(demolishEvent);
+      promptStub.onCall(0).returns(false);
       promptStub.onCall(1).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(demolishSpy.callCount).to.equal(
-        1,
-        `${demolishEvent} was called ${demolishSpy.callCount} times but expected to be 1 times`
+        2,
+        `${inputEvent} was called ${demolishSpy.callCount} times but expected to be 1 times`
       );
     });
-    it(`should emit desired ${mortgageEvent} event`, () => {
+    it(`should call prompt with names of available demo properties`, () => {
+      const testPropertyName = 'testProperty';
+      const propMgmtServiceStub = sinon.stub(
+        PropertyManagementService,
+        'getDemoProperties'
+      );
+      propMgmtServiceStub.onCall(0).returns([{ name: testPropertyName }]);
       const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(mortgageEvent);
+      promptStub.onCall(0).returns(cancelEvent);
+      eventBus.emit(inputEvent);
+      expect(promptStub.getCall(0).args[2]).to.deep.equal(
+        [testPropertyName, 'CANCEL'],
+        `Unexpected prompt input for demo properties list: ${
+          promptStub.getCall(0).args[2]
+        }`
+      );
+    });
+    it(`should demolish property returned from the prompt if output is a valid property`, () => {
+      const testProperty = { name: 'testProperty' };
+      const getdemoStub = sinon.stub(
+        PropertyManagementService,
+        'getDemoProperties'
+      );
+      getdemoStub.returns([testProperty]);
+      const demolishStub = sinon.stub(PropertyManagementService, 'demolish');
+      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      promptStub.onCall(0).returns(testProperty.name);
       promptStub.onCall(1).returns(cancelEvent);
       eventBus.emit(inputEvent);
-      expect(mortgageSpy.callCount).to.equal(
+      expect(demolishStub.callCount).to.equal(
         1,
-        `${mortgageEvent} was called ${mortgageSpy.callCount} times but expected to be 1 times`
+        `${inputEvent} was called with valid property and demolish method was called ${demolishStub.callCount} times but expected to be 1 times`
       );
     });
     it('should make a call to the UI#unknownAction if action input is not recognized', () => {
@@ -98,16 +100,12 @@ describe('Rules -> MANAGE_PROPERTIES', () => {
       userInterface.unknownAction = uiSpy;
 
       const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(undefined);
+      promptStub.onCall(0).returns(false);
       promptStub.onCall(1).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(uiSpy.calledOnce).to.equal(
         true,
         `UI method for ${inputEvent} was not called`
-      );
-      expect(managePropertySpy.callCount).to.equal(
-        2,
-        'Unknown action did not trigger manage property event again'
       );
     });
   });
