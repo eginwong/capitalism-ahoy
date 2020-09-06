@@ -7,7 +7,7 @@ const { GameState } = require('../../entities/GameState');
 const { createPlayerFactory } = require('../testutils');
 const config = require('../../config/monopolyConfiguration');
 const PlayerActions = require('../../entities/PlayerActions');
-const PropertyManagementService = require('../../entities/PropertyManagementService');
+const { cloneDeep } = require('lodash');
 
 describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
   let gameState;
@@ -15,7 +15,6 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
   let eventBus;
   const RULES = require('../../entities/Rules');
   const TEST_PROPERTY = 2;
-  let propertyManagementServiceStub;
 
   beforeEach(() => {
     gameState = new GameState();
@@ -23,11 +22,7 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
     userInterface = mockUIFactory();
     let createPlayer = createPlayerFactory();
     gameState.players = [createPlayer({ name: 'player1' })];
-    propertyManagementServiceStub = sinon.stub(
-      PropertyManagementService,
-      'getProperties'
-    );
-    propertyManagementServiceStub.returns(config.propertyConfig.properties);
+    gameState.config = cloneDeep(config);
   });
 
   afterEach(() => {

@@ -24,12 +24,15 @@ module.exports = class PropertyManagementService {
   static calculateRent(gameState, boardProperty) {
     let rentAmount = boardProperty.rent;
     const playerIndex = gameState.players[boardProperty.ownedBy].id;
+    const {
+      singleUtilityMultiplier,
+      doubleUtilityMultiplier,
+      railRoadPricing,
+    } = gameState.config.propertyConfig;
 
     if (boardProperty.group === 'Utilities') {
       const totalRoll =
         gameState.turnValues.roll[0] + gameState.turnValues.roll[1];
-      const SINGLE_UTILITY_MULTIPLIER = 4;
-      const DOUBLE_UTILITY_MULTIPLIER = 10;
       // check number of utilities
       const hasMonopoly = this.hasMonopoly(
         gameState,
@@ -39,13 +42,12 @@ module.exports = class PropertyManagementService {
       // multiply by roll
       rentAmount =
         totalRoll *
-        (hasMonopoly ? DOUBLE_UTILITY_MULTIPLIER : SINGLE_UTILITY_MULTIPLIER);
+        (hasMonopoly ? doubleUtilityMultiplier : singleUtilityMultiplier);
     } else if (boardProperty.group === 'Railroad') {
-      const railroadPricing = [25, 50, 100, 200];
       const railroadCount = this.getProperties(gameState)
         .filter((p) => p.group === boardProperty.group)
         .filter((p) => p.ownedBy === playerIndex).length;
-      rentAmount = railroadPricing[railroadCount - 1];
+      rentAmount = railRoadPricing[railroadCount - 1];
     } else {
       if (boardProperty.buildings > 0) {
         rentAmount = boardProperty.multipliedRent[boardProperty.buildings - 1];
@@ -69,19 +71,29 @@ module.exports = class PropertyManagementService {
   }
 
   static renovate(gameState, property) {
-    gameState.config.propertyConfig[
-      property.buildings !== 4 ? 'houses' : 'hotels'
+    const propConfig = gameState.config.propertyConfig;
+    propConfig[
+      property.buildings !== propConfig.numberOfHousesBeforeHotel
+        ? 'houses'
+        : 'hotels'
     ] -= 1;
     property.buildings += 1;
     WealthService.buyAsset(gameState.currentPlayer, property.houseCost);
   }
 
   static demolish(gameState, property) {
-    gameState.config.propertyConfig[
-      property.buildings !== 5 ? 'houses' : 'hotels'
+    const propConfig = gameState.config.propertyConfig;
+
+    propConfig[
+      property.buildings <= propConfig.numberOfHousesBeforeHotel
+        ? 'houses'
+        : 'hotels'
     ] += 1;
     property.buildings -= 1;
-    WealthService.sellAsset(gameState.currentPlayer, property.houseCost / 2);
+    WealthService.sellAsset(
+      gameState.currentPlayer,
+      property.houseCost / propConfig.mortgageValueMultiplier
+    );
   }
 
   static toggleMortgageOnProperty(
@@ -90,8 +102,10 @@ module.exports = class PropertyManagementService {
     player = gameState.currentPlayer
   ) {
     boardProperty.mortgaged = !boardProperty.mortgaged;
-    const INTEREST_RATE = 0.1;
-    const mortgageBaseCost = boardProperty.price / 2;
+    const INTEREST_RATE = gameState.config.propertyConfig.interestRate;
+    const mortgageBaseCost =
+      boardProperty.price /
+      gameState.config.propertyConfig.mortgageValueMultiplier;
 
     if (boardProperty.mortgaged) {
       WealthService.sellAsset(player, mortgageBaseCost);
@@ -123,7 +137,13 @@ module.exports = class PropertyManagementService {
   }
 
   static getRenoProperties(gameState) {
-    const { houses, hotels, properties } = gameState.config.propertyConfig;
+    const {
+      houses,
+      hotels,
+      properties,
+      numberOfHousesBeforeHotel,
+      maxBuildingsAllowedOnProperty,
+    } = gameState.config.propertyConfig;
     const player = gameState.currentPlayer;
     if (houses + hotels === 0) return [];
     const limitedHouses = houses === 0;
@@ -139,10 +159,7 @@ module.exports = class PropertyManagementService {
           properties[0].group,
           properties[0].ownedBy
         ),
-        minBuildingCount: Math.min.apply(
-          Math,
-          properties.map((p) => p.buildings)
-        ),
+        minBuildingCount: Math.min(...properties.map((p) => p.buildings)),
       })) // { 'groupName': { propertiesInTheGroup: [], hasMonopoly: bool, minBuildingCount: number } }
       // CHECK: Property must be part of a monopoly
       .filter((pg) => pg.hasMonopoly)
@@ -156,14 +173,22 @@ module.exports = class PropertyManagementService {
       .flattenDeep()
       .filter((p) => !p.mortgaged)
       // CHECK: Must have houses to build
-      .filter((p) => !limitedHouses || (limitedHouses && p.buildings === 4))
+      .filter(
+        (p) =>
+          !limitedHouses ||
+          (limitedHouses && p.buildings === numberOfHousesBeforeHotel)
+      )
       // CHECK: Must have hotels to build
-      .filter((p) => !limitedHotels || (limitedHotels && p.buildings < 4))
+      .filter(
+        (p) =>
+          !limitedHotels ||
+          (limitedHotels && p.buildings < numberOfHousesBeforeHotel)
+      )
       // CHECK: Must have available cash on hand
       // could do a more sophisticated check with liquidity, but player can also
       //   manually go to liquidity screen for simplicity
       .filter((p) => p.houseCost < player.cash)
-      .filter((p) => p.buildings < 5)
+      .filter((p) => p.buildings < maxBuildingsAllowedOnProperty)
       .value();
 
     return availableRenoProps;

@@ -61,6 +61,10 @@ module.exports = class WealthService {
           : p.price
       )
       .reduce((acc, val) => acc + val, 0);
-    return totalLiquidAssets / 2 + player.cash;
+    return (
+      totalLiquidAssets /
+        gameState.config.propertyConfig.mortgageValueMultiplier +
+      player.cash
+    );
   }
 };

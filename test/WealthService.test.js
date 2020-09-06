@@ -2,6 +2,8 @@ const expect = require('chai').expect;
 const WealthService = require('../entities/WealthService');
 const { GameState } = require('../entities/GameState');
 const { createPlayerFactory } = require('./testutils');
+const { cloneDeep } = require('lodash');
+const config = require('../config/monopolyConfiguration.json');
 
 describe('WealthService', () => {
   let gameState;
@@ -13,7 +15,7 @@ describe('WealthService', () => {
       createPlayer({ name: 'player1' }),
       createPlayer({ name: 'player2' }),
     ];
-    gameState.config = { propertyConfig: { properties: [] } };
+    gameState.config = cloneDeep(config);
   });
 
   describe('increment', () => {
