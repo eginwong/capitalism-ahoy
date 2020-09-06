@@ -362,8 +362,12 @@ module.exports = {
   MORTGAGE: [
     ({ notify, UI }, gameState) => {
       const player = gameState.currentPlayer;
+      const {
+        interestRate,
+        mortgageValueMultiplier,
+      } = gameState.config.propertyConfig;
 
-      const INTEREST_RATE_MULTIPLIER = 1.1;
+      const INTEREST_RATE_MULTIPLIER = 1 + interestRate;
       // can only mortgage or unmortgage properties with 0 buildings
       const mortgageAbleProps = require('../PropertyManagementService')
         .getProperties(gameState)
@@ -382,7 +386,9 @@ module.exports = {
         );
         if (
           mortgageProp.mortgaged &&
-          player.cash < (mortgageProp.price / 2) * INTEREST_RATE_MULTIPLIER
+          player.cash <
+            (mortgageProp.price / mortgageValueMultiplier) *
+              INTEREST_RATE_MULTIPLIER
         ) {
           UI.noCashMustLiquidate();
         } else {

@@ -4,6 +4,13 @@
   "propertyConfig": {
     "houses": 32,
     "hotels": 12,
+    "singleUtilityMultiplier": 4,
+    "doubleUtilityMultiplier": 10,
+    "interestRate": 0.1,
+    "numberOfHousesBeforeHotel": 4,
+    "maxBuildingsAllowedOnProperty": 5,
+    "mortgageValueMultiplier": 2,
+    "railRoadPricing": [25, 50, 100, 200],
     "properties": [
       {
         "name": "Mediterranean Avenue",

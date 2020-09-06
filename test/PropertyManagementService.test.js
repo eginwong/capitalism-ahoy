@@ -118,12 +118,11 @@ describe('PropertyManagementService', () => {
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;
         createMonopoly(gameState, testProperty.group, ownerId);
-        const railroadPricing = [25, 50, 100, 200];
 
         expect(
           PropertyManagementService.calculateRent(gameState, testProperty)
         ).to.equal(
-          railroadPricing[3],
+          config.propertyConfig.railRoadPricing[3],
           'Rent incorrectly calculated for railroad properties'
         );
       });
@@ -141,7 +140,10 @@ describe('PropertyManagementService', () => {
 
         expect(
           PropertyManagementService.calculateRent(gameState, testProperty)
-        ).to.equal(totalRoll * 4, 'Rent incorrectly calculated for utilities');
+        ).to.equal(
+          totalRoll * config.propertyConfig.singleUtilityMultiplier,
+          'Rent incorrectly calculated for utilities'
+        );
       });
       it(`should charge 10x multiplier for both utilities owned`, () => {
         const ownerId = 1;
@@ -156,7 +158,10 @@ describe('PropertyManagementService', () => {
 
         expect(
           PropertyManagementService.calculateRent(gameState, testProperty)
-        ).to.equal(totalRoll * 10, 'Rent incorrectly calculated for utilities');
+        ).to.equal(
+          totalRoll * config.propertyConfig.doubleUtilityMultiplier,
+          'Rent incorrectly calculated for utilities'
+        );
       });
     });
   });
@@ -240,13 +245,16 @@ describe('PropertyManagementService', () => {
     it('charges mortgage cost + interest rate when unmortgaging property', () => {
       testBoardProperty.mortgaged = true;
       const startingCash = gameState.currentPlayer.cash;
-      const INTEREST_MULTIPLIER = 1.1;
+      const INTEREST_MULTIPLIER = 1 + config.propertyConfig.interestRate;
       PropertyManagementService.toggleMortgageOnProperty(
         gameState,
         testBoardProperty
       );
       expect(gameState.currentPlayer.cash).to.equal(
-        startingCash - (testBoardProperty.price / 2) * INTEREST_MULTIPLIER,
+        startingCash -
+          (testBoardProperty.price /
+            config.propertyConfig.mortgageValueMultiplier) *
+            INTEREST_MULTIPLIER,
         "Board property mortgage cost was not correctly charged to the current player's cash"
       );
     });
@@ -257,7 +265,9 @@ describe('PropertyManagementService', () => {
         testBoardProperty
       );
       expect(gameState.currentPlayer.cash).to.equal(
-        startingCash + testBoardProperty.price / 2,
+        startingCash +
+          testBoardProperty.price /
+            config.propertyConfig.mortgageValueMultiplier,
         "Board property mortgage cost was not correctly added to the current player's cash"
       );
     });
@@ -270,7 +280,9 @@ describe('PropertyManagementService', () => {
         player2
       );
       expect(player2.cash).to.equal(
-        startingCash + testBoardProperty.price / 2,
+        startingCash +
+          testBoardProperty.price /
+            config.propertyConfig.mortgageValueMultiplier,
         "Board property mortgage cost was not correctly added to the designated player's cash"
       );
     });
@@ -283,7 +295,9 @@ describe('PropertyManagementService', () => {
         testBoardProperty
       );
       expect(gameState.currentPlayer.assets).to.equal(
-        startingAssets + testBoardProperty.price / 2,
+        startingAssets +
+          testBoardProperty.price /
+            config.propertyConfig.mortgageValueMultiplier,
         "Board property mortgage cost was not correctly added to the player's assets"
       );
     });
@@ -296,7 +310,9 @@ describe('PropertyManagementService', () => {
         testBoardProperty
       );
       expect(gameState.currentPlayer.assets).to.equal(
-        startingAssets - testBoardProperty.price / 2,
+        startingAssets -
+          testBoardProperty.price /
+            config.propertyConfig.mortgageValueMultiplier,
         "Board property mortgage cost was not correctly subtracted from the player's assets"
       );
     });
@@ -414,9 +430,12 @@ describe('PropertyManagementService', () => {
       const startingCash = gameState.currentPlayer.cash;
       PropertyManagementService.demolish(gameState, testBoardProperty);
       expect(gameState.currentPlayer.cash).to.equal(
-        startingCash + testBoardProperty.houseCost / 2,
+        startingCash +
+          testBoardProperty.houseCost /
+            config.propertyConfig.mortgageValueMultiplier,
         `Cash should have been incremented by ${
-          testBoardProperty.houseCost / 2
+          testBoardProperty.houseCost /
+          config.propertyConfig.mortgageValueMultiplier
         }`
       );
     });
@@ -424,9 +443,12 @@ describe('PropertyManagementService', () => {
       const startingAssets = gameState.currentPlayer.assets;
       PropertyManagementService.demolish(gameState, testBoardProperty);
       expect(gameState.currentPlayer.assets).to.equal(
-        startingAssets - testBoardProperty.houseCost / 2,
+        startingAssets -
+          testBoardProperty.houseCost /
+            config.propertyConfig.mortgageValueMultiplier,
         `Assets should have been decremented by ${
-          testBoardProperty.houseCost / 2
+          testBoardProperty.houseCost /
+          config.propertyConfig.mortgageValueMultiplier
         }`
       );
     });
