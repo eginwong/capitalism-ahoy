@@ -145,6 +145,9 @@ module.exports = {
       ) {
         notify('PAY_RENT');
       }
+      if (boardProperty.group === 'Special') {
+        notify('RESOLVE_SPECIAL_PROPERTY');
+      }
     },
   ],
   END_TURN: [
@@ -404,8 +407,73 @@ module.exports = {
       notify('MORTGAGE');
     },
   ],
+  RESOLVE_SPECIAL_PROPERTY: [
+    ({ UI, notify }, gameState) => {
+      const boardProperty = gameState.currentBoardProperty;
+      if (boardProperty.id.includes('chance')) {
+      }
+      if (boardProperty.id.includes('communitychest')) {
+      }
+      switch (boardProperty.id) {
+        case 'incometax':
+          notify('INCOME_TAX');
+          break;
+        case 'gotojail':
+          notify('JAIL');
+          break;
+        case 'luxurytax':
+          // potentially entering negative wealth here, will be resolved in subsequent rule
+          // TODO: WEALTHSERVICE: Check Liquidity
+          // what happens if current player doesn't have enough?
+          require('../WealthService').decrement(
+            gameState.currentPlayer,
+            gameState.config.luxuryTaxAmount
+          );
+          break;
+        default:
+          break;
+      }
+    },
+  ],
+  INCOME_TAX: [
+    ({ UI }, gameState) =>
+      UI.incomeTaxPayment(
+        gameState.config.incomeTaxAmount,
+        gameState.config.incomeTaxRate * 100
+      ),
+    ({ UI, notify }, gameState) => {
+      const FIXED = 'FIXED';
+      const VARIABLE = 'VARIABLE';
+
+      const paymentSelection = require('../PlayerActions').prompt(
+        { notify, UI },
+        gameState,
+        [FIXED, VARIABLE]
+      );
+
+      // potentially entering negative wealth here, will be resolved in subsequent rule
+      // TODO: WEALTHSERVICE: Check Liquidity
+      // what happens if current player doesn't have enough?
+      if (paymentSelection === FIXED) {
+        require('../WealthService').decrement(
+          gameState.currentPlayer,
+          gameState.config.incomeTaxAmount
+        );
+      } else if (paymentSelection === VARIABLE) {
+        const netWorth = require('../WealthService').calculateNetWorth(
+          gameState.currentPlayer
+        );
+        require('../WealthService').decrement(
+          gameState.currentPlayer,
+          gameState.config.incomeTaxRate * netWorth
+        );
+      } else {
+        UI.unknownAction();
+        notify('INCOME_TAX');
+      }
+    },
+  ],
   //   TRADE,
-  //   PROPERTY_DEVELOPMENT,
   //   BANKRUPTCY: () => gameState.currentPlayerActions["END_TURN"].execute(),
   //   // potentially Chance/Community Cards
 };

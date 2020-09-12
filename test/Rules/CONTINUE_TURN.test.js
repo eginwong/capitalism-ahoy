@@ -84,7 +84,7 @@ describe('Rules -> CONTINUE_TURN', () => {
       );
       expect(continueTurnSpy.callCount).to.equal(
         3,
-        'Unknown action did not trigger continue turn event again'
+        `Unknown action did not trigger ${inputEvent} event again`
       );
     });
     it('should end turn if player is newly in jail', () => {

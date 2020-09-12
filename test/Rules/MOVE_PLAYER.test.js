@@ -33,10 +33,12 @@ describe('Rules -> MOVE_PLAYER', () => {
     const passGoEvent = 'PASS_GO';
     const resolveNewPropertyEvent = 'RESOLVE_NEW_PROPERTY';
     const payRentEvent = 'PAY_RENT';
+    const resolveSpecialPropertyEvent = 'RESOLVE_SPECIAL_PROPERTY';
 
     let passGoSpy;
     let resolveNewPropertySpy;
     let payRentSpy;
+    let resolveSpecialPropertySpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -55,10 +57,12 @@ describe('Rules -> MOVE_PLAYER', () => {
       passGoSpy = sinon.spy();
       resolveNewPropertySpy = sinon.spy();
       payRentSpy = sinon.spy();
+      resolveSpecialPropertySpy = sinon.spy();
 
       eventBus.on(passGoEvent, passGoSpy);
       eventBus.on(resolveNewPropertyEvent, resolveNewPropertySpy);
       eventBus.on(payRentEvent, payRentSpy);
+      eventBus.on(resolveSpecialPropertyEvent, resolveSpecialPropertySpy);
     });
 
     it('should set gameState current board property', () => {
@@ -180,12 +184,34 @@ describe('Rules -> MOVE_PLAYER', () => {
       );
     });
     it(`should not emit ${payRentEvent} event if property is special`, () => {
-      gameState.currentPlayer.position = 1; // to land on space 4, with a roll of 3
-      // TODO: Opaque to know that space 4 is a special property
+      const specialProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.group === 'Special'
+      );
+      // turn value movement
+      gameState.currentPlayer.position = specialProperty.position - 3;
       eventBus.emit(inputEvent);
       expect(payRentSpy.callCount).to.equal(
         0,
         `${payRentEvent} event was called`
+      );
+    });
+    it(`should emit ${resolveSpecialPropertyEvent} event if property is special`, () => {
+      const specialProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.group === 'Special'
+      );
+      // turn value movement
+      gameState.currentPlayer.position = specialProperty.position - 3;
+      eventBus.emit(inputEvent);
+      expect(resolveSpecialPropertySpy.callCount).to.equal(
+        1,
+        `${resolveSpecialPropertyEvent} event was not called`
+      );
+    });
+    it(`should not emit ${resolveSpecialPropertyEvent} event if property is not special`, () => {
+      eventBus.emit(inputEvent);
+      expect(resolveSpecialPropertySpy.callCount).to.equal(
+        0,
+        `${resolveSpecialPropertyEvent} event was called`
       );
     });
   });
