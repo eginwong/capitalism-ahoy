@@ -1,6 +1,9 @@
 {
   "passGoAmount": 200,
   "fineAmount": 50,
+  "luxuryTaxAmount": 75,
+  "incomeTaxAmount": 200,
+  "incomeTaxRate": 0.1,
   "propertyConfig": {
     "houses": 32,
     "hotels": 12,

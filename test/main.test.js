@@ -204,6 +204,7 @@ describe('main', () => {
         '',
         'ROLL_DICE',
         'ROLL_DICE',
+        'FIXED',
         'ROLL_DICE',
         'END_GAME',
       ];
@@ -234,6 +235,10 @@ describe('main', () => {
         0,
         "Player #1's jail status was not correctly set"
       );
+      expect(gameState.players[0].cash).to.equal(
+        1500 - config.incomeTaxAmount,
+        "Player #1's cash was not correctly set"
+      );
       expect(gameState.players[1].position).to.equal(0, 'Player #2 moved');
     });
 
@@ -248,8 +253,10 @@ describe('main', () => {
           '',
           'ROLL_DICE',
           'ROLL_DICE',
+          'FIXED',
           'ROLL_DICE',
           'ROLL_DICE', // p2
+          'FIXED',
           'END_TURN',
           'PAY_FINE', // p1
           'ROLL_DICE',
@@ -288,8 +295,11 @@ describe('main', () => {
           'Player #1 did not correctly move to expected location after rolling doubles'
         );
         expect(gameState.players[0].cash).to.equal(
-          1500 - config.fineAmount - expectedFinalBoardProperty.price,
-          "Player #1's cash does not account for fine and property purchase"
+          1500 -
+            config.fineAmount -
+            expectedFinalBoardProperty.price -
+            config.incomeTaxAmount,
+          "Player #1's cash does not account for fine, property purchase, and income tax"
         );
       }
     );
@@ -306,8 +316,10 @@ describe('main', () => {
           '',
           'ROLL_DICE',
           'ROLL_DICE',
+          'FIXED',
           'ROLL_DICE',
           'ROLL_DICE', // p2
+          'FIXED',
           'END_TURN',
           'ROLL_DICE', // p1
           'END_TURN',
@@ -346,8 +358,46 @@ describe('main', () => {
 
         expect(gameState.turn).equal(6, 'Incorrect turn value');
         expect(gameState.players[0].cash).to.equal(
-          1500 - config.fineAmount,
-          "Player #1's cash does not account for fine"
+          1500 - config.fineAmount - config.incomeTaxAmount,
+          "Player #1's cash does not account for fine, and income tax"
+        );
+      }
+    );
+
+    // TODO: hot start
+    it(
+      gwt`cold start | game is loaded | player pays variable income tax`,
+      () => {
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+          'ROLL_DICE',
+          'VARIABLE',
+          'END_GAME',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [
+          [6],
+          [1],
+          [1, 3], // p1: income tax
+        ];
+        fillStub(diceStub, diceStubValues);
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        expect(gameState.turn).equal(0, 'Incorrect turn value');
+        expect(gameState.players[0].cash).to.equal(
+          1500 - config.incomeTaxRate * 1500,
+          "Player #1's cash does not account for variable income tax"
         );
       }
     );
@@ -363,8 +413,10 @@ describe('main', () => {
           '',
           'ROLL_DICE',
           'ROLL_DICE',
+          'FIXED',
           'ROLL_DICE',
           'ROLL_DICE', // p2
+          'FIXED',
           'END_TURN',
           'ROLL_DICE', // p1
           'BUY_PROPERTY',
@@ -393,8 +445,8 @@ describe('main', () => {
 
         expect(gameState.turn).equal(3, 'Incorrect turn value');
         expect(gameState.players[0].cash).to.equal(
-          1350,
-          "Player #1's cash was incorrectly fined"
+          1350 - config.incomeTaxAmount,
+          "Player #1's cash was incorrectly fined + income tax amount"
         );
         expect(gameState.players[0].position).to.equal(
           12,
@@ -449,7 +501,7 @@ describe('main', () => {
           "Player #1's jail status was not correctly set"
         );
         expect(gameState.players[0].cash).to.equal(
-          1500,
+          1500 - config.luxuryTaxAmount,
           "Player #1's incorrectly received GO money while getting caught for speeding"
         );
       }
@@ -489,6 +541,46 @@ describe('main', () => {
         expect(gameState.players[0].cash).to.equal(
           1700,
           "Player #1's did not receive GO money when going around the board"
+        );
+      }
+    );
+
+    // TODO: hot start
+    it(
+      gwt`cold start | game is loaded | player goes to jail when landing on Go To Jail`,
+      () => {
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+          'ROLL_DICE',
+          'END_GAME',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [
+          [6],
+          [1],
+          [6, 5], // p1: chance
+        ];
+        fillStub(diceStub, diceStubValues);
+
+        // begin player1 partway through the board
+        gameState.players[0].position = 19;
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        expect(gameState.turn).equal(1, 'Incorrect turn value');
+        expect(gameState.players[0].position).to.equal(
+          10,
+          "Player #1's did not go to jail when landing on the Go To Jail property"
         );
       }
     );

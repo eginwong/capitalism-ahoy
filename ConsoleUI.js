@@ -57,6 +57,11 @@ const consoleUI = (function (readline) {
       console.log(
         `Player only has ${player.cash} and cannot complete the operation. Either sell or liquidate assets and try again.`
       ),
+    incomeTaxPayment: (flatFee, taxRate) => {
+      console.log(
+        `Income Tax: Pay fixed fee ($${flatFee}) or variable fee (${taxRate}% of your net-worth)`
+      );
+    },
   };
 })(require('readline-sync'));
 
