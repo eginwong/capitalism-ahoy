@@ -26,5 +26,6 @@ module.exports = function mockUIFactory() {
     payingRent: () => true,
     noCashMustLiquidate: () => true,
     incomeTaxPayment: () => true,
+    incomeTaxPaid: () => true,
   };
 };

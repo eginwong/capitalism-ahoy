@@ -122,7 +122,7 @@ module.exports = class PropertyManagementService {
   }
 
   static getAvailableManagementActions(gameState) {
-    let availableActions = ['TOGGLE_MORTGAGE'];
+    let availableActions = ['MORTGAGE'];
 
     if (this.getRenoProperties(gameState).length > 0) {
       availableActions.push('RENOVATE');

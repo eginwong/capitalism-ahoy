@@ -91,6 +91,20 @@ describe('Rules -> INCOME_TAX', () => {
         `Player did not pay $${config.incomeTaxAmount} when FIXED was chosen for payment `
       );
     });
+    it('should make a call to the UI#incomeTaxPaid for FIXED', () => {
+      const uiSpy = sinon.spy();
+      userInterface.incomeTaxPaid = uiSpy;
+      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      promptStub.onCall(0).returns('FIXED');
+
+      eventBus.emit(inputEvent);
+      expect(
+        uiSpy.calledOnceWithExactly(gameState.config.incomeTaxAmount)
+      ).to.equal(
+        true,
+        `UI method for ${inputEvent} to display fee was not called`
+      );
+    });
     it('should decrease player cash by config incomeTaxRate if player chooses VARIABLE', () => {
       const startingCash = gameState.currentPlayer.cash;
       const promptStub = sinon.stub(PlayerActions, 'prompt');
@@ -102,6 +116,20 @@ describe('Rules -> INCOME_TAX', () => {
         `Player did not pay ${
           100 * config.incomeTaxRate
         }% of networth when VARIABLE was chosen for payment `
+      );
+    });
+    it('should make a call to the UI#incomeTaxPaid for VARIABLE', () => {
+      const uiSpy = sinon.spy();
+      userInterface.incomeTaxPaid = uiSpy;
+      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      promptStub.onCall(0).returns('VARIABLE');
+      const expectedFee =
+        gameState.config.incomeTaxRate * gameState.currentPlayer.cash;
+
+      eventBus.emit(inputEvent);
+      expect(uiSpy.calledOnceWithExactly(expectedFee)).to.equal(
+        true,
+        `UI method for ${inputEvent} to display fee was not called`
       );
     });
   });
