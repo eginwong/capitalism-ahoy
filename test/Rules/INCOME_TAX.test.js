@@ -134,6 +134,22 @@ describe('Rules -> INCOME_TAX', () => {
         }% of networth when VARIABLE was chosen for payment `
       );
     });
+    it('should decrease player cash by config incomeTaxRate if player chooses VARIABLE, rounded to 2 decimal places', () => {
+      const startingCash = gameState.currentPlayer.cash;
+      const assets = 11;
+      gameState.currentPlayer.assets = assets;
+      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      promptStub.onCall(0).returns('VARIABLE');
+
+      eventBus.emit(inputEvent);
+      expect(gameState.currentPlayer.cash).to.equal(
+        startingCash -
+          ((startingCash + assets) * config.incomeTaxRate).toFixed(2),
+        `Player did not pay ${
+          100 * config.incomeTaxRate
+        }% of networth when VARIABLE was chosen for payment `
+      );
+    });
     it('should make a call to the UI#incomeTaxPaid for VARIABLE', () => {
       const uiSpy = sinon.spy();
       userInterface.incomeTaxPaid = uiSpy;
