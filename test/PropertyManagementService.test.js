@@ -455,15 +455,15 @@ describe('PropertyManagementService', () => {
   });
   describe('getAvailableManagementActions', () => {
     it('should always return toggle mortgage and cancel', () => {
-      const TOGGLE_MORTGAGE_ACTION = 'TOGGLE_MORTGAGE';
+      const MORTGAGE_ACTION = 'MORTGAGE';
       const CANCEL_ACTION = 'CANCEL';
       expect(
         PropertyManagementService.getAvailableManagementActions(
           gameState
-        ).includes(TOGGLE_MORTGAGE_ACTION)
+        ).includes(MORTGAGE_ACTION)
       ).to.equal(
         true,
-        `Missing ${TOGGLE_MORTGAGE_ACTION} in available property management actions`
+        `Missing ${MORTGAGE_ACTION} in available property management actions`
       );
       expect(
         PropertyManagementService.getAvailableManagementActions(

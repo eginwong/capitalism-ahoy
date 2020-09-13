@@ -12,10 +12,10 @@ const ACTIONS = {
   PAY_FINE: (gameState) => gameState.currentPlayer.jailed >= 0,
   END_TURN: (gameState) =>
     !!gameState.turnValues.roll && gameState.turnValues.speedingCounter === 0,
-  END_GAME: () => true,
   MANAGE_PROPERTIES: (gameState, player = gameState.currentPlayer) =>
     getProperties(gameState).some((p) => p.ownedBy === player.id),
   // INITIATE_TRADE
+  END_GAME: () => true,
 };
 
 module.exports = class PlayerActions {

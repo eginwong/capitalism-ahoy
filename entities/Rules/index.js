@@ -459,14 +459,14 @@ module.exports = {
           gameState.currentPlayer,
           gameState.config.incomeTaxAmount
         );
+        UI.incomeTaxPaid(gameState.config.incomeTaxAmount);
       } else if (paymentSelection === VARIABLE) {
         const netWorth = require('../WealthService').calculateNetWorth(
           gameState.currentPlayer
         );
-        require('../WealthService').decrement(
-          gameState.currentPlayer,
-          gameState.config.incomeTaxRate * netWorth
-        );
+        const fee = gameState.config.incomeTaxRate * netWorth;
+        require('../WealthService').decrement(gameState.currentPlayer, fee);
+        UI.incomeTaxPaid(fee);
       } else {
         UI.unknownAction();
         notify('INCOME_TAX');

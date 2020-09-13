@@ -59,8 +59,11 @@ const consoleUI = (function (readline) {
       ),
     incomeTaxPayment: (flatFee, taxRate) => {
       console.log(
-        `Income Tax: Pay fixed fee ($${flatFee}) or variable fee (${taxRate}% of your net-worth)`
+        `INCOME TAX: Pay fixed fee ($${flatFee}) or variable fee (${taxRate}% of your net-worth)`
       );
+    },
+    incomeTaxPaid: (cost) => {
+      console.log(`INCOME TAX: Paid a total of $${cost}`);
     },
   };
 })(require('readline-sync'));
