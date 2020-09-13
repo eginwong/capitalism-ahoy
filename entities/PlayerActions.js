@@ -35,6 +35,8 @@ module.exports = class PlayerActions {
     // TODO: inquirer
     // TODO: UI.prompt -> UI.selectFrom(actions: [String], msg: String) : String | String `el` <actions>
     const answer = UI.prompt(`Which action would you like to take?\n\n`);
-    return actions.find((action) => action === String(answer).toUpperCase());
+    return actions.find(
+      (action) => action.toUpperCase() === String(answer).toUpperCase()
+    );
   }
 };
