@@ -29,11 +29,9 @@ describe('Rules -> PAY_FINE', () => {
 
   describe('moveRoll', () => {
     const inputEvent = 'PAY_FINE';
-    const bankruptcyEvent = 'BANKRUPTCY';
     const liquidationEvent = 'LIQUIDATION';
 
-    let bankruptcySpy;
-    let liquidationSpy;
+    let liquidationStub;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -49,12 +47,9 @@ describe('Rules -> PAY_FINE', () => {
         roll: [1, 2],
         speedingCounter: 0,
       };
+      liquidationStub = sinon.stub();
 
-      bankruptcySpy = sinon.spy();
-      liquidationSpy = sinon.spy();
-
-      eventBus.on(bankruptcyEvent, bankruptcySpy);
-      eventBus.on(liquidationEvent, liquidationSpy);
+      eventBus.on(liquidationEvent, liquidationStub);
     });
 
     it('should make a call to the UI#payFine', () => {
@@ -82,26 +77,15 @@ describe('Rules -> PAY_FINE', () => {
         `Player did not lose $${config.fineAmount}`
       );
     });
-    it(`should set player free from jail`, () => {
-      eventBus.emit(inputEvent);
-      expect(gameState.currentPlayer.jailed).to.equal(
-        -1,
-        'Player is still in jail after paying fine'
-      );
-    });
-    it(`the ${bankruptcyEvent} event should be called if player has negative net-worth`, () => {
+    it(`${liquidationEvent} event should be called if current player has no more cash to pay the fine`, () => {
       gameState.currentPlayer.cash = 0;
+      liquidationStub.callsFake(() => {
+        gameState.currentPlayer.cash += 50;
+      });
+
       eventBus.emit(inputEvent);
-      expect(bankruptcySpy.callCount).to.equal(
-        1,
-        `${bankruptcyEvent} was not called`
-      );
-    });
-    it(`the ${liquidationEvent} event should be called if current player has no more cash but positive net-worth`, () => {
-      gameState.currentPlayer.assets = 200;
-      gameState.currentPlayer.cash = 0;
-      eventBus.emit(inputEvent);
-      expect(liquidationSpy.callCount).to.equal(
+
+      expect(liquidationStub.callCount).to.equal(
         1,
         `${liquidationEvent} was not called`
       );

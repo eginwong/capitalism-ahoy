@@ -22,6 +22,8 @@ module.exports = {
       notify('TURN_VALUES_RESET');
     },
     ({ UI }, gameState) => UI.startTurn(gameState.currentPlayer),
+    // TODO: add bankruptcy check here and END_TURN if true
+    // TODO: problem if we keep player is that the turn order increments an extra time going onwards
     (_, gameState) =>
       (gameState.currentBoardProperty = require('../PropertyManagementService').getCurrentPlayerBoardProperty(
         gameState
@@ -157,29 +159,21 @@ module.exports = {
   ],
   PAY_FINE: [
     ({ UI }) => UI.payFine(),
-    (_, gameState) => {
-      // potentially entering negative wealth here, will be resolved in subsequent rule
-      // TODO: WEALTHSERVICE: Check Liquidity
-      // what happens if current player doesn't have enough?
+    ({ UI, notify }, gameState) => {
+      // TODO: add extra check if bankrupt and out of the game
+      while (gameState.currentPlayer.cash < gameState.config.fineAmount) {
+        UI.playerShortOnFunds(
+          gameState.currentPlayer.cash,
+          gameState.config.fineAmount
+        );
+        notify('LIQUIDATION');
+      }
 
       require('../WealthService').decrement(
         gameState.currentPlayer,
         gameState.config.fineAmount
       );
       gameState.currentPlayer.jailed = -1;
-    },
-    // TODO: see if rule below can be combined above or made modular
-    function conditionalEventsOnLostWealth({ notify }, gameState) {
-      if (
-        require('../WealthService').calculateNetWorth(gameState.currentPlayer) <
-        Math.abs(gameState.currentPlayer.cash)
-      ) {
-        notify('BANKRUPTCY');
-      } else if (gameState.currentPlayer.cash < 0) {
-        // UI: show liquidation menu
-        notify('LIQUIDATION');
-        // might need to have cancel here
-      }
     },
   ],
   SPEEDING: [({ UI }) => UI.caughtSpeeding(), ({ notify }) => notify('JAIL')],
@@ -248,18 +242,17 @@ module.exports = {
     },
   ],
   BUY_PROPERTY: [
-    ({ UI }, gameState) => {
+    ({ UI, notify }, gameState) => {
       const boardProperty = gameState.currentBoardProperty;
 
-      // checking buying power first in case we have a cancel option in the future
-      // const playerBuyingPower = require('../WealthService').calculateLiquidity(
-      //   gameState,
-      //   require ...
-      // );
-
-      // if (playerBuyingPower < boardProperty.price) {
-      //   require('../LiquidateService').liquidate(UI, gameState);
-      // }
+      while (gameState.currentPlayer.cash < boardProperty.price) {
+        UI.playerShortOnFunds(
+          gameState.currentPlayer.cash,
+          boardProperty.price
+        );
+        notify('LIQUIDATION');
+      }
+      // TODO: add cancel option here
 
       require('../WealthService').buyAsset(
         gameState.currentPlayer,
@@ -286,7 +279,8 @@ module.exports = {
       );
 
       // TODO: WEALTHSERVICE: Check Liquidity
-      // what happens if current player doesn't have enough?
+      // TODO: add bankruptcy check to explain what will happen
+      // pay out what cash is leftover
       require('../WealthService').exchange(
         gameState.currentPlayer,
         owner,
@@ -380,14 +374,14 @@ module.exports = {
       const propSelection = require('../PlayerActions').prompt(
         { notify, UI },
         gameState,
-        [...mortgageAbleProps.map((p) => p.name), 'CANCEL']
+        [...mortgageAbleProps.map((p) => p.name.toUpperCase()), 'CANCEL']
       );
 
       if (propSelection === 'CANCEL') return;
 
       if (propSelection) {
         const mortgageProp = mortgageAbleProps.find(
-          (p) => p.name === propSelection
+          (p) => p.name.toUpperCase() === propSelection
         );
         if (
           mortgageProp.mortgaged &&
@@ -395,7 +389,7 @@ module.exports = {
             (mortgageProp.price / mortgageValueMultiplier) *
               INTEREST_RATE_MULTIPLIER
         ) {
-          UI.noCashMustLiquidate();
+          UI.noCashMustLiquidate(gameState.currentPlayer);
         } else {
           require('../PropertyManagementService').toggleMortgageOnProperty(
             gameState,
@@ -426,7 +420,7 @@ module.exports = {
         case 'luxurytax':
           // potentially entering negative wealth here, will be resolved in subsequent rule
           // TODO: WEALTHSERVICE: Check Liquidity
-          // what happens if current player doesn't have enough?
+          // TODO: add bankruptcy check to explain what will happen
           require('../WealthService').decrement(
             gameState.currentPlayer,
             gameState.config.luxuryTaxAmount
@@ -456,7 +450,7 @@ module.exports = {
 
       // potentially entering negative wealth here, will be resolved in subsequent rule
       // TODO: WEALTHSERVICE: Check Liquidity
-      // what happens if current player doesn't have enough?
+      // TODO: add bankruptcy check to explain what will happen
       if (paymentSelection === FIXED) {
         require('../WealthService').decrement(
           gameState.currentPlayer,
@@ -467,13 +461,34 @@ module.exports = {
         const netWorth = require('../WealthService').calculateNetWorth(
           gameState.currentPlayer
         );
-        const fee = gameState.config.incomeTaxRate * netWorth;
+        const fee = (gameState.config.incomeTaxRate * netWorth).toFixed(2);
         require('../WealthService').decrement(gameState.currentPlayer, fee);
         UI.incomeTaxPaid(fee);
       } else {
         UI.unknownAction();
         notify('INCOME_TAX');
       }
+    },
+  ],
+  LIQUIDATION: [
+    ({ UI, notify }, gameState) => {
+      const liquidateOption = require('../PlayerActions').prompt(
+        { notify, UI },
+        gameState,
+        // TODO: be smart about what options are available to the user?
+        ['MANAGE_PROPERTIES', 'TRADE', 'BANKRUPTCY', 'CANCEL']
+      );
+
+      if (liquidateOption === 'CANCEL') return;
+
+      if (liquidateOption) {
+        notify(liquidateOption);
+      } else {
+        UI.unknownAction();
+      }
+
+      if (liquidateOption === 'BANKRUPTCY') return;
+      notify('LIQUIDATION');
     },
   ],
   //   TRADE,
