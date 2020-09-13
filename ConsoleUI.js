@@ -53,6 +53,8 @@ const consoleUI = (function (readline) {
         `Game ended. Winner is: 🎉${name}🎉 with a net worth of: ${netWorth}`
       ),
     propertyBought: () => console.log('Property bought! 🎉🎉'),
+    payingRent: (player, owner, amount) =>
+      console.log(`${player.name} paid $${amount} in rent to ${owner.name}`),
     noCashMustLiquidate: (player) =>
       console.log(
         `Player only has ${player.cash} and cannot complete the operation. Either sell or liquidate assets and try again.`
