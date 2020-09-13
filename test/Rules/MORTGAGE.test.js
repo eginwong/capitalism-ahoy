@@ -71,7 +71,7 @@ describe('Rules -> MORTGAGE', () => {
       promptStub.onCall(0).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(promptStub.getCall(0).args[2]).to.deep.equal(
-        [...expectedProperties.map((p) => p.name), 'CANCEL'],
+        [...expectedProperties.map((p) => p.name.toUpperCase()), 'CANCEL'],
         `Unexpected prompt input for mortgage properties list: ${
           promptStub.getCall(0).args[2]
         }`
@@ -121,7 +121,7 @@ describe('Rules -> MORTGAGE', () => {
       const originalMortgageState = expectedProperty.mortgaged;
 
       const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(expectedProperty.name);
+      promptStub.onCall(0).returns(expectedProperty.name.toUpperCase());
       promptStub.onCall(1).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(expectedProperty.mortgaged).to.equal(
@@ -143,14 +143,14 @@ describe('Rules -> MORTGAGE', () => {
       const originalMortgageState = expectedProperty.mortgaged;
 
       const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(expectedProperty.name);
+      promptStub.onCall(0).returns(expectedProperty.name.toUpperCase());
       promptStub.onCall(1).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(expectedProperty.mortgaged).to.equal(
         originalMortgageState,
         `${inputEvent} was called with valid property without sufficient funds and mortgage was toggled`
       );
-      expect(uiSpy.calledOnce).to.equal(
+      expect(uiSpy.calledOnceWithExactly(gameState.currentPlayer)).to.equal(
         true,
         `UI method for ${inputEvent} was not called although player has insufficient funds`
       );

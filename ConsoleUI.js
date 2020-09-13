@@ -70,6 +70,11 @@ const consoleUI = (function (readline) {
     luxuryTaxPaid: (cost) => {
       console.log(`LUXURY TAX: Paid a total of $${cost}`);
     },
+    playerShortOnFunds: (cashOnHand, price) => {
+      console.log(
+        `💰💰💰: Insufficient funds ($${cashOnHand}) to afford payment ($${price})`
+      );
+    },
   };
 })(require('readline-sync'));
 

@@ -3,7 +3,11 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 const EventEmitter = require('events');
 const { GameState } = require('../entities/GameState');
-const { createPlayerFactory, fillStub } = require('./testutils');
+const {
+  createPlayerFactory,
+  fillStub,
+  createMonopoly,
+} = require('./testutils');
 const mockUIFactory = require('./mocks/UI');
 const Dice = require('../entities/Components/Dice');
 const PlayerActions = require('../entities/PlayerActions');
@@ -581,6 +585,53 @@ describe('main', () => {
         expect(gameState.players[0].position).to.equal(
           10,
           "Player #1's did not go to jail when landing on the Go To Jail property"
+        );
+      }
+    );
+
+    // TODO: hot start
+    it(
+      gwt`cold start | game is loaded | player needs to liquidate to pay fine from jail`,
+      () => {
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+          'PAY_FINE',
+          'MANAGE_PROPERTIES',
+          'MORTGAGE',
+          'MEDITERRANEAN AVENUE',
+          'CANCEL',
+          'CANCEL',
+          'CANCEL',
+          'END_GAME',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [[6], [1]];
+        fillStub(diceStub, diceStubValues);
+
+        gameState.players[0].jailed = 0;
+        gameState.players[0].cash = 20;
+        createMonopoly(gameState, 'Purple', gameState.players[0].id);
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        expect(gameState.turn).equal(0, 'Incorrect turn value');
+        expect(gameState.players[0].cash).to.equal(
+          0,
+          "Player #1's cash was incorrectly fined after mortgaging property"
+        );
+        expect(gameState.players[0].jailed).to.equal(
+          -1,
+          "Player #1's jail status is incorrect"
         );
       }
     );

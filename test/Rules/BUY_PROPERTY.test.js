@@ -32,6 +32,9 @@ describe('Rules -> BUY_PROPERTY', () => {
 
   describe('buyProperty', () => {
     const inputEvent = 'BUY_PROPERTY';
+    const liquidationEvent = 'LIQUIDATION';
+
+    let liquidationStub;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -43,6 +46,10 @@ describe('Rules -> BUY_PROPERTY', () => {
           handler.bind(null, { notify, UI: userInterface }, gameState)
         )
       );
+
+      liquidationStub = sinon.stub();
+
+      eventBus.on(liquidationEvent, liquidationStub);
     });
 
     it('should make a call to the UI#propertyBought', () => {
@@ -79,6 +86,40 @@ describe('Rules -> BUY_PROPERTY', () => {
       expect(property.ownedBy).to.equal(
         gameState.players[0].id,
         `Property ownership was not updated after ${inputEvent} event`
+      );
+    });
+    it('should make a call to the UI#playerShortOnFunds when funds are insufficient', () => {
+      const uiSpy = sinon.spy();
+      userInterface.playerShortOnFunds = uiSpy;
+      const property =
+        gameState.config.propertyConfig.properties[TEST_PROPERTY];
+      gameState.currentBoardProperty = property; // price: 60
+      gameState.currentPlayer.cash = 50;
+      liquidationStub.callsFake(() => {
+        gameState.currentPlayer.cash += 50;
+      });
+
+      eventBus.emit(inputEvent);
+
+      expect(uiSpy.calledOnce).to.equal(
+        true,
+        `UI method for ${inputEvent} with insufficient funds was not called`
+      );
+    });
+    it(`should make a call to the ${liquidationStub} when funds are insufficient`, () => {
+      const property =
+        gameState.config.propertyConfig.properties[TEST_PROPERTY];
+      gameState.currentBoardProperty = property; // price: 60
+      gameState.currentPlayer.cash = 50;
+      liquidationStub.callsFake(() => {
+        gameState.currentPlayer.cash += 50;
+      });
+
+      eventBus.emit(inputEvent);
+
+      expect(liquidationStub.calledOnce).to.equal(
+        true,
+        `${liquidationEvent} event was not called when player with insufficient funds is in ${inputEvent}`
       );
     });
   });
