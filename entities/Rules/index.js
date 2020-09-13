@@ -276,7 +276,9 @@ module.exports = {
   PAY_RENT: [
     ({ UI }, gameState) => {
       const boardProperty = gameState.currentBoardProperty;
-      const owner = gameState.players[boardProperty.ownedBy];
+      const owner = gameState.players.find(
+        (p) => p.id === boardProperty.ownedBy
+      );
 
       const rentAmount = require('../PropertyManagementService').calculateRent(
         gameState,
