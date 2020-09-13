@@ -67,6 +67,9 @@ const consoleUI = (function (readline) {
     incomeTaxPaid: (cost) => {
       console.log(`INCOME TAX: Paid a total of $${cost}`);
     },
+    luxuryTaxPaid: (cost) => {
+      console.log(`LUXURY TAX: Paid a total of $${cost}`);
+    },
   };
 })(require('readline-sync'));
 

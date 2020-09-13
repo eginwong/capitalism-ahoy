@@ -429,6 +429,7 @@ module.exports = {
             gameState.currentPlayer,
             gameState.config.luxuryTaxAmount
           );
+          UI.luxuryTaxPaid(gameState.config.luxuryTaxAmount);
           break;
         default:
           break;
