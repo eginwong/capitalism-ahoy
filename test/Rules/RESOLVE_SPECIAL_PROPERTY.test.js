@@ -95,5 +95,21 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
         `Luxury Tax property did not decrement ${gameState.config.luxuryTaxAmount} from player's cash`
       );
     });
+    it('should make a call to the UI#luxuryTaxPaid', () => {
+      const luxuryTaxProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.id === 'luxurytax'
+      );
+      gameState.currentBoardProperty = luxuryTaxProperty;
+      const uiSpy = sinon.spy();
+      userInterface.luxuryTaxPaid = uiSpy;
+
+      eventBus.emit(inputEvent);
+      expect(
+        uiSpy.calledOnceWithExactly(gameState.config.luxuryTaxAmount)
+      ).to.equal(
+        true,
+        `UI method for ${inputEvent} to display fee was not called`
+      );
+    });
   });
 });

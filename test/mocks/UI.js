@@ -27,5 +27,6 @@ module.exports = function mockUIFactory() {
     noCashMustLiquidate: () => true,
     incomeTaxPayment: () => true,
     incomeTaxPaid: () => true,
+    luxuryTaxPaid: () => true,
   };
 };
