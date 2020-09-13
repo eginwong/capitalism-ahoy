@@ -92,6 +92,30 @@ describe('Rules -> PAY_RENT', () => {
         "Player's cash amount incorrectly decremented in rent exchange"
       );
     });
+    it(`should exchange rent cost between current player and owner when ids are not ordered`, () => {
+      const ownerId = 0;
+      // invert player ids
+      gameState.players.find((p) => p.name === 'player1').id = 1;
+      gameState.players.find((p) => p.name === 'player2').id = 0;
+      const owner = gameState.players.find((p) => p.id === ownerId);
+      const testProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.position === 3
+      );
+      testProperty.ownedBy = ownerId;
+      gameState.currentBoardProperty = testProperty;
+      const startingOwnerCash = owner.cash;
+      const startingPlayerCash = gameState.currentPlayer.cash;
+
+      eventBus.emit(inputEvent);
+      expect(owner.cash).to.equal(
+        startingOwnerCash + testProperty.rent,
+        "Owner's cash amount incorrectly incremented in rent exchange"
+      );
+      expect(gameState.currentPlayer.cash).to.equal(
+        startingPlayerCash - testProperty.rent,
+        "Player's cash amount incorrectly decremented in rent exchange"
+      );
+    });
     describe('common properties', () => {
       it(`should charge rent based on buildings if built on the property`, () => {
         const ownerId = 1;
