@@ -74,6 +74,23 @@ describe('PropertyManagementService', () => {
       );
     });
   });
+  describe('getPropertiesInPropertyGroup', () => {
+    it('should retrieve gameState properties in same property group', () => {
+      const propertyGroup = 'Railroad';
+      const propertiesInGroup = gameState.config.propertyConfig.properties.filter(
+        (p) => p.group === propertyGroup
+      );
+      expect(
+        PropertyManagementService.getPropertiesInPropertyGroup(
+          gameState,
+          propertyGroup
+        )
+      ).to.deep.equal(
+        propertiesInGroup,
+        `Incorrect properties returned from gameState for properties of one property group`
+      );
+    });
+  });
   describe('calculateRent', () => {
     describe('common properties', () => {
       it(`should charge rent based on buildings if built on the property`, () => {
@@ -105,6 +122,21 @@ describe('PropertyManagementService', () => {
           PropertyManagementService.calculateRent(gameState, testProperty)
         ).to.equal(
           testProperty.rent * 2,
+          'Rent incorrectly calculated for common properties with monopoly'
+        );
+      });
+      it(`should not charge monopoly if not all properties owned in group`, () => {
+        const ownerId = 1;
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.position === 3
+        );
+        testProperty.ownedBy = ownerId;
+        gameState.currentBoardProperty = testProperty;
+
+        expect(
+          PropertyManagementService.calculateRent(gameState, testProperty)
+        ).to.equal(
+          testProperty.rent,
           'Rent incorrectly calculated for common properties with monopoly'
         );
       });
@@ -755,6 +787,70 @@ describe('PropertyManagementService', () => {
       expect(
         PropertyManagementService.getDemoProperties(gameState)
       ).to.deep.equal([], 'Properties returned that have 0 buildings');
+    });
+  });
+  describe('getConstructedHouses', () => {
+    it('returns empty array if no buildings are owned', () => {
+      expect(
+        PropertyManagementService.getConstructedHouses(gameState)
+      ).to.equal(0, 'Unexpected houses when no buildings are owned');
+    });
+    it('should return all houses owned across all properties, not including hotels', () => {
+      const propertyGroup1 = 'Light Green';
+      createMonopoly(gameState, propertyGroup1);
+      const propertyGroup2 = 'Purple';
+      createMonopoly(gameState, propertyGroup2);
+      const propertyGroup3 = 'Dark Green';
+      createMonopoly(gameState, propertyGroup3);
+      gameState.config.propertyConfig.properties
+        .filter((p) => p.group === propertyGroup1)
+        .forEach((p) => {
+          p.buildings = 5; // total: 3 * 4 = 12
+        });
+      gameState.config.propertyConfig.properties
+        .filter((p) => p.group === propertyGroup2)
+        .forEach((p) => {
+          p.buildings = 3; // total: 3 * 2 = 6
+        });
+
+      const result = PropertyManagementService.getConstructedHouses(gameState);
+
+      expect(result).to.equal(
+        18,
+        `Constructed houses incorrectly returned: ${result}`
+      );
+    });
+  });
+  describe('getConstructedHotels', () => {
+    it('returns empty array if no hotels are owned', () => {
+      expect(
+        PropertyManagementService.getConstructedHotels(gameState)
+      ).to.equal(0, 'Unexpected hotels when no buildings are owned');
+    });
+    it('should return all houses owned across all properties, not including hotels', () => {
+      const propertyGroup1 = 'Light Green';
+      createMonopoly(gameState, propertyGroup1);
+      const propertyGroup2 = 'Purple';
+      createMonopoly(gameState, propertyGroup2);
+      const propertyGroup3 = 'Dark Green';
+      createMonopoly(gameState, propertyGroup3);
+      gameState.config.propertyConfig.properties
+        .filter((p) => p.group === propertyGroup1)
+        .forEach((p) => {
+          p.buildings = 5; // total: 3 * 1
+        });
+      gameState.config.propertyConfig.properties
+        .filter((p) => p.group === propertyGroup2)
+        .forEach((p) => {
+          p.buildings = 3; // total: 3 * 0
+        });
+
+      const result = PropertyManagementService.getConstructedHotels(gameState);
+
+      expect(result).to.equal(
+        3,
+        `Constructed hotels incorrectly returned: ${result}`
+      );
     });
   });
 });

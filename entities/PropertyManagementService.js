@@ -10,6 +10,11 @@ module.exports = class PropertyManagementService {
     return gameState.config.propertyConfig.properties;
   }
 
+  static getPropertiesInPropertyGroup(gameState, propertyGroup) {
+    const properties = PropertyManagementService.getProperties(gameState);
+    return properties.filter((p) => p.group === propertyGroup);
+  }
+
   static findProperty(gameState, id) {
     return this.getProperties(gameState).find((prop) => prop.id === id);
   }
@@ -212,6 +217,39 @@ module.exports = class PropertyManagementService {
       .value();
 
     return availableDemoProps;
+  }
+
+  // always for current player
+  static getConstructedHouses(gameState) {
+    const {
+      properties,
+      numberOfHousesBeforeHotel,
+      maxBuildingsAllowedOnProperty,
+    } = gameState.config.propertyConfig;
+    const player = gameState.currentPlayer;
+
+    return properties
+      .filter((p) => p.ownedBy === player.id)
+      .filter((p) => p.buildings > 0)
+      .map((p) =>
+        p.buildings === maxBuildingsAllowedOnProperty
+          ? numberOfHousesBeforeHotel
+          : p.buildings
+      )
+      .reduce((prev, curr) => prev + curr, 0);
+  }
+
+  // always for current player
+  static getConstructedHotels(gameState) {
+    const {
+      properties,
+      maxBuildingsAllowedOnProperty,
+    } = gameState.config.propertyConfig;
+    const player = gameState.currentPlayer;
+
+    return properties
+      .filter((p) => p.ownedBy === player.id)
+      .filter((p) => p.buildings === maxBuildingsAllowedOnProperty).length;
   }
 
   // TODO: AUCTION

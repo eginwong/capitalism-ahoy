@@ -27,11 +27,11 @@ describe('Rules -> JAIL_ROLL', () => {
 
   describe('jailRoll', () => {
     const inputEvent = 'JAIL_ROLL';
-    const movePlayerEvent = 'MOVE_PLAYER';
+    const updatePositionWithRollEvent = 'UPDATE_POSITION_WITH_ROLL';
     const payFineEvent = 'PAY_FINE';
 
     let payFineSpy;
-    let movePlayerSpy;
+    let updatePositionWithRollSpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -48,10 +48,10 @@ describe('Rules -> JAIL_ROLL', () => {
         roll: [1, 2],
       };
       payFineSpy = sinon.spy();
-      movePlayerSpy = sinon.spy();
+      updatePositionWithRollSpy = sinon.spy();
 
       eventBus.on(payFineEvent, payFineSpy);
-      eventBus.on(movePlayerEvent, movePlayerSpy);
+      eventBus.on(updatePositionWithRollEvent, updatePositionWithRollSpy);
     });
 
     it('should make a call to the UI#rollJailDice', () => {
@@ -88,14 +88,14 @@ describe('Rules -> JAIL_ROLL', () => {
         `${payFineEvent} event was called`
       );
     });
-    it(`should emit ${movePlayerEvent} event if player is not in jail`, () => {
+    it(`should emit ${updatePositionWithRollEvent} event if player is not in jail`, () => {
       gameState.turnValues = {
         roll: [1, 1],
       };
       eventBus.emit(inputEvent);
-      expect(movePlayerSpy.callCount).to.equal(
+      expect(updatePositionWithRollSpy.callCount).to.equal(
         1,
-        `${movePlayerEvent} event was not called`
+        `${updatePositionWithRollEvent} event was not called`
       );
     });
   });

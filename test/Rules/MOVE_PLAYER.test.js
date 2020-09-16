@@ -71,7 +71,7 @@ describe('Rules -> MOVE_PLAYER', () => {
     });
 
     it('should set gameState current board property', () => {
-      gameState.currentPlayer.position = 10;
+      gameState.currentPlayer.position = 13;
       const uiSpy = sinon.spy();
       userInterface.playerMovement = uiSpy;
       eventBus.emit(inputEvent);
@@ -94,7 +94,7 @@ describe('Rules -> MOVE_PLAYER', () => {
       );
     });
     it('should make a call to the UI#playerMovement', () => {
-      gameState.currentPlayer.position = 10;
+      gameState.currentPlayer.position = 13;
       const uiSpy = sinon.spy();
       userInterface.playerMovement = uiSpy;
       eventBus.emit(inputEvent);
@@ -117,7 +117,7 @@ describe('Rules -> MOVE_PLAYER', () => {
       );
     });
     it('should emit pass go when player wraps around board', () => {
-      gameState.currentPlayer.position = 39;
+      gameState.currentPlayer.position = 42;
       eventBus.emit(inputEvent);
       expect(gameState.currentPlayer.position).to.equal(
         2,
@@ -142,6 +142,11 @@ describe('Rules -> MOVE_PLAYER', () => {
       );
     });
     it(`should emit ${resolveNewPropertyEvent} event if property is not owned`, () => {
+      const testProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.position === 3
+      );
+      gameState.currentPlayer.position = testProperty.position;
+
       eventBus.emit(inputEvent);
       expect(resolveNewPropertySpy.callCount).to.equal(
         1,
@@ -149,7 +154,12 @@ describe('Rules -> MOVE_PLAYER', () => {
       );
     });
     it(`should not emit ${resolveNewPropertyEvent} event if property is owned`, () => {
-      gameState.config.propertyConfig.properties[1].ownedBy = 0;
+      const testProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.position === 3
+      );
+      testProperty.ownedBy = 1;
+      gameState.currentPlayer.position = testProperty.position;
+
       eventBus.emit(inputEvent);
       expect(resolveNewPropertySpy.callCount).to.equal(
         0,
@@ -161,6 +171,8 @@ describe('Rules -> MOVE_PLAYER', () => {
         (p) => p.position === defaultTurnValMovement
       );
       testProperty.ownedBy = 1;
+      gameState.currentPlayer.position = testProperty.position;
+
       eventBus.emit(inputEvent);
       expect(payRentSpy.callCount).to.equal(
         1,
@@ -172,6 +184,7 @@ describe('Rules -> MOVE_PLAYER', () => {
         (p) => p.position === defaultTurnValMovement
       );
       testProperty.ownedBy = gameState.currentPlayer.id;
+      gameState.currentPlayer.position = testProperty.position;
       eventBus.emit(inputEvent);
       expect(payRentSpy.callCount).to.equal(
         0,
@@ -183,6 +196,7 @@ describe('Rules -> MOVE_PLAYER', () => {
         (p) => p.position === defaultTurnValMovement
       );
       testProperty.mortgaged = true;
+      gameState.currentPlayer.position = testProperty.position;
       eventBus.emit(inputEvent);
       expect(payRentSpy.callCount).to.equal(
         0,
@@ -216,6 +230,9 @@ describe('Rules -> MOVE_PLAYER', () => {
       );
     });
     it(`should not emit ${resolveSpecialPropertyEvent} event if property is not special`, () => {
+      gameState.currentPlayer.position = gameState.config.propertyConfig.properties.find(
+        (p) => p.group !== 'Special'
+      ).position;
       eventBus.emit(inputEvent);
       expect(resolveSpecialPropertySpy.callCount).to.equal(
         0,
