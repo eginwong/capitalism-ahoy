@@ -88,7 +88,7 @@ module.exports = {
       if (gameState.turnValues.speedingCounter > 2) {
         notify('SPEEDING');
       } else {
-        notify('MOVE_PLAYER');
+        notify('UPDATE_POSITION_WITH_ROLL');
       }
     },
   ],
@@ -108,18 +108,22 @@ module.exports = {
     },
     ({ notify }, gameState) => {
       if (gameState.currentPlayer.jailed === -1) {
-        notify('MOVE_PLAYER');
+        notify('UPDATE_POSITION_WITH_ROLL');
       }
     },
   ],
-  MOVE_PLAYER: [
-    // update position first
+  UPDATE_POSITION_WITH_ROLL: [
     ({ notify }, gameState) => {
       gameState.currentPlayer.position += gameState.turnValues.roll.reduce(
         (acc, val) => acc + val,
         0
       );
-
+      notify('MOVE_PLAYER');
+    },
+  ],
+  MOVE_PLAYER: [
+    // update position first
+    ({ notify }, gameState) => {
       const currentPlayerBoardPosition = require('../BoardService').normalizePlayerBoardPosition(
         gameState
       );
@@ -377,6 +381,7 @@ module.exports = {
         [...mortgageAbleProps.map((p) => p.name.toUpperCase()), 'CANCEL']
       );
 
+      // TODO: DISPLAY DIFFERENTLY IF MORTGAGED OR NOT
       if (propSelection === 'CANCEL') return;
 
       if (propSelection) {

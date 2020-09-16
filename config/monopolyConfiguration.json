@@ -465,8 +465,8 @@
       },
       {
         "title": "Get out of Jail Free - This card may be kept until needed, or traded/sold",
-        "action": "jail",
-        "subaction": "getout"
+        "action": "getoutofjailfree",
+        "ownedBy": -1
       },
       {
         "title": "Go Back 3 Spaces",
@@ -475,8 +475,7 @@
       },
       {
         "title": "Go to Jail - Go directly to Jail - Do not pass Go, do not collect $200",
-        "action": "jail",
-        "subaction": "goto"
+        "action": "jail"
       },
       {
         "title": "Make general repairs on all your property - For each house pay $25 - For each hotel $100",
@@ -535,13 +534,12 @@
       },
       {
         "title": "Get Out of Jail Free",
-        "action": "jail",
-        "subaction": "getout"
+        "action": "getoutofjailfree",
+        "ownedBy": -1
       },
       {
         "title": "Go to Jail - Go directly to jail - Do not pass Go - Do not collect $200",
-        "action": "jail",
-        "subaction": "goto"
+        "action": "jail"
       },
       {
         "title": "Grand Opera Night - Collect $50 from every player for opening night seats",

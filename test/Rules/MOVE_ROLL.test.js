@@ -28,11 +28,11 @@ describe('Rules -> MOVE_ROLL', () => {
   describe('moveRoll', () => {
     const inputEvent = 'MOVE_ROLL';
     const turnValuesUpdatedEvent = 'TURN_VALUES_UPDATED';
-    const movePlayerEvent = 'MOVE_PLAYER';
+    const updatePositionWithRollEvent = 'UPDATE_POSITION_WITH_ROLL';
     const speedingEvent = 'SPEEDING';
 
     let speedingSpy;
-    let movePlayerSpy;
+    let updatePositionWithRollSpy;
     let turnValuesUpdatedSpy;
 
     beforeEach(() => {
@@ -52,11 +52,11 @@ describe('Rules -> MOVE_ROLL', () => {
 
       speedingSpy = sinon.spy();
       turnValuesUpdatedSpy = sinon.spy();
-      movePlayerSpy = sinon.spy();
+      updatePositionWithRollSpy = sinon.spy();
 
       eventBus.on(speedingEvent, speedingSpy);
       eventBus.on(turnValuesUpdatedEvent, turnValuesUpdatedSpy);
-      eventBus.on(movePlayerEvent, movePlayerSpy);
+      eventBus.on(updatePositionWithRollEvent, updatePositionWithRollSpy);
     });
 
     it('should make a call to the UI#rollNormalDice', () => {
@@ -118,22 +118,22 @@ describe('Rules -> MOVE_ROLL', () => {
         `${speedingEvent} event was called`
       );
     });
-    it(`should emit ${movePlayerEvent} event if player is not caught speeding`, () => {
+    it(`should emit ${updatePositionWithRollEvent} event if player is not caught speeding`, () => {
       eventBus.emit(inputEvent);
-      expect(movePlayerSpy.callCount).to.equal(
+      expect(updatePositionWithRollSpy.callCount).to.equal(
         1,
-        `${movePlayerEvent} event was not called`
+        `${updatePositionWithRollEvent} event was not called`
       );
     });
-    it(`should not emit ${movePlayerEvent} event if player is caught speeding`, () => {
+    it(`should not emit ${updatePositionWithRollEvent} event if player is caught speeding`, () => {
       gameState.turnValues = {
         roll: [1, 1],
         speedingCounter: 2,
       };
       eventBus.emit(inputEvent);
-      expect(movePlayerSpy.callCount).to.equal(
+      expect(updatePositionWithRollSpy.callCount).to.equal(
         0,
-        `${movePlayerEvent} event was called`
+        `${updatePositionWithRollEvent} event was called`
       );
     });
   });
