@@ -32,9 +32,13 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
     const inputEvent = 'RESOLVE_SPECIAL_PROPERTY';
     const jailEvent = 'JAIL';
     const incomeTaxEvent = 'INCOME_TAX';
+    const chanceEvent = 'CHANCE';
+    const communityChestEvent = 'COMMUNITY_CHEST';
 
     let jailSpy;
     let incomeTaxSpy;
+    let chanceSpy;
+    let communityChestSpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -48,22 +52,53 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
       );
       jailSpy = sinon.spy();
       incomeTaxSpy = sinon.spy();
+      chanceSpy = sinon.spy();
+      communityChestSpy = sinon.spy();
 
       eventBus.on(jailEvent, jailSpy);
       eventBus.on(incomeTaxEvent, incomeTaxSpy);
+      eventBus.on(chanceEvent, chanceSpy);
+      eventBus.on(communityChestEvent, communityChestSpy);
     });
 
     it(`should emit ${jailEvent} event if special property is go to jail`, () => {
-      const goToJailProperty = gameState.config.propertyConfig.properties.find(
+      const property = gameState.config.propertyConfig.properties.find(
         (p) => p.id === 'gotojail'
       );
-      gameState.currentBoardProperty = goToJailProperty;
+      gameState.currentBoardProperty = property;
 
       eventBus.emit(inputEvent);
 
       expect(jailSpy.calledOnce).to.equal(
         true,
         `Go to Jail property did not emit ${jailEvent}`
+      );
+    });
+
+    it(`should emit ${chanceEvent} event if special property is chance`, () => {
+      const property = gameState.config.propertyConfig.properties.find(
+        (p) => p.id === 'chance1'
+      );
+      gameState.currentBoardProperty = property;
+
+      eventBus.emit(inputEvent);
+
+      expect(chanceSpy.calledOnce).to.equal(
+        true,
+        `Chance property did not emit ${chanceEvent}`
+      );
+    });
+    it(`should emit ${communityChestEvent} event if special property is communityChest`, () => {
+      const property = gameState.config.propertyConfig.properties.find(
+        (p) => p.id === 'communitychest1'
+      );
+      gameState.currentBoardProperty = property;
+
+      eventBus.emit(inputEvent);
+
+      expect(communityChestSpy.calledOnce).to.equal(
+        true,
+        `Community Chest property did not emit ${communityChestEvent}`
       );
     });
 

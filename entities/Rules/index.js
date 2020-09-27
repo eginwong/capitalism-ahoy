@@ -412,8 +412,10 @@ module.exports = {
     ({ UI, notify }, gameState) => {
       const boardProperty = gameState.currentBoardProperty;
       if (boardProperty.id.includes('chance')) {
+        notify('CHANCE');
       }
       if (boardProperty.id.includes('communitychest')) {
+        notify('COMMUNITY_CHEST');
       }
       switch (boardProperty.id) {
         case 'incometax':

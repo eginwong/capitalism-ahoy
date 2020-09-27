@@ -439,7 +439,7 @@
       {
         "title": "Advance to Illinois Avenue - If you pass Go, collect $200",
         "action": "move",
-        "tileid": "illinoiseave"
+        "tileid": "illinoisave"
       },
       {
         "title": "Advance to St. Charles Place - If you pass Go, collect $200",
@@ -465,8 +465,7 @@
       },
       {
         "title": "Get out of Jail Free - This card may be kept until needed, or traded/sold",
-        "action": "getoutofjailfree",
-        "ownedBy": -1
+        "action": "getoutofjailfree"
       },
       {
         "title": "Go Back 3 Spaces",
@@ -508,7 +507,8 @@
         "action": "addfunds",
         "amount": 50
       }
-    ]
+    ],
+    "discardedCards": []
   },
   "communityChestConfig": {
     "availableCards": [
@@ -592,6 +592,7 @@
         "action": "addfunds",
         "amount": 100
       }
-    ]
+    ],
+    "discardedCards": []
   }
 }

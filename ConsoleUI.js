@@ -75,6 +75,8 @@ const consoleUI = (function (readline) {
         `💰💰💰: Insufficient funds ($${cashOnHand}) to afford payment ($${price})`
       );
     },
+    drewCard: (type, { title }) =>
+      console.log(`${type.toUpperCase()}: ${title}`),
   };
 })(require('readline-sync'));
 
