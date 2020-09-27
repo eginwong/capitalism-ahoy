@@ -83,6 +83,32 @@ describe('PlayerActions', () => {
         );
       });
     });
+    describe('USE_GET_OUT_OF_JAIL_FREE_CARD', () => {
+      it('returns if player is in jail and has a card with action getoutofjailfree', () => {
+        gameState.currentPlayer.jailed = 0;
+        gameState.currentPlayer.cards = [
+          gameState.config.chanceConfig.availableCards.find(
+            (c) => c.action === 'getoutofjailfree'
+          ),
+        ];
+        expect(PlayerActions.refresh(gameState)).to.contain(
+          'USE_GET_OUT_OF_JAIL_FREE_CARD',
+          'Get Out of Jail Free action is unavailable'
+        );
+      });
+      it('does not return if player is in jail without a card with action getoutofjailfree', () => {
+        expect(PlayerActions.refresh(gameState)).not.to.contain(
+          'USE_GET_OUT_OF_JAIL_FREE_CARD',
+          'Get Out of Jail Free action is available'
+        );
+      });
+      it('does not return if player is not in jail', () => {
+        expect(PlayerActions.refresh(gameState)).not.to.contain(
+          'USE_GET_OUT_OF_JAIL_FREE_CARD',
+          'Get Out of Jail Free action is available'
+        );
+      });
+    });
     describe('PAY_FINE', () => {
       it('returns if player is in jail', () => {
         gameState.currentPlayer.jailed = 0;

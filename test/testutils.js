@@ -9,7 +9,7 @@ module.exports = {
         jailed: -1,
         cash: 1500,
         assets: 0,
-        getOutOfJailFreeCards: 0,
+        cards: [],
       };
     }
 

@@ -29,5 +29,6 @@ module.exports = function mockUIFactory() {
     incomeTaxPaid: () => true,
     luxuryTaxPaid: () => true,
     playerShortOnFunds: () => true,
+    drewCard: () => true,
   };
 };

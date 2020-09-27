@@ -8,7 +8,9 @@ const { getProperties } = require('./PropertyManagementService');
 const ACTIONS = {
   ROLL_DICE: (gameState) =>
     !gameState.turnValues.roll || gameState.turnValues.speedingCounter > 0,
-  // USE_GET_OUT_OF_JAIL_CARD,
+  USE_GET_OUT_OF_JAIL_FREE_CARD: (gameState) =>
+    gameState.currentPlayer.jailed >= 0 &&
+    gameState.currentPlayer.cards.some((c) => c.action === 'getoutofjailfree'),
   PAY_FINE: (gameState) => gameState.currentPlayer.jailed >= 0,
   END_TURN: (gameState) =>
     !!gameState.turnValues.roll && gameState.turnValues.speedingCounter === 0,
