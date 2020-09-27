@@ -12,7 +12,9 @@ module.exports = class PropertyManagementService {
 
   static getPropertiesInPropertyGroup(gameState, propertyGroup) {
     const properties = PropertyManagementService.getProperties(gameState);
-    return properties.filter((p) => p.group === propertyGroup);
+    return properties.filter(
+      (p) => p.group.toUpperCase() === propertyGroup.toUpperCase()
+    );
   }
 
   static findProperty(gameState, id) {

@@ -90,6 +90,21 @@ describe('PropertyManagementService', () => {
         `Incorrect properties returned from gameState for properties of one property group`
       );
     });
+    it('should retrieve gameState properties in same property group, case-insensitive', () => {
+      const propertyGroup = 'railroad';
+      const propertiesInGroup = gameState.config.propertyConfig.properties.filter(
+        (p) => p.group.toUpperCase() === propertyGroup.toUpperCase()
+      );
+      expect(
+        PropertyManagementService.getPropertiesInPropertyGroup(
+          gameState,
+          propertyGroup
+        )
+      ).to.deep.equal(
+        propertiesInGroup,
+        `Incorrect properties returned from gameState for properties of one property group`
+      );
+    });
   });
   describe('calculateRent', () => {
     describe('common properties', () => {

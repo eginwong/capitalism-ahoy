@@ -498,6 +498,105 @@ module.exports = {
       notify('LIQUIDATION');
     },
   ],
+  CHANCE: [
+    ({ UI, notify }, gameState) => {
+      const { draw, replaceAvailableCards } = require('../Components/Deck');
+      const pmsService = require('../PropertyManagementService');
+      const wealthService = require('../WealthService');
+      const player = gameState.currentPlayer;
+      let cardConfig = gameState.config.chanceConfig;
+      if (cardConfig.availableCards.length === 0) {
+        cardConfig = replaceAvailableCards(cardConfig);
+      }
+      const { card, deck } = draw(cardConfig.availableCards);
+      cardConfig.availableCards = deck;
+
+      UI.drewCard('chance', card);
+
+      // do the action
+      if (card.action === 'getoutofjailfree') {
+        player.cards.push(card);
+        return;
+      }
+
+      switch (card.action) {
+        case 'move': {
+          let position = 0;
+          if (card.tileid) {
+            const targetPosition = pmsService.findProperty(
+              gameState,
+              card.tileid
+            ).position;
+            position =
+              targetPosition > player.position
+                ? targetPosition
+                : targetPosition + pmsService.getProperties(gameState).length;
+          }
+
+          if (card.count) {
+            position = player.position + card.count;
+          }
+          player.position = position;
+
+          notify('MOVE_PLAYER');
+          break;
+        }
+        case 'movenearest': {
+          let position = 0;
+          const targetPosition = require('../BoardService').nearestPropertyByGroupToPlayer(
+            gameState,
+            card.groupid
+          ).position;
+          position =
+            targetPosition > player.position
+              ? targetPosition
+              : targetPosition + pmsService.getProperties(gameState).length;
+          player.position = position;
+
+          require('./updateTurnValues')({
+            rentMultiplier: card.rentmultiplier,
+          })(gameState);
+          notify('TURN_VALUES_UPDATED');
+
+          notify('MOVE_PLAYER');
+          break;
+        }
+        case 'addfunds': {
+          wealthService.increment(player, card.amount);
+          break;
+        }
+        case 'jail': {
+          notify('JAIL');
+          break;
+        }
+        case 'propertycharges': {
+          // TODO: check liquidation
+          const houses = pmsService.getConstructedHouses(gameState);
+          const hotels = pmsService.getConstructedHotels(gameState);
+          wealthService.decrement(
+            player,
+            houses * card.buildings + hotels * card.hotels
+          );
+          break;
+        }
+        case 'removefunds': {
+          // TODO: check liquidation
+          wealthService.decrement(player, card.amount);
+          break;
+        }
+        case 'removefundstoplayers': {
+          // TODO: check liquidation
+          for (let i = 0; i < gameState.players.length; i++) {
+            if (gameState.players[i].id !== player.id) {
+              wealthService.exchange(player, gameState.players[i], card.amount);
+            }
+          }
+          break;
+        }
+      }
+      require('../Components/Deck').discard(card, cardConfig.discardedCards);
+    },
+  ],
   //   TRADE,
   //   BANKRUPTCY: () => gameState.currentPlayerActions["END_TURN"].execute(),
   //   // potentially Chance/Community Cards
