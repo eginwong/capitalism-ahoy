@@ -10,6 +10,7 @@ const {
 } = require('./testutils');
 const mockUIFactory = require('./mocks/UI');
 const Dice = require('../entities/Components/Dice');
+const Deck = require('../entities/Components/Deck');
 const PlayerActions = require('../entities/PlayerActions');
 const config = require('../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
@@ -283,6 +284,12 @@ describe('main', () => {
         ];
         fillStub(diceStub, diceStubValues);
 
+        const expectedCard = gameState.config.chanceConfig.availableCards.find(
+          (c) => c.action === 'getoutofjailfree'
+        );
+        const deckDrawStub = sinon.stub(Deck, 'draw');
+        deckDrawStub.returns({ card: expectedCard, deck: [] });
+
         require('../entities/Game')({
           eventBus,
           userInterface,
@@ -353,6 +360,12 @@ describe('main', () => {
           [3, 4], // p2: jail 3, community chest
         ];
         fillStub(diceStub, diceStubValues);
+
+        const expectedCard = gameState.config.chanceConfig.availableCards.find(
+          (c) => c.action === 'addfunds'
+        );
+        const deckDrawStub = sinon.stub(Deck, 'draw');
+        deckDrawStub.returns({ card: expectedCard, deck: [] });
 
         require('../entities/Game')({
           eventBus,
@@ -485,6 +498,12 @@ describe('main', () => {
           [4, 4], // p1: speeding
         ];
         fillStub(diceStub, diceStubValues);
+
+        const expectedCard = gameState.config.chanceConfig.availableCards.find(
+          (c) => c.action === 'getoutofjailfree'
+        );
+        const deckDrawStub = sinon.stub(Deck, 'draw');
+        deckDrawStub.returns({ card: expectedCard, deck: [] });
 
         // begin player1 partway through the board
         gameState.players[0].position = 34;
