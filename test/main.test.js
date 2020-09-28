@@ -225,6 +225,12 @@ describe('main', () => {
       ];
       fillStub(diceStub, diceStubValues);
 
+      const expectedCard = gameState.config.chanceConfig.availableCards.find(
+        (c) => c.action === 'getoutofjailfree'
+      );
+      const deckDrawStub = sinon.stub(Deck, 'draw');
+      deckDrawStub.returns({ card: expectedCard, deck: [] });
+
       require('../entities/Game')({
         eventBus,
         userInterface,
@@ -357,15 +363,31 @@ describe('main', () => {
           [1, 2], // p2: chance
           [1, 2], // p1: jail 2
           [1, 2], // p2: visiting jail
-          [3, 4], // p2: jail 3, community chest
+          [3, 4], // p1: jail 3, community chest
         ];
         fillStub(diceStub, diceStubValues);
 
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
+        const deckDrawStub = sinon.stub(Deck, 'draw');
+        const expectedChanceCard = gameState.config.chanceConfig.availableCards.find(
           (c) => c.action === 'addfunds'
         );
-        const deckDrawStub = sinon.stub(Deck, 'draw');
-        deckDrawStub.returns({ card: expectedCard, deck: [] });
+
+        const expectedCommunityCard1 = gameState.config.chanceConfig.availableCards.find(
+          (c) => c.action === 'getoutofjailfree'
+        );
+        const expectedCommunityCard2 = gameState.config.chanceConfig.availableCards.find(
+          (c) => c.action === 'addfunds' && c.title.includes('$50')
+        );
+        deckDrawStub
+          .onCall(0)
+          .returns({
+            card: expectedCommunityCard1,
+            deck: [expectedCommunityCard2],
+          });
+        deckDrawStub.onCall(1).returns({ card: expectedChanceCard, deck: [] });
+        deckDrawStub
+          .onCall(2)
+          .returns({ card: expectedCommunityCard2, deck: [] });
 
         require('../entities/Game')({
           eventBus,
@@ -375,7 +397,7 @@ describe('main', () => {
 
         expect(gameState.turn).equal(6, 'Incorrect turn value');
         expect(gameState.players[0].cash).to.equal(
-          1500 - config.fineAmount - config.incomeTaxAmount,
+          1500 - config.fineAmount - config.incomeTaxAmount + 50,
           "Player #1's cash does not account for fine, and income tax"
         );
       }
@@ -454,6 +476,12 @@ describe('main', () => {
         ];
         fillStub(diceStub, diceStubValues);
 
+        const expectedCard = gameState.config.chanceConfig.availableCards.find(
+          (c) => c.action === 'addfunds' && c.title.includes('$50')
+        );
+        const deckDrawStub = sinon.stub(Deck, 'draw');
+        deckDrawStub.returns({ card: expectedCard, deck: [] });
+
         require('../entities/Game')({
           eventBus,
           userInterface,
@@ -462,7 +490,7 @@ describe('main', () => {
 
         expect(gameState.turn).equal(3, 'Incorrect turn value');
         expect(gameState.players[0].cash).to.equal(
-          1350 - config.incomeTaxAmount,
+          1350 + 50 - config.incomeTaxAmount,
           "Player #1's cash was incorrectly fined + income tax amount"
         );
         expect(gameState.players[0].position).to.equal(
