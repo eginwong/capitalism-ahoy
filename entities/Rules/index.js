@@ -12,6 +12,15 @@ module.exports = {
       require('./highestRollingPlayerGoesFirst')({ notify, UI }, gameState);
       notify('PLAYER_ORDER_CHANGED');
     },
+    ({}, gameState) => {
+      const { chanceConfig, communityChestConfig } = gameState.config;
+      chanceConfig.availableCards = require('../Components/Deck').shuffle(
+        chanceConfig.availableCards
+      );
+      communityChestConfig.availableCards = require('../Components/Deck').shuffle(
+        communityChestConfig.availableCards
+      );
+    },
     ({ notify }) => notify('START_TURN'),
   ],
   START_TURN: [

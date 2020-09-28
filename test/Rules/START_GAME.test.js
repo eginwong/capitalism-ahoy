@@ -4,7 +4,10 @@ const sinon = require('sinon');
 const mockUIFactory = require('../mocks/UI');
 
 const { GameState } = require('../../entities/GameState');
+const config = require('../../config/monopolyConfiguration');
+const Deck = require('../../entities/Components/Deck');
 const { createPlayerFactory } = require('../testutils');
+const { cloneDeep } = require('lodash');
 
 describe('Rules -> START_GAME', () => {
   let gameState;
@@ -18,6 +21,7 @@ describe('Rules -> START_GAME', () => {
     userInterface = mockUIFactory();
     let createPlayer = createPlayerFactory();
     gameState.players = [createPlayer({ name: 'player1' })];
+    gameState.config = cloneDeep(config);
   });
 
   afterEach(() => {
@@ -42,6 +46,17 @@ describe('Rules -> START_GAME', () => {
       );
       outputSpy = sinon.spy();
       eventBus.on(outputEvent, outputSpy);
+    });
+
+    it('should shuffle chance and community chest cards', () => {
+      const deckShuffleSpy = sinon.spy(Deck, 'shuffle');
+
+      eventBus.emit(inputEvent);
+
+      expect(deckShuffleSpy.callCount).to.equal(
+        2,
+        'Chance and Community Chest cards were not shuffled to begin the game'
+      );
     });
 
     it(`should emit ${outputEvent} event`, () => {
