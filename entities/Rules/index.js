@@ -277,6 +277,9 @@ module.exports = {
         (p) => p.id === boardProperty.ownedBy
       );
 
+      // TODO: check turnvalue multiplier if it exists?
+      // AND for temporary utilities roll, can probably overwrite directly because roll is not used after
+      // for chance cards
       const rentAmount = require('../PropertyManagementService').calculateRent(
         gameState,
         boardProperty
@@ -428,6 +431,7 @@ module.exports = {
           // potentially entering negative wealth here, will be resolved in subsequent rule
           // TODO: WEALTHSERVICE: Check Liquidity
           // TODO: add bankruptcy check to explain what will happen
+          // TODO: create a separate rule to handle decrement + liquidity and bankruptcy
           require('../WealthService').decrement(
             gameState.currentPlayer,
             gameState.config.luxuryTaxAmount
@@ -597,7 +601,84 @@ module.exports = {
       require('../Components/Deck').discard(card, cardConfig.discardedCards);
     },
   ],
+  COMMUNITY_CHEST: [
+    ({ UI, notify }, gameState) => {
+      const { draw, replaceAvailableCards } = require('../Components/Deck');
+      const pmsService = require('../PropertyManagementService');
+      const wealthService = require('../WealthService');
+      let cardConfig = gameState.config.communityChestConfig;
+      const player = gameState.currentPlayer;
+
+      if (cardConfig.availableCards.length === 0) {
+        cardConfig = replaceAvailableCards(cardConfig);
+      }
+      const { card, deck } = draw(cardConfig.availableCards);
+      cardConfig.availableCards = deck;
+
+      UI.drewCard('community chest', card);
+
+      // do the action
+      if (card.action === 'getoutofjailfree') {
+        gameState.currentPlayer.cards.push(card);
+        return;
+      }
+
+      switch (card.action) {
+        case 'move': {
+          let position = 0;
+          if (card.tileid) {
+            const targetPosition = pmsService.findProperty(
+              gameState,
+              card.tileid
+            ).position;
+            position =
+              targetPosition + pmsService.getProperties(gameState).length;
+          }
+
+          if (card.count) {
+            position = player.position + card.count;
+          }
+          player.position = position;
+
+          notify('MOVE_PLAYER');
+          break;
+        }
+        case 'addfunds': {
+          wealthService.increment(player, card.amount);
+          break;
+        }
+        case 'jail': {
+          notify('JAIL');
+          break;
+        }
+        case 'propertycharges': {
+          // TODO: check liquidation
+          const houses = pmsService.getConstructedHouses(gameState);
+          const hotels = pmsService.getConstructedHotels(gameState);
+          wealthService.decrement(
+            player,
+            houses * card.buildings + hotels * card.hotels
+          );
+          break;
+        }
+        case 'removefunds': {
+          // TODO: check liquidation
+          wealthService.decrement(player, card.amount);
+          break;
+        }
+        case 'addfundsfromplayers': {
+          // TODO: check liquidation
+          for (let i = 0; i < gameState.players.length; i++) {
+            if (gameState.players[i].id !== player.id) {
+              wealthService.exchange(gameState.players[i], player, card.amount);
+            }
+          }
+          break;
+        }
+      }
+      require('../Components/Deck').discard(card, cardConfig.discardedCards);
+    },
+  ],
   //   TRADE,
   //   BANKRUPTCY: () => gameState.currentPlayerActions["END_TURN"].execute(),
-  //   // potentially Chance/Community Cards
 };

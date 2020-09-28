@@ -534,8 +534,7 @@
       },
       {
         "title": "Get Out of Jail Free",
-        "action": "getoutofjailfree",
-        "ownedBy": -1
+        "action": "getoutofjailfree"
       },
       {
         "title": "Go to Jail - Go directly to jail - Do not pass Go - Do not collect $200",
