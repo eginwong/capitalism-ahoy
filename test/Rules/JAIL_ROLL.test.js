@@ -88,6 +88,14 @@ describe('Rules -> JAIL_ROLL', () => {
         `${payFineEvent} event was called`
       );
     });
+    it('should enforce pay fine if jailed counter is greater than 2', () => {
+      gameState.currentPlayer.jailed = 3;
+      eventBus.emit(inputEvent);
+      expect(payFineSpy.callCount).to.equal(
+        1,
+        `${payFineEvent} event was called`
+      );
+    });
     it(`should emit ${updatePositionWithRollEvent} event if player is not in jail`, () => {
       gameState.turnValues = {
         roll: [1, 1],

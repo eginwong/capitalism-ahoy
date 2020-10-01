@@ -637,20 +637,11 @@ module.exports = {
 
       switch (card.action) {
         case 'move': {
-          let position = 0;
-          if (card.tileid) {
-            const targetPosition = pmsService.findProperty(
-              gameState,
-              card.tileid
-            ).position;
-            position =
-              targetPosition + pmsService.getProperties(gameState).length;
-          }
-
-          if (card.count) {
-            position = player.position + card.count;
-          }
-          player.position = position;
+          const targetPosition = pmsService.findProperty(gameState, card.tileid)
+            .position;
+          const finalPosition =
+            targetPosition + pmsService.getProperties(gameState).length;
+          player.position = finalPosition;
 
           notify('MOVE_PLAYER');
           break;
