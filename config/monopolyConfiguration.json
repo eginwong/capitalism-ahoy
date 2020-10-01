@@ -465,7 +465,8 @@
       },
       {
         "title": "Get out of Jail Free - This card may be kept until needed, or traded/sold",
-        "action": "getoutofjailfree"
+        "action": "getoutofjailfree",
+        "type": "chance"
       },
       {
         "title": "Go Back 3 Spaces",
@@ -534,7 +535,8 @@
       },
       {
         "title": "Get Out of Jail Free",
-        "action": "getoutofjailfree"
+        "action": "getoutofjailfree",
+        "type": "communitychest"
       },
       {
         "title": "Go to Jail - Go directly to jail - Do not pass Go - Do not collect $200",

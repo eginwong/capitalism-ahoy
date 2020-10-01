@@ -77,6 +77,10 @@ const consoleUI = (function (readline) {
     },
     drewCard: (type, { title }) =>
       console.log(`${type.toUpperCase()}: ${title}`),
+    getOutOfJailFreeCardUsed: () =>
+      console.log(
+        'GET OUT OF JAIL FREE: Card was used and returned to the discard deck.'
+      ),
   };
 })(require('readline-sync'));
 
