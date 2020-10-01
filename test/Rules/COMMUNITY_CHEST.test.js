@@ -101,7 +101,6 @@ describe('Rules -> COMMUNITY_CHEST', () => {
         (c) => c.action === 'getoutofjailfree'
       );
       const deckDrawStub = sinon.stub(Deck, 'draw');
-      const deckDiscardSpy = sinon.spy(Deck, 'discard');
       deckDrawStub.returns({ card: expectedCard, deck: [] });
 
       eventBus.emit(inputEvent);
@@ -110,22 +109,25 @@ describe('Rules -> COMMUNITY_CHEST', () => {
         expectedCard,
         `${inputEvent} did not add the get out of jail free card to the current player's cards`
       );
-      expect(deckDiscardSpy.callCount).to.equal(
-        0,
-        `${inputEvent} for get out of jail free card did not discard the card immediately`
+      expect(
+        gameState.config.communityChestConfig.discardedCards
+      ).to.deep.equal(
+        [],
+        `${inputEvent} for get out of jail free card discarded the card immediately`
       );
     });
     it('should discard card if not getoutofjailfree', () => {
       const expectedCard = gameState.config.communityChestConfig.availableCards.find(
         (c) => c.action === 'move'
       );
-      const deckDiscardSpy = sinon.spy(Deck, 'discard');
       sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
 
       eventBus.emit(inputEvent);
 
-      expect(deckDiscardSpy.calledOnce).to.equal(
-        true,
+      expect(
+        gameState.config.communityChestConfig.discardedCards
+      ).to.deep.equal(
+        [expectedCard],
         `${inputEvent} did not discard the card immediately`
       );
     });

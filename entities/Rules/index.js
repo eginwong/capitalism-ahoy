@@ -12,7 +12,7 @@ module.exports = {
       require('./highestRollingPlayerGoesFirst')({ notify, UI }, gameState);
       notify('PLAYER_ORDER_CHANGED');
     },
-    ({}, gameState) => {
+    (_, gameState) => {
       const { chanceConfig, communityChestConfig } = gameState.config;
       chanceConfig.availableCards = require('../Components/Deck').shuffle(
         chanceConfig.availableCards
@@ -607,7 +607,10 @@ module.exports = {
           break;
         }
       }
-      require('../Components/Deck').discard(card, cardConfig.discardedCards);
+      cardConfig.discardedCards = require('../Components/Deck').discard(
+        card,
+        cardConfig.discardedCards
+      );
     },
   ],
   COMMUNITY_CHEST: [
@@ -685,7 +688,31 @@ module.exports = {
           break;
         }
       }
-      require('../Components/Deck').discard(card, cardConfig.discardedCards);
+      cardConfig.discardedCards = require('../Components/Deck').discard(
+        card,
+        cardConfig.discardedCards
+      );
+    },
+  ],
+  USE_GET_OUT_OF_JAIL_FREE_CARD: [
+    ({ UI }) => UI.getOutOfJailFreeCardUsed(),
+    (_, gameState) => {
+      gameState.currentPlayer.jailed = -1;
+      const card = gameState.currentPlayer.cards.pop();
+      const { chanceConfig, communityChestConfig } = gameState.config;
+
+      if (card.type === 'chance') {
+        chanceConfig.discardedCards = require('../Components/Deck').discard(
+          card,
+          chanceConfig.discardedCards
+        );
+      }
+      if (card.type === 'communitychest') {
+        communityChestConfig.discardedCards = require('../Components/Deck').discard(
+          card,
+          communityChestConfig.discardedCards
+        );
+      }
     },
   ],
   //   TRADE,

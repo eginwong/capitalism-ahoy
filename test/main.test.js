@@ -323,7 +323,7 @@ describe('main', () => {
 
     // TODO: hot start
     it(
-      gwt`cold start | game is loaded | player pays fine to get out of jail after exhausting three turns`,
+      gwt`cold start | game is loaded | player uses get out of jail card to get out of jail, can roll doubles and continue turn`,
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
@@ -338,15 +338,10 @@ describe('main', () => {
           'ROLL_DICE', // p2
           'FIXED',
           'END_TURN',
-          'ROLL_DICE', // p1
-          'END_TURN',
-          'ROLL_DICE', // p2
-          'END_TURN',
-          'ROLL_DICE', // p1
-          'END_TURN',
-          'ROLL_DICE', // p2
-          'END_TURN',
-          'ROLL_DICE', // p1
+          'USE_GET_OUT_OF_JAIL_FREE_CARD', // p1
+          'ROLL_DICE',
+          'BUY_PROPERTY',
+          'ROLL_DICE',
           'END_GAME',
         ];
         userInterface.prompt = fillStub(promptStub, promptStubValues);
@@ -359,35 +354,22 @@ describe('main', () => {
           [1, 1], // p1: income tax
           [4, 4], // p1: speeding
           [1, 3], // p2: income tax
-          [1, 2], // p1: jail 1
-          [1, 2], // p2: chance
-          [1, 2], // p1: jail 2
-          [1, 2], // p2: visiting jail
-          [3, 4], // p1: jail 3, community chest
+          [3, 3], // p1: st james place
+          [4, 2], // p1: chance
         ];
         fillStub(diceStub, diceStubValues);
 
-        const deckDrawStub = sinon.stub(Deck, 'draw');
-        const expectedChanceCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'addfunds'
-        );
-
-        const expectedCommunityCard1 = gameState.config.chanceConfig.availableCards.find(
+        const expectedCommunityChestCard = gameState.config.chanceConfig.availableCards.find(
           (c) => c.action === 'getoutofjailfree'
         );
-        const expectedCommunityCard2 = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'addfunds' && c.title.includes('$50')
+        const expectedChanceCard = gameState.config.chanceConfig.availableCards.find(
+          (c) => c.action === 'getoutofjailfree'
         );
+        const deckDrawStub = sinon.stub(Deck, 'draw');
         deckDrawStub
           .onCall(0)
-          .returns({
-            card: expectedCommunityCard1,
-            deck: [expectedCommunityCard2],
-          });
+          .returns({ card: expectedCommunityChestCard, deck: [] });
         deckDrawStub.onCall(1).returns({ card: expectedChanceCard, deck: [] });
-        deckDrawStub
-          .onCall(2)
-          .returns({ card: expectedCommunityCard2, deck: [] });
 
         require('../entities/Game')({
           eventBus,
@@ -395,10 +377,18 @@ describe('main', () => {
           gameState,
         });
 
-        expect(gameState.turn).equal(6, 'Incorrect turn value');
+        const expectedFinalBoardProperty = {
+          position: 22,
+          price: 180,
+        };
+        expect(gameState.turn).equal(2, 'Incorrect turn value');
+        expect(gameState.players[0].position).to.equal(
+          expectedFinalBoardProperty.position,
+          'Player #1 did not correctly move to expected location after rolling doubles'
+        );
         expect(gameState.players[0].cash).to.equal(
-          1500 - config.fineAmount - config.incomeTaxAmount + 50,
-          "Player #1's cash does not account for fine, and income tax"
+          1500 - expectedFinalBoardProperty.price - config.incomeTaxAmount,
+          "Player #1's cash does not account for property purchase and income tax"
         );
       }
     );
