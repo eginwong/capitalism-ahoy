@@ -37,6 +37,9 @@ module.exports = class PropertyManagementService {
       railRoadPricing,
     } = gameState.config.propertyConfig;
 
+    // check rent multiplier from chance
+    const optionalRentMultiplier = gameState.turnValues.rentMultiplier;
+
     if (boardProperty.group === 'Utilities') {
       const totalRoll =
         gameState.turnValues.roll[0] + gameState.turnValues.roll[1];
@@ -49,12 +52,17 @@ module.exports = class PropertyManagementService {
       // multiply by roll
       rentAmount =
         totalRoll *
-        (hasMonopoly ? doubleUtilityMultiplier : singleUtilityMultiplier);
+        (optionalRentMultiplier ||
+          (hasMonopoly ? doubleUtilityMultiplier : singleUtilityMultiplier));
     } else if (boardProperty.group === 'Railroad') {
       const railroadCount = this.getProperties(gameState)
         .filter((p) => p.group === boardProperty.group)
         .filter((p) => p.ownedBy === playerIndex).length;
       rentAmount = railRoadPricing[railroadCount - 1];
+
+      rentAmount = optionalRentMultiplier
+        ? optionalRentMultiplier * rentAmount
+        : rentAmount;
     } else {
       if (boardProperty.buildings > 0) {
         rentAmount = boardProperty.multipliedRent[boardProperty.buildings - 1];

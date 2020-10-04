@@ -173,6 +173,24 @@ describe('PropertyManagementService', () => {
           'Rent incorrectly calculated for railroad properties'
         );
       });
+      it(`should charge multiplier for railroad rent if optional multiplier is passed`, () => {
+        const ownerId = 1;
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.group === 'Railroad'
+        );
+        testProperty.ownedBy = ownerId;
+        gameState.currentBoardProperty = testProperty;
+        createMonopoly(gameState, testProperty.group, ownerId);
+        const multiplier = 2;
+        gameState.turnValues.rentMultiplier = multiplier;
+
+        expect(
+          PropertyManagementService.calculateRent(gameState, testProperty)
+        ).to.equal(
+          config.propertyConfig.railRoadPricing[3] * multiplier,
+          'Rent incorrectly calculated for railroad properties with turn value multiplier'
+        );
+      });
     });
     describe('utilities', () => {
       it(`should charge based on roll`, () => {
@@ -208,6 +226,25 @@ describe('PropertyManagementService', () => {
         ).to.equal(
           totalRoll * config.propertyConfig.doubleUtilityMultiplier,
           'Rent incorrectly calculated for utilities'
+        );
+      });
+      it(`should charge turn value multiplier if passed`, () => {
+        const ownerId = 1;
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.position === 12
+        );
+        testProperty.ownedBy = ownerId;
+        gameState.currentBoardProperty = testProperty;
+        const totalRoll =
+          gameState.turnValues.roll[0] + gameState.turnValues.roll[1];
+        gameState.turnValues.rentMultiplier =
+          config.propertyConfig.doubleUtilityMultiplier;
+
+        expect(
+          PropertyManagementService.calculateRent(gameState, testProperty)
+        ).to.equal(
+          totalRoll * config.propertyConfig.doubleUtilityMultiplier,
+          'Rent incorrectly calculated for utilities with turn value multiplier'
         );
       });
     });
