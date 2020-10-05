@@ -174,16 +174,10 @@ module.exports = class PropertyManagementService {
       .filter((p) => !p.mortgaged)
       // CHECK: Must have houses to build
       .filter(
-        (p) =>
-          !limitedHouses ||
-          (limitedHouses && p.buildings === numberOfHousesBeforeHotel)
+        (p) => !limitedHouses || p.buildings === numberOfHousesBeforeHotel
       )
       // CHECK: Must have hotels to build
-      .filter(
-        (p) =>
-          !limitedHotels ||
-          (limitedHotels && p.buildings < numberOfHousesBeforeHotel)
-      )
+      .filter((p) => !limitedHotels || p.buildings < numberOfHousesBeforeHotel)
       // CHECK: Must have available cash on hand
       // could do a more sophisticated check with liquidity, but player can also
       //   manually go to liquidity screen for simplicity
