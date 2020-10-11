@@ -88,7 +88,7 @@ describe('Rules -> INCOME_TAX', () => {
       eventBus.emit(inputEvent);
       expect(gameState.currentPlayer.cash).to.equal(
         startingCash - config.incomeTaxAmount,
-        `Player did not pay $${config.incomeTaxAmount} when FIXED was chosen for payment `
+        `Player did not pay $${config.incomeTaxAmount} when FIXED was chosen for payment`
       );
     });
     it('should make a call to the UI#incomeTaxPaid for FIXED', () => {
