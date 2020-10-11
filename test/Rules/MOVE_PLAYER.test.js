@@ -39,6 +39,7 @@ describe('Rules -> MOVE_PLAYER', () => {
     let resolveNewPropertySpy;
     let payRentSpy;
     let resolveSpecialPropertySpy;
+    let defaultTurnValMovement;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -53,6 +54,10 @@ describe('Rules -> MOVE_PLAYER', () => {
       gameState.turnValues = {
         roll: [1, 2],
       };
+      defaultTurnValMovement = gameState.turnValues.roll.reduce(
+        (acc, val) => acc + val,
+        0
+      );
 
       passGoSpy = sinon.spy();
       resolveNewPropertySpy = sinon.spy();
@@ -124,10 +129,11 @@ describe('Rules -> MOVE_PLAYER', () => {
       );
     });
     it('should not emit pass go if player does not wrap around board', () => {
-      gameState.currentPlayer.position = 36;
+      const originalPosition = 36;
+      gameState.currentPlayer.position = originalPosition;
       eventBus.emit(inputEvent);
       expect(gameState.currentPlayer.position).to.equal(
-        39,
+        originalPosition + defaultTurnValMovement,
         'Current Player position was not updated'
       );
       expect(passGoSpy.callCount).to.equal(
@@ -152,7 +158,7 @@ describe('Rules -> MOVE_PLAYER', () => {
     });
     it(`should emit ${payRentEvent} event if property is owned, not mortgaged, and belonging to someone else`, () => {
       const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.position === 3
+        (p) => p.position === defaultTurnValMovement
       );
       testProperty.ownedBy = 1;
       eventBus.emit(inputEvent);
@@ -163,7 +169,7 @@ describe('Rules -> MOVE_PLAYER', () => {
     });
     it(`should not emit ${payRentEvent} event if property is owned by current player`, () => {
       const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.position === 3
+        (p) => p.position === defaultTurnValMovement
       );
       testProperty.ownedBy = gameState.currentPlayer.id;
       eventBus.emit(inputEvent);
@@ -174,7 +180,7 @@ describe('Rules -> MOVE_PLAYER', () => {
     });
     it(`should not emit ${payRentEvent} event if property is mortgaged`, () => {
       const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.position === 3
+        (p) => p.position === defaultTurnValMovement
       );
       testProperty.mortgaged = true;
       eventBus.emit(inputEvent);
@@ -188,7 +194,8 @@ describe('Rules -> MOVE_PLAYER', () => {
         (p) => p.group === 'Special'
       );
       // turn value movement
-      gameState.currentPlayer.position = specialProperty.position - 3;
+      gameState.currentPlayer.position =
+        specialProperty.position - defaultTurnValMovement;
       eventBus.emit(inputEvent);
       expect(payRentSpy.callCount).to.equal(
         0,
@@ -200,7 +207,8 @@ describe('Rules -> MOVE_PLAYER', () => {
         (p) => p.group === 'Special'
       );
       // turn value movement
-      gameState.currentPlayer.position = specialProperty.position - 3;
+      gameState.currentPlayer.position =
+        specialProperty.position - defaultTurnValMovement;
       eventBus.emit(inputEvent);
       expect(resolveSpecialPropertySpy.callCount).to.equal(
         1,
