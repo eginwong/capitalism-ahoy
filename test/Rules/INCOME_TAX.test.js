@@ -113,14 +113,14 @@ describe('Rules -> INCOME_TAX', () => {
       eventBus.emit(inputEvent);
       expect(gameState.currentPlayer.cash).to.equal(
         startingCash - startingCash * config.incomeTaxRate,
-        `Player did not pay ${
+        `Player did not pay $${
           100 * config.incomeTaxRate
         }% of networth when VARIABLE was chosen for payment `
       );
     });
     it('should decrease player cash by config incomeTaxRate if player chooses VARIABLE, rounded to 2 decimal places', () => {
       const startingCash = gameState.currentPlayer.cash;
-      const assets = 11;
+      const assets = 11; // arbitrary value
       gameState.currentPlayer.assets = assets;
       const promptStub = sinon.stub(PlayerActions, 'prompt');
       promptStub.onCall(0).returns('VARIABLE');
@@ -129,7 +129,7 @@ describe('Rules -> INCOME_TAX', () => {
       expect(gameState.currentPlayer.cash).to.equal(
         startingCash -
           ((startingCash + assets) * config.incomeTaxRate).toFixed(2),
-        `Player did not pay ${
+        `Player did not pay $${
           100 * config.incomeTaxRate
         }% of networth when VARIABLE was chosen for payment `
       );

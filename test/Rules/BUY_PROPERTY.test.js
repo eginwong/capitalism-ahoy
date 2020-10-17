@@ -93,10 +93,10 @@ describe('Rules -> BUY_PROPERTY', () => {
       userInterface.playerShortOnFunds = uiSpy;
       const property =
         gameState.config.propertyConfig.properties[TEST_PROPERTY];
-      gameState.currentBoardProperty = property; // price: 60
-      gameState.currentPlayer.cash = 50;
+      gameState.currentBoardProperty = property;
+      gameState.currentPlayer.cash = property.price - 1;
       liquidationStub.callsFake(() => {
-        gameState.currentPlayer.cash += 50;
+        gameState.currentPlayer.cash += property.price - 1;
       });
 
       eventBus.emit(inputEvent);
@@ -109,10 +109,10 @@ describe('Rules -> BUY_PROPERTY', () => {
     it(`should make a call to the ${liquidationStub} when funds are insufficient`, () => {
       const property =
         gameState.config.propertyConfig.properties[TEST_PROPERTY];
-      gameState.currentBoardProperty = property; // price: 60
-      gameState.currentPlayer.cash = 50;
+      gameState.currentBoardProperty = property;
+      gameState.currentPlayer.cash = property.price - 1;
       liquidationStub.callsFake(() => {
-        gameState.currentPlayer.cash += 50;
+        gameState.currentPlayer.cash += property.price - 1;
       });
 
       eventBus.emit(inputEvent);
