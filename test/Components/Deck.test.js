@@ -50,15 +50,16 @@ describe('Deck', () => {
   describe('discard', () => {
     it('should add the input card to the second input of discarded cards', () => {
       const discardedCards = [1, 2, 3].map((x) => ({ id: x }));
+      const testCard = { id: 4 };
 
-      const output = Deck.discard({ id: 4 }, discardedCards);
+      const output = Deck.discard(testCard, discardedCards);
 
       expect(Array.isArray(output)).to.equal(
         true,
         'discard did not output an Array'
       );
       expect(output[output.length - 1]).to.deep.equal(
-        { id: 4 },
+        testCard,
         'discard did not add the specific card input to the end of the discarded cards input'
       );
       expect(output.length).to.equal(

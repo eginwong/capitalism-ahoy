@@ -286,9 +286,6 @@ module.exports = {
         (p) => p.id === boardProperty.ownedBy
       );
 
-      // TODO: check turnvalue multiplier if it exists?
-      // AND for temporary utilities roll, can probably overwrite directly because roll is not used after
-      // for chance cards
       const rentAmount = require('../PropertyManagementService').calculateRent(
         gameState,
         boardProperty
