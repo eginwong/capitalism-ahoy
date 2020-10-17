@@ -43,4 +43,19 @@ describe('GameState', () => {
       `Incorrect current player ${gameState.currentPlayer.name}`
     );
   });
+  it('should override current player if turn value is set', () => {
+    let createPlayer = createPlayerFactory();
+    gameState.players = [
+      createPlayer({ name: 'player1' }),
+      createPlayer({ name: 'player2' }),
+    ];
+    gameState.turnValues = {
+      subTurnPlayer: gameState.players[1],
+    };
+
+    expect(gameState.currentPlayer.name).to.equal(
+      'player2',
+      `Incorrect current player ${gameState.currentPlayer.name} with override`
+    );
+  });
 });

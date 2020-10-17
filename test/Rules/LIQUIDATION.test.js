@@ -33,13 +33,11 @@ describe('Rules -> LIQUIDATION', () => {
     const inputEvent = 'LIQUIDATION';
     const managePropertiesEvent = 'MANAGE_PROPERTIES';
     const tradeEvent = 'TRADE';
-    const bankruptcyEvent = 'BANKRUPTCY';
     const cancelEvent = 'CANCEL';
 
     let liquidationSpy;
     let managePropertiesSpy;
     let tradeSpy;
-    let bankruptcySpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -54,12 +52,10 @@ describe('Rules -> LIQUIDATION', () => {
       liquidationSpy = sinon.spy();
       managePropertiesSpy = sinon.spy();
       tradeSpy = sinon.spy();
-      bankruptcySpy = sinon.spy();
 
       eventBus.on(inputEvent, liquidationSpy);
       eventBus.on(managePropertiesEvent, managePropertiesSpy);
       eventBus.on(tradeEvent, tradeSpy);
-      eventBus.on(bankruptcyEvent, bankruptcySpy);
     });
 
     it(`should emit desired ${managePropertiesEvent} event`, () => {
@@ -80,17 +76,6 @@ describe('Rules -> LIQUIDATION', () => {
       expect(tradeSpy.callCount).to.equal(
         1,
         `${tradeEvent} was called ${tradeSpy.callCount} times but expected to be 1 times`
-      );
-    });
-    it(`should emit desired ${bankruptcyEvent} event`, () => {
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(bankruptcyEvent);
-
-      eventBus.emit(inputEvent);
-
-      expect(bankruptcySpy.callCount).to.equal(
-        1,
-        `${bankruptcyEvent} was called ${bankruptcySpy.callCount} times but expected to be 1 times`
       );
     });
     it('should make a call to the UI#unknownAction if action input is not recognized', () => {
