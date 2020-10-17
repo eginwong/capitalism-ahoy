@@ -16,16 +16,19 @@ describe('BoardService', () => {
 
   describe('normalizePlayerBoardPosition', () => {
     it('should return current player position if not wrapping around the board', () => {
-      gameState.currentPlayer.position = 3;
+      const positionWithinBoardLength = 3;
+      gameState.currentPlayer.position = positionWithinBoardLength;
       expect(BoardService.normalizePlayerBoardPosition(gameState)).to.equal(
-        3,
+        positionWithinBoardLength,
         "Incorrectly lowers current player's position"
       );
     });
     it('should return current player position modded if over length of properties', () => {
-      gameState.currentPlayer.position = 42;
+      const positionOverBoardLength = 42;
+      gameState.currentPlayer.position = positionOverBoardLength;
       expect(BoardService.normalizePlayerBoardPosition(gameState)).to.equal(
-        2,
+        positionOverBoardLength -
+          gameState.config.propertyConfig.properties.length,
         "Incorrectly overflows current player's position"
       );
     });
@@ -33,7 +36,8 @@ describe('BoardService', () => {
 
   describe('nearestPropertyByGroupToPlayer', () => {
     it('should return property closest to player by property group when property is before GO', () => {
-      gameState.currentPlayer.position = 10;
+      const startingPlayerPosition = 10;
+      gameState.currentPlayer.position = startingPlayerPosition;
       const pennsylvaniaRailroadProperty = gameState.config.propertyConfig.properties.find(
         (p) => p.id === 'pennsylvaniarailroad'
       );
@@ -49,7 +53,8 @@ describe('BoardService', () => {
       );
     });
     it('should return property closest to player by property group when property is after GO', () => {
-      gameState.currentPlayer.position = 39;
+      const startingPlayerPosition = 39;
+      gameState.currentPlayer.position = startingPlayerPosition;
       const readingRailroadProperty = gameState.config.propertyConfig.properties.find(
         (p) => p.id === 'readingrailroad'
       );
@@ -68,7 +73,8 @@ describe('BoardService', () => {
 
   describe('retrievePositionToPropertyWithoutNormalization', () => {
     it('should return property position if not wrapping around the board', () => {
-      gameState.currentPlayer.position = 3;
+      const startingPlayerPosition = 3;
+      gameState.currentPlayer.position = startingPlayerPosition;
       const readingRailroadProperty = gameState.config.propertyConfig.properties.find(
         (p) => p.id === 'readingrailroad'
       );
@@ -83,7 +89,8 @@ describe('BoardService', () => {
       );
     });
     it('should return property position added to length of the board if wrapping around the board', () => {
-      gameState.currentPlayer.position = 39;
+      const startingPlayerPosition = 39;
+      gameState.currentPlayer.position = startingPlayerPosition;
       const readingRailroadProperty = gameState.config.propertyConfig.properties.find(
         (p) => p.id === 'readingrailroad'
       );

@@ -132,10 +132,7 @@ describe('Rules -> MOVE_PLAYER', () => {
       const originalPosition = 36;
       gameState.currentPlayer.position = originalPosition;
       eventBus.emit(inputEvent);
-      expect(gameState.currentPlayer.position).to.equal(
-        originalPosition + defaultTurnValMovement,
-        'Current Player position was not updated'
-      );
+
       expect(passGoSpy.callCount).to.equal(
         0,
         'Move Player emitted pass go event without wrapping around the board'
@@ -208,8 +205,7 @@ describe('Rules -> MOVE_PLAYER', () => {
         (p) => p.group === 'Special'
       );
       // turn value movement
-      gameState.currentPlayer.position =
-        specialProperty.position - defaultTurnValMovement;
+      gameState.currentPlayer.position = specialProperty.position;
       eventBus.emit(inputEvent);
       expect(payRentSpy.callCount).to.equal(
         0,
@@ -221,8 +217,7 @@ describe('Rules -> MOVE_PLAYER', () => {
         (p) => p.group === 'Special'
       );
       // turn value movement
-      gameState.currentPlayer.position =
-        specialProperty.position - defaultTurnValMovement;
+      gameState.currentPlayer.position = specialProperty.position;
       eventBus.emit(inputEvent);
       expect(resolveSpecialPropertySpy.callCount).to.equal(
         1,

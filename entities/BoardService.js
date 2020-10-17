@@ -8,6 +8,7 @@ module.exports = class BoardSevice {
     );
   }
 
+  // Takes into consideration only the nearest properties forward of the player's current position.
   static nearestPropertyByGroupToPlayer(gameState, propertyGroup) {
     const propertiesInGroup = PropertyManagementService.getPropertiesInPropertyGroup(
       gameState,
