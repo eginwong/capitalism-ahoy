@@ -237,12 +237,12 @@ module.exports = {
       );
 
       if (playerBuyingPower < boardProperty.price) {
-        notify('BEGIN_AUCTION');
+        notify('AUCTION');
       } else {
         const action = require('../PlayerActions').prompt(
           { notify, UI },
           gameState,
-          ['BUY_PROPERTY', 'BEGIN_AUCTION']
+          ['BUY_PROPERTY', 'AUCTION']
         );
 
         if (action) {
@@ -493,7 +493,7 @@ module.exports = {
         { notify, UI },
         gameState,
         // TODO: be smart about what options are available to the user?
-        ['MANAGE_PROPERTIES', 'TRADE', 'BANKRUPTCY', 'CANCEL']
+        ['MANAGE_PROPERTIES', 'TRADE', 'CANCEL']
       );
 
       if (liquidateOption === 'CANCEL') return;
@@ -504,7 +504,6 @@ module.exports = {
         UI.unknownAction();
       }
 
-      if (liquidateOption === 'BANKRUPTCY') return;
       notify('LIQUIDATION');
     },
   ],

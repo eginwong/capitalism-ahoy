@@ -81,6 +81,30 @@ const consoleUI = (function (readline) {
       console.log(
         'GET OUT OF JAIL FREE: Card was used and returned to the discard deck.'
       ),
+    auctionInstructions: () =>
+      console.log(
+        'AUCTION: The rules are as follows. All players who can afford the property will continue to bid until there is one clear winner. Each player will get a chance to input their bid for the round. If a player enters nothing or a bid below the current bidding cost, that player is out of the auction. At least one player must bid to exit the auction.'
+      ),
+    auctionPropertyInfo: (property) => {
+      console.log(`AUCTION: ${property.name}`);
+      console.dir(property);
+    },
+    playersInAuction: (players) => {
+      let playerInfo = `PLAYERS IN AUCTION: `;
+
+      for (let player of players) {
+        playerInfo += `(${player.name}, $${player.liquidity}) `;
+      }
+      console.log(playerInfo);
+    },
+    playerInAuction: (player) =>
+      console.log(`${player.name}, $${player.liquidity}`),
+    playerOutOfAuction: (player) =>
+      console.log(
+        `${player.name}'s bid is either under the acceptable amount or over the player's available liquidity.`
+      ),
+    wonAuction: (player, price) =>
+      console.log(`Property SOLD to ${player.name} for $${price}`),
   };
 })(require('readline-sync'));
 

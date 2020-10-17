@@ -8,7 +8,6 @@ module.exports = function _updateTurnValues(template) {
   return function updateTurnValues(gameState) {
     merge(gameState, {
       turnValues: template,
-      // turnValues: typeof template === 'function' ? template() : template
     });
   };
 };

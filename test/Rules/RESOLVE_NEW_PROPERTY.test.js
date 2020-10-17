@@ -32,10 +32,10 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
 
   describe('resolveNewProperty', () => {
     const inputEvent = 'RESOLVE_NEW_PROPERTY';
-    const beginAuctionEvent = 'BEGIN_AUCTION';
+    const auctionEvent = 'AUCTION';
     const buyPropertyEvent = 'BUY_PROPERTY';
 
-    let beginAuctionSpy;
+    let auctionSpy;
     let buyPropertySpy;
 
     beforeEach(() => {
@@ -48,10 +48,10 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
           handler.bind(null, { notify, UI: userInterface }, gameState)
         )
       );
-      beginAuctionSpy = sinon.spy();
+      auctionSpy = sinon.spy();
       buyPropertySpy = sinon.spy();
 
-      eventBus.on(beginAuctionEvent, beginAuctionSpy);
+      eventBus.on(auctionEvent, auctionSpy);
       eventBus.on(buyPropertyEvent, buyPropertySpy);
     });
 
@@ -83,9 +83,9 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
       userInterface.unknownAction = uiSpy;
 
       eventBus.emit(inputEvent);
-      expect(beginAuctionSpy.calledOnce).to.equal(
+      expect(auctionSpy.calledOnce).to.equal(
         true,
-        `${beginAuctionEvent} was not called when player did not have enough liquidity`
+        `${auctionEvent} was not called when player did not have enough liquidity`
       );
 
       expect(playerActionsStub.callCount).to.equal(
@@ -102,7 +102,7 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
 
       eventBus.emit(inputEvent);
       expect(playerActionsStub.getCall(0).args[2]).to.deep.equal(
-        [buyPropertyEvent, beginAuctionEvent],
+        [buyPropertyEvent, auctionEvent],
         `Prompt method for ${inputEvent} does not have expected options`
       );
     });
