@@ -2,29 +2,29 @@
 
 ## High Level
 
-| Entry Point | Game Loop | Outputs        |
-|-------------|-----------|--------------: |
-| main.js     | game.js   | SIG_TERM, Save |
+| Inputs                | Entry Point | Game Loop | Outputs        |
+|-----------------------|-------------|-----------|--------------: |
+| void \| saveFile.json | main.js     | game.js   | saveFile.json  |
 
 ### `main.js`
 
-Serves as a boostrapping file for the environment the game will run in.
+Current boostrapping file for the environment the game will run in.
 
 Provides to `game.js`:
 
-- EventBus -- backbone of the physical game loop. Must be synchronous.
-- GameState -- a clean one for a new game, else a dirty one for a loaded save file.
-- userInterface -- an interface bridging the game to an arbitrary UI to describe it.
+- Event Bus (`eventBus`) -- backbone of the physical game loop. Must be synchronous.
+- Game State (`gameState`) -- new state or loaded from `saveFile.json`.
+- User Interface (`UI`) -- an interface bridging the game to an arbitrary UI to describe it.
 
 ### `game.js`
 
-Describes the game loop by organizing necessary dependencies and queuing the game actions in the passed `EventBus`.
+Describes the game loop by organizing necessary dependencies and queuing the game actions unto the passed `eventBus`.
 
-We use the setup logic in `game.js` to bind out `UI` and `gameState` to all of our `Rules` (see section below).
+We use the setup logic in `game.js` to bind our `UI` and `gameState` to all of our [`Rules`](###Rules%20Dictionary).
 
 ### Outputs
 
-The game loop ends produces two outputs, one of which is arguable a byproduct.
+The game loop produces two outputs:
 
 - `SIG_TERM` -- the game ends via a termination signal, outputting the associated code value.
 - `Save` -- the game outputs a save file (dirty `gameState`); this does _not_ terminate the game.
@@ -51,7 +51,7 @@ Game rules are written in the `Rules/index.js` file, which exists as a Dictionar
 
 An Action is a function with the signature `function ({ UI, notify }, gameState): void Event?`, where:
 
-- `UI` is the `userInterface` injected from `main.js`.
+- `UI` is the `User Interface` injected from `main.js`.
 - `notify` is a function to produce the `void Event?` effect (i.e., broadcast an event to evaluate another rule).
 - `gameState` is an object containing the game's state.
 
@@ -73,27 +73,29 @@ const Rules = {
 }
 ```
 
-It might be important to note that calls to `notify` usually only happen at the _end_ of a `Rule` (i.e., the last executed line of the last `Action` in the `Rule`'s array of `Action`s) and that the `EventBus` is synchronous, as mentioned earlier. This dictates the pace and order in which `Rule`s can be evaluated, so make sure you understand that well.
+Note that calls to `notify` typically happen at the _end_ of a `Rule` (i.e., the last executed line of the last `Action` in the `Rule`'s array of `Action`s) and that the `eventBus` must be synchronous, as mentioned earlier.
 
-`notify` has a return type of `void` but it broadcasts an `Event`, so we've presented the type signature `void Event` to denote this. You may have seen above for the `Action` signature that it returned `void Event?` - the `?` here simply denotes that not all actions emit `Event`s, hence it is an optional return type.
+> **Info:** This is not a "hard-and-fast" rule, but it does promote safer control flow logic. There are exceptions.
 
-> **Protip:** Looking for how something in the game works? Everything is in the `Rules/index.js` file. Open the file and skim through top-down and you are likely to either find a `Rule` name matching what you're looking for, else see another `Rule` that you are familiar with and can follow it's `notify` flow to learn the name of the `Rule`(s) you are trying to find.
+`notify` has a return type of `void` but it optionally broadcasts an `Event`, so we use the type signature `void Event?` to denote this.
+
+> **Protip:** Looking for how something in the game works? Everything is in the `Rules/index.js` file. Open the file and you are likely to either find a `Rule` name matching what you're looking for, else a familiar `Rule` name that will enable you to trace through the logic flow.
 
 ## Components
 
-Components are meant to capture-with-code real-world objects that are needed for a boardgame, such as a dice, spinners, paper money, and even a board (doy!).
+Components attempt to facsimile real-world objects required of a board game (such as a dice, spinners, paper money, and even a board).
 
-Not all components are needed to be captured-with-code for all games (e.g., we can use a `Number` property on the `gameState` to track money or points instead of making `Token`s for them), but sometimes it is convenient.
+Not all components are required to be impemented as objects for all games (e.g., we can use a `Number` property on the `gameState` to track money or points instead of making `Token`s for them).
 
 Review the `Components` folder to see what has been abstracted.
 
 ## Services
 
-Services are meant to encapsulate some behaviours usually across multiple components. An example might be the `PlayerActions` service that encapsulates all the behaviours that players can take so that they can be more easily shared instead of in instances of a class.
+Services encapsulate behaviours of a component for use in other components. For example, the `PlayerActions` service encapsulates the behaviour of players interactions so that it can be injected into `Components` and `Rules`.
 
-Other examples include:
+Other services:
 
-- The `WealthService` which interfaces all the money-related operations of a game
+- `WealthService` - interfaces all the money-related operations of a game
 
 ## Misc
 
