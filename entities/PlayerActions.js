@@ -41,4 +41,45 @@ module.exports = class PlayerActions {
       (action) => action.toUpperCase() === String(answer).toUpperCase()
     );
   }
+
+  // returns { buyer, price }
+  static auction(UI, players, property, baseCost) {
+    let biddingPlayers;
+    let cost = baseCost;
+    let currentHighestBidPlayer;
+
+    // require at least one player to have bid
+    while (!currentHighestBidPlayer) {
+      biddingPlayers = players.slice();
+      // while players are still in the running
+      while (biddingPlayers.length > 1) {
+        UI.auctionPropertyInfo(property);
+        UI.playersInAuction(biddingPlayers);
+        for (let i = 0; i < biddingPlayers.length; i++) {
+          UI.playerInAuction(biddingPlayers[i]);
+          let bid = UI.prompt(
+            `How much would you like to bid? Minimum bid is ${cost + 1} \n`
+          );
+
+          // if a player enters "$__"
+          const bidParsed = parseInt(bid.replace(/[^0-9\.]+/g, ''), 10);
+          const biddingPlayer = biddingPlayers[i];
+          if (
+            isNaN(bidParsed) ||
+            bidParsed <= cost ||
+            bidParsed > biddingPlayer.liquidity
+          ) {
+            UI.playerOutOfAuction(biddingPlayer);
+            biddingPlayer.outOfAuction = true;
+          } else {
+            currentHighestBidPlayer = biddingPlayer;
+            cost = bidParsed;
+          }
+        }
+
+        biddingPlayers = biddingPlayers.filter((p) => !p.outOfAuction);
+      }
+    }
+    return { buyer: currentHighestBidPlayer, price: cost };
+  }
 };
