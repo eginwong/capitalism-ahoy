@@ -10,8 +10,8 @@ class GameState {
 
   get currentPlayer() {
     // add override for intra-turn context switches
-    if (this.turnValues?.subTurnPlayer) {
-      return this.turnValues.subTurnPlayer;
+    if (this.turnValues?.subTurn?.player) {
+      return this.turnValues.subTurn.player;
     }
     return this.players[this.turn % this.players.length];
   }

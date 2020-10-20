@@ -704,4 +704,87 @@ module.exports = {
   ],
   //   TRADE,
   //   BANKRUPTCY: () => gameState.currentPlayerActions["END_TURN"].execute(),
+  AUCTION: [
+    ({ UI }) => UI.auctionInstructions(),
+    ({ UI, notify }, gameState) => {
+      const { calculateLiquidity } = require('../WealthService');
+      const boardProperty = gameState.currentBoardProperty;
+      const {
+        mortgageValueMultiplier,
+        interestRate,
+      } = gameState.config.propertyConfig;
+      const mortgageFee = boardProperty.mortgaged
+        ? interestRate * boardProperty.price
+        : 0;
+
+      // HOUSE RULE: Pay the max of either the 10% fee for interest of a mortgaged property or the minimum cost
+      const baseCost = Math.max(
+        mortgageFee,
+        gameState.config.propertyConfig.minimumPropertyPrice
+      );
+
+      const availablePlayers = gameState.players
+        .map((player) => ({
+          ...player,
+          liquidity: calculateLiquidity(
+            gameState,
+            gameState.config.propertyConfig.properties,
+            player
+          ),
+        }))
+        .filter((p) => p.liquidity >= baseCost);
+
+      let { buyer, price } =
+        availablePlayers.length > 1
+          ? require('../PlayerActions').auction(
+              UI,
+              availablePlayers,
+              boardProperty,
+              baseCost
+            )
+          : { buyer: availablePlayers[0], price: baseCost };
+      UI.wonAuction(buyer, price);
+
+      while (buyer.cash < price) {
+        UI.playerShortOnFunds(buyer.cash, price);
+
+        require('./updateTurnValues')({
+          subTurn: {
+            player: buyer,
+            charge: price,
+          },
+        })(gameState);
+        notify('TURN_VALUES_UPDATED');
+
+        notify('LIQUIDATION');
+        // re-set winning player after liquidation is run
+        buyer = gameState.turnValues.subTurn.player;
+
+        require('./updateTurnValues')({
+          subTurn: null,
+        })(gameState);
+        notify('TURN_VALUES_UPDATED');
+      }
+      // TODO: prompt for unmortgage if mortgaged?
+
+      // need to reset values of winning player, otherwise the liquidation changes are not persisted
+      let winningPlayer = gameState.players.find((p) => p.id === buyer.id);
+      winningPlayer.cash = buyer.cash;
+      winningPlayer.assets = buyer.assets;
+      winningPlayer.cards = buyer.cards;
+
+      require('../WealthService').buyAsset(
+        winningPlayer,
+        price,
+        boardProperty.mortgaged
+          ? boardProperty.price / mortgageValueMultiplier
+          : boardProperty.price
+      );
+
+      require('../PropertyManagementService').changeOwner(
+        boardProperty,
+        winningPlayer.id
+      );
+    },
+  ],
 };

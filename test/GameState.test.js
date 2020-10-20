@@ -50,7 +50,9 @@ describe('GameState', () => {
       createPlayer({ name: 'player2' }),
     ];
     gameState.turnValues = {
-      subTurnPlayer: gameState.players[1],
+      subTurn: {
+        player: gameState.players[1],
+      },
     };
 
     expect(gameState.currentPlayer.name).to.equal(
