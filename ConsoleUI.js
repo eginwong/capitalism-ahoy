@@ -83,7 +83,7 @@ const consoleUI = (function (readline) {
       ),
     auctionInstructions: () =>
       console.log(
-        'AUCTION: The rules are as follows. All players who can afford the property will continue to bid until there is one clear winner. Each player will get a chance to input their bid for the round. If a player enters nothing or a bid below the current bidding cost, that player is out of the auction. At least one player must bid to exit the auction.'
+        'AUCTION: The rules are as follows: All players who can afford the property will continue to bid in rounds until there is one winner. Players take turns inputting their bids each round. If a player bids nothing or a bid below the current bidding cost, that player is out of the auction. At least one player must bid to exit the auction.'
       ),
     auctionPropertyInfo: (property) => {
       console.log(`AUCTION: ${property.name}`);
