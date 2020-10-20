@@ -59,6 +59,16 @@ describe('WealthService', () => {
         "Incorrectly increases player's assets"
       );
     });
+    it("should increase player's assets by optional asset value", () => {
+      const startingAssets = gameState.players[0].assets;
+      const assetPrice = 200;
+      const assetValue = 300;
+      WealthService.buyAsset(gameState.players[0], assetPrice, assetValue);
+      expect(gameState.players[0].assets).to.equal(
+        startingAssets + assetValue,
+        "Incorrectly increases player's assets"
+      );
+    });
   });
   describe('sellAsset', () => {
     it('should deposit cash from player equal to buildingPrice param', () => {

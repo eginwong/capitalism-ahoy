@@ -12,9 +12,9 @@ module.exports = class WealthService {
    * @param {*} player
    * @param {*} assetPrice
    */
-  static buyAsset(player, assetPrice) {
+  static buyAsset(player, assetPrice, assetValue = assetPrice) {
     this.decrement(player, assetPrice);
-    player.assets += assetPrice;
+    player.assets += assetValue;
   }
 
   /**

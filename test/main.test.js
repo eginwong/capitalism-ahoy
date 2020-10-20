@@ -672,5 +672,107 @@ describe('main', () => {
         );
       }
     );
+
+    // TODO: hot start
+    it(gwt`cold start | game is loaded | player auctions a property`, () => {
+      // arrange
+      const promptStub = sinon.stub(PlayerActions, 'prompt');
+
+      const promptStubValues = [
+        '', // highest rolling player
+        '',
+        'ROLL_DICE',
+        'AUCTION',
+        '30',
+        '50',
+        '$40',
+        '',
+        'END_GAME',
+      ];
+      userInterface.prompt = fillStub(promptStub, promptStubValues);
+
+      const diceStub = sinon.stub(Dice, 'roll');
+      const diceStubValues = [[6], [1], [1, 2]];
+      fillStub(diceStub, diceStubValues);
+
+      require('../entities/Game')({
+        eventBus,
+        userInterface,
+        gameState,
+      });
+
+      expect(gameState.players[0].cash).to.equal(
+        1500,
+        "Player #1's cash was incorrectly deducted after losing the auction"
+      );
+      expect(gameState.players[1].cash).to.equal(
+        1500 - 50,
+        "Player #2's cash was not correctly deducted after winning the auction"
+      );
+      expect(gameState.players[1].assets).to.equal(
+        60,
+        "Player #2's assets were not correctly added after winning the auction"
+      );
+    });
+
+    // TODO: hot start
+    it(
+      gwt`cold start | game is loaded | player auctions a property that requires liquidation`,
+      () => {
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+          'ROLL_DICE',
+          'AUCTION',
+          '30',
+          '50',
+          '$40',
+          '',
+          'MANAGE_PROPERTIES',
+          'MORTGAGE',
+          'ORIENTAL AVENUE',
+          'CANCEL',
+          'CANCEL',
+          'CANCEL',
+          'END_GAME',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [[6], [1], [1, 2]];
+        fillStub(diceStub, diceStubValues);
+
+        const orientalAve = gameState.config.propertyConfig.properties.find(
+          (p) => p.id === 'orientalave'
+        );
+        orientalAve.ownedBy = gameState.players[1].id;
+        gameState.players[1].cash = 40;
+        gameState.players[1].assets = orientalAve.price;
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        expect(gameState.players[0].cash).to.equal(
+          1500,
+          "Player #1's cash was incorrectly deducted after losing the auction"
+        );
+        expect(gameState.players[1].cash).to.equal(
+          40,
+          "Player #2's cash was not correctly deducted after winning the auction"
+        );
+        expect(gameState.players[1].assets).to.equal(
+          60 +
+            orientalAve.price /
+              gameState.config.propertyConfig.mortgageValueMultiplier,
+          "Player #2's assets were not correctly added after winning the auction"
+        );
+      }
+    );
   });
 });
