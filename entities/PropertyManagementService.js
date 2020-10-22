@@ -111,23 +111,34 @@ module.exports = class PropertyManagementService {
     );
   }
 
-  static toggleMortgageOnProperty(
-    gameState,
-    boardProperty,
-    player = gameState.currentPlayer
-  ) {
-    boardProperty.mortgaged = !boardProperty.mortgaged;
+  static mortgage(gameState, boardProperty) {
+    PropertyManagementService.toggleMortgageState(boardProperty);
+    const mortgageBaseCost =
+      boardProperty.price /
+      gameState.config.propertyConfig.mortgageValueMultiplier;
+
+    WealthService.sellAsset(gameState.currentPlayer, mortgageBaseCost);
+  }
+
+  static unmortgage(gameState, boardProperty, chargeInterest = true) {
+    PropertyManagementService.toggleMortgageState(boardProperty);
     const INTEREST_RATE = gameState.config.propertyConfig.interestRate;
     const mortgageBaseCost =
       boardProperty.price /
       gameState.config.propertyConfig.mortgageValueMultiplier;
 
-    if (boardProperty.mortgaged) {
-      WealthService.sellAsset(player, mortgageBaseCost);
-    } else {
-      WealthService.decrement(player, mortgageBaseCost * INTEREST_RATE);
-      WealthService.buyAsset(player, mortgageBaseCost);
+    // in an auction, we want to bypass charging double interest
+    if (chargeInterest) {
+      WealthService.decrement(
+        gameState.currentPlayer,
+        mortgageBaseCost * INTEREST_RATE
+      );
     }
+    WealthService.buyAsset(gameState.currentPlayer, mortgageBaseCost);
+  }
+
+  static toggleMortgageState(boardProperty) {
+    boardProperty.mortgaged = !boardProperty.mortgaged;
   }
 
   static hasMonopoly(gameState, propertyGroup, playerId) {
@@ -137,7 +148,17 @@ module.exports = class PropertyManagementService {
   }
 
   static getAvailableManagementActions(gameState) {
-    let availableActions = ['MORTGAGE'];
+    let availableActions = [];
+
+    const mortgageableProperties = this.getMortgageableProperties(gameState);
+
+    if (mortgageableProperties.filter((p) => p.mortgaged).length > 0) {
+      availableActions.push('UNMORTGAGE');
+    }
+
+    if (mortgageableProperties.filter((p) => !p.mortgaged).length > 0) {
+      availableActions.push('MORTGAGE');
+    }
 
     if (this.getRenoProperties(gameState).length > 0) {
       availableActions.push('RENOVATE');
@@ -149,6 +170,13 @@ module.exports = class PropertyManagementService {
 
     availableActions.push('CANCEL');
     return availableActions;
+  }
+
+  static getMortgageableProperties(gameState) {
+    const { properties } = gameState.config.propertyConfig;
+    return properties.filter(
+      (p) => p.ownedBy === gameState.currentPlayer.id && p.buildings === 0
+    );
   }
 
   static getRenoProperties(gameState) {
@@ -261,6 +289,4 @@ module.exports = class PropertyManagementService {
       .filter((p) => p.ownedBy === player.id)
       .filter((p) => p.buildings === maxBuildingsAllowedOnProperty).length;
   }
-
-  // TODO: AUCTION
 };

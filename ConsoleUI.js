@@ -105,6 +105,20 @@ const consoleUI = (function (readline) {
       ),
     wonAuction: (player, price) =>
       console.log(`Property SOLD to ${player.name} for $${price}`),
+    auctionOfferUnmortgage: (property) =>
+      console.log(
+        `Would you like to unmortgage this property right now? If yes, you can save on the interest rate charge! The cost is $${
+          property.price / 2
+        }`
+      ),
+    skipTurnForBankruptPlayer: (player) =>
+      console.log(
+        `Player ${player.name}'s turn is skipped as they are bankrupt and out of the game.`
+      ),
+    playerLost: (player) =>
+      console.log(
+        `Insufficient funds. Player ${player.name} declares bankruptcy.`
+      ),
   };
 })(require('readline-sync'));
 

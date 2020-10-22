@@ -4,6 +4,7 @@ const sinon = require('sinon');
 const mockUIFactory = require('../mocks/UI');
 
 const { GameState } = require('../../entities/GameState');
+const WealthService = require('../../entities/WealthService');
 const { createPlayerFactory } = require('../testutils');
 const config = require('../../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
@@ -34,11 +35,15 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
     const incomeTaxEvent = 'INCOME_TAX';
     const chanceEvent = 'CHANCE';
     const communityChestEvent = 'COMMUNITY_CHEST';
+    const collectionsEvent = 'COLLECTIONS';
+    const turnValuesUpdatedEvent = 'TURN_VALUES_UPDATED';
 
     let jailSpy;
     let incomeTaxSpy;
     let chanceSpy;
     let communityChestSpy;
+    let collectionsSpy;
+    let turnValuesUpdatedSpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -54,11 +59,15 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
       incomeTaxSpy = sinon.spy();
       chanceSpy = sinon.spy();
       communityChestSpy = sinon.spy();
+      collectionsSpy = sinon.stub();
+      turnValuesUpdatedSpy = sinon.spy();
 
       eventBus.on(jailEvent, jailSpy);
       eventBus.on(incomeTaxEvent, incomeTaxSpy);
       eventBus.on(chanceEvent, chanceSpy);
       eventBus.on(communityChestEvent, communityChestSpy);
+      eventBus.on(collectionsEvent, collectionsSpy);
+      eventBus.on(turnValuesUpdatedEvent, turnValuesUpdatedSpy);
     });
 
     it(`should emit ${jailEvent} event if special property is go to jail`, () => {
@@ -74,7 +83,6 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
         `Go to Jail property did not emit ${jailEvent}`
       );
     });
-
     it(`should emit ${chanceEvent} event if special property is chance`, () => {
       const property = gameState.config.propertyConfig.properties.find(
         (p) => p.id === 'chance1'
@@ -101,7 +109,6 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
         `Community Chest property did not emit ${communityChestEvent}`
       );
     });
-
     it(`should emit ${incomeTaxEvent} event if special property is income tax`, () => {
       const incomeTaxProperty = gameState.config.propertyConfig.properties.find(
         (p) => p.id === 'incometax'
@@ -115,7 +122,6 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
         `Income Tax property did not emit ${incomeTaxEvent}`
       );
     });
-
     it(`should decrement luxury tax if special property is luxury tax`, () => {
       const luxuryTaxProperty = gameState.config.propertyConfig.properties.find(
         (p) => p.id === 'luxurytax'
@@ -144,6 +150,54 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
       ).to.equal(
         true,
         `UI method for ${inputEvent} to display fee was not called`
+      );
+    });
+    it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
+      const luxuryTaxProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.id === 'luxurytax'
+      );
+      gameState.currentBoardProperty = luxuryTaxProperty;
+      gameState.currentPlayer.cash = 0;
+      eventBus.emit(inputEvent);
+
+      expect(gameState.turnValues.subTurn).to.deep.equal(
+        {
+          player: gameState.currentPlayer,
+          charge: gameState.config.luxuryTaxAmount,
+        },
+        `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+      );
+      expect(turnValuesUpdatedSpy.callCount).to.equal(
+        1,
+        `${turnValuesUpdatedEvent} was not called`
+      );
+    });
+    it(`${collectionsEvent} event should be called if current player has no more cash to pay the fine`, () => {
+      const luxuryTaxProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.id === 'luxurytax'
+      );
+      gameState.currentBoardProperty = luxuryTaxProperty;
+      gameState.currentPlayer.cash = 0;
+      eventBus.emit(inputEvent);
+
+      expect(collectionsSpy.callCount).to.equal(
+        1,
+        `${collectionsEvent} was not called`
+      );
+    });
+    it('should not decrement luxury tax if player is bankrupt', () => {
+      const luxuryTaxProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.id === 'luxurytax'
+      );
+      gameState.currentBoardProperty = luxuryTaxProperty;
+      gameState.currentPlayer.cash = 0;
+      const wealthServiceStub = sinon.stub(WealthService, 'buyAsset');
+      gameState.currentPlayer.bankrupt = true;
+
+      eventBus.emit(inputEvent);
+      expect(wealthServiceStub.callCount).to.equal(
+        0,
+        `Player in bankrupt state should not have any operations occur`
       );
     });
   });

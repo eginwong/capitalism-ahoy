@@ -37,5 +37,8 @@ module.exports = function mockUIFactory() {
     playerInAuction: () => true,
     playerOutOfAuction: () => true,
     wonAuction: () => true,
+    skipTurnForBankruptPlayer: () => true,
+    playerLost: () => true,
+    auctionOfferUnmortgage: () => true,
   };
 };

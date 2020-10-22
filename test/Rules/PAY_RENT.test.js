@@ -33,6 +33,11 @@ describe('Rules -> PAY_RENT', () => {
 
   describe('payRent', () => {
     const inputEvent = 'PAY_RENT';
+    const collectionsEvent = 'COLLECTIONS';
+    const turnValuesUpdatedEvent = 'TURN_VALUES_UPDATED';
+
+    let collectionsSpy;
+    let turnValuesUpdatedSpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -48,13 +53,18 @@ describe('Rules -> PAY_RENT', () => {
         roll: [1, 2],
         speedingCounter: 0,
       };
+      collectionsSpy = sinon.stub();
+      turnValuesUpdatedSpy = sinon.spy();
+
+      eventBus.on(collectionsEvent, collectionsSpy);
+      eventBus.on(turnValuesUpdatedEvent, turnValuesUpdatedSpy);
     });
 
     it('should make a call to the UI#payingRent', () => {
       const ownerId = 1;
       const owner = gameState.players.find((p) => p.id === ownerId);
       const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.position === 3
+        (p) => p.id === 'balticave'
       );
       testProperty.ownedBy = ownerId;
       gameState.currentBoardProperty = testProperty;
@@ -75,7 +85,7 @@ describe('Rules -> PAY_RENT', () => {
       const ownerId = 1;
       const owner = gameState.players.find((p) => p.id === ownerId);
       const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.position === 3
+        (p) => p.id === 'balticave'
       );
       testProperty.ownedBy = ownerId;
       gameState.currentBoardProperty = testProperty;
@@ -99,7 +109,7 @@ describe('Rules -> PAY_RENT', () => {
       gameState.players.find((p) => p.name === 'player2').id = 0;
       const owner = gameState.players.find((p) => p.id === ownerId);
       const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.position === 3
+        (p) => p.id === 'balticave'
       );
       testProperty.ownedBy = ownerId;
       gameState.currentBoardProperty = testProperty;
@@ -116,12 +126,74 @@ describe('Rules -> PAY_RENT', () => {
         "Player's cash amount incorrectly decremented in rent exchange"
       );
     });
+    it(`should exchange only what rent cost is available when current player is about to be bankrupt`, () => {
+      const ownerId = 1;
+      const owner = gameState.players.find((p) => p.id === ownerId);
+      const testProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.id === 'balticave'
+      );
+      testProperty.ownedBy = ownerId;
+      gameState.currentBoardProperty = testProperty;
+      const startingOwnerCash = owner.cash;
+      const startingPlayerCash = 3;
+      gameState.currentPlayer.cash = startingPlayerCash;
+
+      eventBus.emit(inputEvent);
+      expect(owner.cash).to.equal(
+        startingOwnerCash + startingPlayerCash,
+        "Owner's cash amount incorrectly incremented in rent exchange when limited funds"
+      );
+      expect(gameState.currentPlayer.cash).to.equal(
+        0,
+        "Player's cash amount incorrectly decremented in rent exchange with limited funds"
+      );
+    });
+    it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
+      const ownerId = 1;
+      const testProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.id === 'balticave'
+      );
+      testProperty.ownedBy = ownerId;
+      gameState.currentBoardProperty = testProperty;
+      const startingPlayerCash = 3;
+      gameState.currentPlayer.cash = startingPlayerCash;
+      eventBus.emit(inputEvent);
+
+      expect(gameState.turnValues.subTurn).to.deep.equal(
+        {
+          player: gameState.currentPlayer,
+          charge: testProperty.rent,
+        },
+        `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+      );
+      expect(turnValuesUpdatedSpy.callCount).to.equal(
+        1,
+        `${turnValuesUpdatedEvent} was not called`
+      );
+    });
+    it(`${collectionsEvent} event should be called if current player has no more cash to pay the fine`, () => {
+      const ownerId = 1;
+      const testProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.id === 'balticave'
+      );
+      testProperty.ownedBy = ownerId;
+      gameState.currentBoardProperty = testProperty;
+      const startingPlayerCash = 3;
+      gameState.currentPlayer.cash = startingPlayerCash;
+      eventBus.emit(inputEvent);
+
+      expect(collectionsSpy.callCount).to.equal(
+        1,
+        `${collectionsEvent} was not called`
+      );
+    });
+
     describe('common properties', () => {
       it(`should charge rent based on buildings if built on the property`, () => {
         const ownerId = 1;
         const owner = gameState.players.find((p) => p.id === ownerId);
         const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.position === 3
+          (p) => p.id === 'balticave'
         );
         testProperty.ownedBy = ownerId;
         testProperty.buildings = 3;
@@ -145,7 +217,7 @@ describe('Rules -> PAY_RENT', () => {
         const ownerId = 1;
         const owner = gameState.players.find((p) => p.id === ownerId);
         const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.position === 3
+          (p) => p.id === 'balticave'
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;

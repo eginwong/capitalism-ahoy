@@ -115,5 +115,46 @@ describe('Rules -> CONTINUE_TURN', () => {
         `${inputEvent} was called ${continueTurnSpy.callCount} times but expected to be 1 times`
       );
     });
+    it(`should emit ${endTurnEvent} event if game is over`, () => {
+      gameState.gameOver = true;
+      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      promptStub.onCall(0).returns(rollDiceEvent);
+
+      eventBus.emit(inputEvent);
+      expect(continueTurnSpy.callCount).to.equal(
+        1,
+        `${inputEvent} was called ${continueTurnSpy.callCount} times but expected to be 1 times`
+      );
+      expect(endTurnSpy.callCount).to.equal(
+        1,
+        `${endTurnEvent} was called ${endTurnSpy.callCount} times but expected to be 1 times`
+      );
+    });
+    it(`should emit ${endTurnEvent} event if player is bankrupt`, () => {
+      gameState.currentPlayer.bankrupt = true;
+      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      promptStub.onCall(0).returns(rollDiceEvent);
+
+      eventBus.emit(inputEvent);
+      expect(continueTurnSpy.callCount).to.equal(
+        1,
+        `${inputEvent} was called ${continueTurnSpy.callCount} times but expected to be 1 times`
+      );
+      expect(endTurnSpy.callCount).to.equal(
+        1,
+        `${endTurnEvent} was called ${endTurnSpy.callCount} times but expected to be 1 times`
+      );
+    });
+    it(`should not call ${inputEvent} if player is bankrupt`, () => {
+      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      promptStub.onCall(0).returns(rollDiceEvent);
+      gameState.currentPlayer.bankrupt = true;
+
+      eventBus.emit(inputEvent);
+      expect(continueTurnSpy.callCount).to.equal(
+        1,
+        `${inputEvent} was called ${continueTurnSpy.callCount} times but expected to be 1 times`
+      );
+    });
   });
 });

@@ -10,6 +10,7 @@ module.exports = {
         cash: 1500,
         assets: 0,
         cards: [],
+        bankrupt: false,
       };
     }
 

@@ -297,7 +297,7 @@ describe('PropertyManagementService', () => {
       );
     });
   });
-  describe('toggleMortgageOnProperty', () => {
+  describe('mortgage', () => {
     let testBoardProperty;
 
     beforeEach(() => {
@@ -308,21 +308,49 @@ describe('PropertyManagementService', () => {
     });
 
     it('toggles property mortgage flag', () => {
-      PropertyManagementService.toggleMortgageOnProperty(
-        gameState,
-        testBoardProperty
-      );
+      PropertyManagementService.mortgage(gameState, testBoardProperty);
       expect(testBoardProperty.mortgaged).to.equal(
         true,
         'Board property mortgaged flag was not toggled to true'
       );
-
-      PropertyManagementService.toggleMortgageOnProperty(
-        gameState,
-        testBoardProperty
+    });
+    it('adds mortgage relief when mortgaging property', () => {
+      const startingCash = gameState.currentPlayer.cash;
+      PropertyManagementService.mortgage(gameState, testBoardProperty);
+      expect(gameState.currentPlayer.cash).to.equal(
+        startingCash +
+          testBoardProperty.price /
+            config.propertyConfig.mortgageValueMultiplier,
+        "Board property mortgage cost was not correctly added to the current player's cash"
       );
+    });
+    it('decrease player assets on mortgage', () => {
+      gameState.currentPlayer.assets = testBoardProperty.price;
+      const startingAssets = gameState.currentPlayer.assets;
+
+      PropertyManagementService.mortgage(gameState, testBoardProperty);
+      expect(gameState.currentPlayer.assets).to.equal(
+        startingAssets -
+          testBoardProperty.price /
+            config.propertyConfig.mortgageValueMultiplier,
+        "Board property mortgage cost was not correctly subtracted from the player's assets"
+      );
+    });
+  });
+  describe('unmortgage', () => {
+    let testBoardProperty;
+
+    beforeEach(() => {
+      testBoardProperty = {
+        mortgaged: false,
+        price: 60,
+      };
+    });
+
+    it('toggles property unmortgage flag', () => {
+      PropertyManagementService.unmortgage(gameState, testBoardProperty);
       expect(testBoardProperty.mortgaged).to.equal(
-        false,
+        true,
         'Board property mortgaged flag was not toggled to false'
       );
     });
@@ -330,10 +358,7 @@ describe('PropertyManagementService', () => {
       testBoardProperty.mortgaged = true;
       const startingCash = gameState.currentPlayer.cash;
       const INTEREST_MULTIPLIER = 1 + config.propertyConfig.interestRate;
-      PropertyManagementService.toggleMortgageOnProperty(
-        gameState,
-        testBoardProperty
-      );
+      PropertyManagementService.unmortgage(gameState, testBoardProperty);
       expect(gameState.currentPlayer.cash).to.equal(
         startingCash -
           (testBoardProperty.price /
@@ -342,42 +367,27 @@ describe('PropertyManagementService', () => {
         "Board property mortgage cost was not correctly charged to the current player's cash"
       );
     });
-    it('adds mortgage relief when mortgaging property', () => {
+    it('charges mortgage cost only when unmortgaging property if called with bypass', () => {
+      testBoardProperty.mortgaged = true;
       const startingCash = gameState.currentPlayer.cash;
-      PropertyManagementService.toggleMortgageOnProperty(
-        gameState,
-        testBoardProperty
-      );
-      expect(gameState.currentPlayer.cash).to.equal(
-        startingCash +
-          testBoardProperty.price /
-            config.propertyConfig.mortgageValueMultiplier,
-        "Board property mortgage cost was not correctly added to the current player's cash"
-      );
-    });
-    it('toggles mortgage for player param', () => {
-      const player2 = gameState.players[1];
-      const startingCash = player2.cash;
-      PropertyManagementService.toggleMortgageOnProperty(
+      const chargeInterest = false;
+      PropertyManagementService.unmortgage(
         gameState,
         testBoardProperty,
-        player2
+        chargeInterest
       );
-      expect(player2.cash).to.equal(
-        startingCash +
+      expect(gameState.currentPlayer.cash).to.equal(
+        startingCash -
           testBoardProperty.price /
             config.propertyConfig.mortgageValueMultiplier,
-        "Board property mortgage cost was not correctly added to the designated player's cash"
+        "Board property mortgage cost was not correctly charged to the current player's cash"
       );
     });
     it('increase player assets on unmortgage', () => {
       testBoardProperty.mortgaged = true;
       const startingAssets = gameState.currentPlayer.assets;
 
-      PropertyManagementService.toggleMortgageOnProperty(
-        gameState,
-        testBoardProperty
-      );
+      PropertyManagementService.unmortgage(gameState, testBoardProperty);
       expect(gameState.currentPlayer.assets).to.equal(
         startingAssets +
           testBoardProperty.price /
@@ -385,19 +395,28 @@ describe('PropertyManagementService', () => {
         "Board property mortgage cost was not correctly added to the player's assets"
       );
     });
-    it('decrease player assets on mortgage', () => {
-      gameState.currentPlayer.assets = testBoardProperty.price;
-      const startingAssets = gameState.currentPlayer.assets;
+  });
+  describe('toggleMortgageState', () => {
+    let testBoardProperty;
 
-      PropertyManagementService.toggleMortgageOnProperty(
-        gameState,
-        testBoardProperty
+    beforeEach(() => {
+      testBoardProperty = {
+        mortgaged: false,
+        price: 60,
+      };
+    });
+
+    it('toggles property mortgaged flag', () => {
+      PropertyManagementService.toggleMortgageState(testBoardProperty);
+      expect(testBoardProperty.mortgaged).to.equal(
+        true,
+        'Board property mortgaged flag was not toggled to true'
       );
-      expect(gameState.currentPlayer.assets).to.equal(
-        startingAssets -
-          testBoardProperty.price /
-            config.propertyConfig.mortgageValueMultiplier,
-        "Board property mortgage cost was not correctly subtracted from the player's assets"
+
+      PropertyManagementService.toggleMortgageState(testBoardProperty);
+      expect(testBoardProperty.mortgaged).to.equal(
+        false,
+        'Board property mortgaged flag was not toggled to false'
       );
     });
   });
@@ -538,9 +557,12 @@ describe('PropertyManagementService', () => {
     });
   });
   describe('getAvailableManagementActions', () => {
-    it('should always return toggle mortgage and cancel', () => {
+    it('should return mortgage if unmortgaged properties are available', () => {
       const MORTGAGE_ACTION = 'MORTGAGE';
       const CANCEL_ACTION = 'CANCEL';
+      const propertyGroup = 'Purple';
+      createMonopoly(gameState, propertyGroup);
+
       expect(
         PropertyManagementService.getAvailableManagementActions(
           gameState
@@ -548,6 +570,33 @@ describe('PropertyManagementService', () => {
       ).to.equal(
         true,
         `Missing ${MORTGAGE_ACTION} in available property management actions`
+      );
+      expect(
+        PropertyManagementService.getAvailableManagementActions(
+          gameState
+        ).includes(CANCEL_ACTION)
+      ).to.equal(
+        true,
+        `Missing ${CANCEL_ACTION} in available property management actions`
+      );
+    });
+    it('should return unmortgage if mortgaged properties are available', () => {
+      const UNMORTGAGE_ACTION = 'UNMORTGAGE';
+      const CANCEL_ACTION = 'CANCEL';
+      const propertyGroup = 'Purple';
+      createMonopoly(gameState, propertyGroup);
+      const expectedProperties = gameState.config.propertyConfig.properties.filter(
+        (p) => p.group === propertyGroup
+      );
+      expectedProperties[0].mortgaged = true;
+
+      expect(
+        PropertyManagementService.getAvailableManagementActions(
+          gameState
+        ).includes(UNMORTGAGE_ACTION)
+      ).to.equal(
+        true,
+        `Missing ${UNMORTGAGE_ACTION} in available property management actions`
       );
       expect(
         PropertyManagementService.getAvailableManagementActions(
@@ -589,6 +638,40 @@ describe('PropertyManagementService', () => {
         true,
         `Missing ${DEMOLISH_ACTION} in available property management actions`
       );
+    });
+  });
+  describe('getMortgageableProperties', () => {
+    it('should return properties that are owned with no buildings', () => {
+      const propertyGroup = 'Purple';
+      createMonopoly(gameState, propertyGroup);
+      const expectedProperties = gameState.config.propertyConfig.properties.filter(
+        (p) => p.group === propertyGroup
+      );
+
+      expect(
+        PropertyManagementService.getMortgageableProperties(gameState)
+      ).to.deep.equal(
+        expectedProperties,
+        'Properties that are not mortgageable are not returned'
+      );
+    });
+    it('should not return properties if none are owned', () => {
+      expect(
+        PropertyManagementService.getMortgageableProperties(gameState)
+      ).to.deep.equal([], 'Properties are returned when none are owned');
+    });
+    it('should not return properties that have buildings', () => {
+      const propertyGroup = 'Purple';
+      createMonopoly(gameState, propertyGroup);
+      const expectedProperties = gameState.config.propertyConfig.properties.filter(
+        (p) => p.group === propertyGroup
+      );
+      expectedProperties[0].buildings = 1;
+      expectedProperties[1].buildings = 2;
+
+      expect(
+        PropertyManagementService.getMortgageableProperties(gameState)
+      ).to.deep.equal([], 'Properties are returned when none are mortgageable');
     });
   });
   describe('getRenoProperties', () => {

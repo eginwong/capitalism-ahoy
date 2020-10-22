@@ -8,6 +8,7 @@ const { createPlayerFactory, createMonopoly } = require('../testutils');
 const config = require('../../config/monopolyConfiguration');
 const Deck = require('../../entities/Components/Deck');
 const PropertyManagementService = require('../../entities/PropertyManagementService');
+const WealthService = require('../../entities/WealthService');
 const { cloneDeep } = require('lodash');
 
 describe('Rules -> COMMUNITY_CHEST', () => {
@@ -39,9 +40,11 @@ describe('Rules -> COMMUNITY_CHEST', () => {
     const movePlayerEvent = 'MOVE_PLAYER';
     const jailEvent = 'JAIL';
     const turnValuesUpdatedEvent = 'TURN_VALUES_UPDATED';
+    const collectionsEvent = 'COLLECTIONS';
 
     let movePlayerSpy;
     let turnValuesUpdatedSpy;
+    let collectionsSpy;
     let jailSpy;
 
     beforeEach(() => {
@@ -62,10 +65,12 @@ describe('Rules -> COMMUNITY_CHEST', () => {
       movePlayerSpy = sinon.spy();
       turnValuesUpdatedSpy = sinon.spy();
       jailSpy = sinon.spy();
+      collectionsSpy = sinon.spy();
 
       eventBus.on(movePlayerEvent, movePlayerSpy);
       eventBus.on(turnValuesUpdatedEvent, turnValuesUpdatedSpy);
       eventBus.on(jailEvent, jailSpy);
+      eventBus.on(collectionsEvent, collectionsSpy);
     });
 
     it('should make a call to the UI#drewCard', () => {
@@ -188,6 +193,55 @@ describe('Rules -> COMMUNITY_CHEST', () => {
           `${inputEvent} for a removefunds card did not remove cash from the player`
         );
       });
+      it(`should not decrement property charge if player is bankrupt`, () => {
+        const expectedCard = gameState.config.communityChestConfig.availableCards.find(
+          (c) => c.action === 'removefunds'
+        );
+        sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
+        gameState.currentPlayer.bankrupt = true;
+        const wealthServiceStub = sinon.stub(WealthService, 'decrement');
+
+        eventBus.emit(inputEvent);
+
+        expect(wealthServiceStub.callCount).to.equal(
+          0,
+          `${inputEvent} for a removefunds card decremented charge even though player is bankrupt`
+        );
+      });
+      it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
+        const expectedCard = gameState.config.communityChestConfig.availableCards.find(
+          (c) => c.action === 'removefunds'
+        );
+        sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
+        gameState.currentPlayer.cash = 0;
+
+        eventBus.emit(inputEvent);
+
+        expect(gameState.turnValues.subTurn).to.deep.equal(
+          {
+            player: gameState.currentPlayer,
+            charge: expectedCard.amount,
+          },
+          `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+        );
+        expect(turnValuesUpdatedSpy.callCount).to.equal(
+          1,
+          `${turnValuesUpdatedEvent} was not called`
+        );
+      });
+      it(`${collectionsEvent} event should be called if current player has no more cash to pay the fine`, () => {
+        const expectedCard = gameState.config.communityChestConfig.availableCards.find(
+          (c) => c.action === 'removefunds'
+        );
+        sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
+        gameState.currentPlayer.cash = 0;
+        eventBus.emit(inputEvent);
+
+        expect(collectionsSpy.callCount).to.equal(
+          1,
+          `${collectionsEvent} was not called`
+        );
+      });
     });
     describe('jail', () => {
       it(`should emit ${jailEvent}`, () => {
@@ -236,6 +290,86 @@ describe('Rules -> COMMUNITY_CHEST', () => {
           `${inputEvent} for a propertycharges card did not remove correct cash from the player`
         );
       });
+      it(`should not decrement property charge if player is bankrupt`, () => {
+        const expectedCard = gameState.config.communityChestConfig.availableCards.find(
+          (c) => c.action === 'propertycharges'
+        );
+        sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
+        const testProperties = gameState.config.propertyConfig.properties.filter(
+          (p) => p.group === 'Purple'
+        );
+        createMonopoly(
+          gameState,
+          testProperties[0].group,
+          gameState.currentPlayer.id
+        );
+        testProperties[0].buildings = 1;
+        gameState.currentPlayer.bankrupt = true;
+        const wealthServiceStub = sinon.stub(WealthService, 'decrement');
+
+        eventBus.emit(inputEvent);
+
+        expect(wealthServiceStub.callCount).to.equal(
+          0,
+          `${inputEvent} for a propertycharges card decremented charge even though player is bankrupt`
+        );
+      });
+      it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
+        const expectedCard = gameState.config.communityChestConfig.availableCards.find(
+          (c) => c.action === 'propertycharges'
+        );
+        sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
+        const testProperties = gameState.config.propertyConfig.properties.filter(
+          (p) => p.group === 'Purple'
+        );
+        createMonopoly(
+          gameState,
+          testProperties[0].group,
+          gameState.currentPlayer.id
+        );
+        testProperties[0].buildings = 1;
+        gameState.currentPlayer.cash = 0;
+
+        eventBus.emit(inputEvent);
+
+        const expectedHouseCharge =
+          PropertyManagementService.getConstructedHouses(gameState) *
+          expectedCard.buildings;
+
+        expect(gameState.turnValues.subTurn).to.deep.equal(
+          {
+            player: gameState.currentPlayer,
+            charge: expectedHouseCharge,
+          },
+          `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+        );
+        expect(turnValuesUpdatedSpy.callCount).to.equal(
+          1,
+          `${turnValuesUpdatedEvent} was not called`
+        );
+      });
+      it(`${collectionsEvent} event should be called if current player has no more cash to pay the fine`, () => {
+        const expectedCard = gameState.config.communityChestConfig.availableCards.find(
+          (c) => c.action === 'propertycharges'
+        );
+        sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
+        const testProperties = gameState.config.propertyConfig.properties.filter(
+          (p) => p.group === 'Purple'
+        );
+        createMonopoly(
+          gameState,
+          testProperties[0].group,
+          gameState.currentPlayer.id
+        );
+        testProperties[0].buildings = 1;
+        gameState.currentPlayer.cash = 0;
+        eventBus.emit(inputEvent);
+
+        expect(collectionsSpy.callCount).to.equal(
+          1,
+          `${collectionsEvent} was not called`
+        );
+      });
     });
     describe('addfundsfromplayers', () => {
       it(`should add funds by amount * # of players, and take cash from all other players`, () => {
@@ -261,6 +395,89 @@ describe('Rules -> COMMUNITY_CHEST', () => {
             );
           }
         }
+      });
+      it(`should add funds by amount and take cash from all other players that are not bankrupt`, () => {
+        const startingCash = gameState.currentPlayer.cash;
+        const startingCashOfOtherPlayers = gameState.players[1].cash;
+        const expectedCard = gameState.config.communityChestConfig.availableCards.find(
+          (c) => c.action === 'addfundsfromplayers'
+        );
+        sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
+        const otherPlayersCount = gameState.players.length - 2; // including bankrupt player
+        gameState.players[2].bankrupt = true;
+
+        eventBus.emit(inputEvent);
+
+        expect(gameState.currentPlayer.cash).to.equal(
+          startingCash + otherPlayersCount * expectedCard.amount,
+          `${inputEvent} for an addfundsfromplayers card did not add correct cash to the player`
+        );
+        for (let i = 0; i < gameState.players.length; i++) {
+          if (
+            gameState.players[i].id !== gameState.currentPlayer.id &&
+            !gameState.players[i].bankrupt
+          ) {
+            expect(gameState.players[i].cash).to.equal(
+              startingCashOfOtherPlayers - expectedCard.amount,
+              `${inputEvent} for an addfundsfromplayers card did not remove correct cash from each other player`
+            );
+          }
+        }
+      });
+      it(`should only remove funds by amount player has left if player is bankrupt`, () => {
+        const startingCash = gameState.currentPlayer.cash;
+        const startingPlayer2Cash = 25;
+        gameState.players[1].cash = startingPlayer2Cash;
+        const expectedCard = gameState.config.communityChestConfig.availableCards.find(
+          (c) => c.action === 'addfundsfromplayers'
+        );
+        sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
+
+        eventBus.emit(inputEvent);
+        gameState.turnValues.subTurn = null;
+
+        expect(gameState.currentPlayer.cash).to.equal(
+          startingCash + startingPlayer2Cash + expectedCard.amount,
+          `${inputEvent} for a addfundsfromplayers card did not add correct cash to the player`
+        );
+        expect(gameState.players[1].cash).to.equal(
+          0,
+          `${inputEvent} for a addfundsfromplayers card did not remove correct cash from player1`
+        );
+      });
+      it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
+        const expectedCard = gameState.config.communityChestConfig.availableCards.find(
+          (c) => c.action === 'addfundsfromplayers'
+        );
+        sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
+        gameState.players[1].cash = 0;
+
+        eventBus.emit(inputEvent);
+
+        expect(gameState.turnValues.subTurn).to.deep.equal(
+          {
+            player: gameState.players[1],
+            charge: expectedCard.amount,
+          },
+          `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+        );
+        expect(turnValuesUpdatedSpy.callCount).to.equal(
+          1,
+          `${turnValuesUpdatedEvent} was not called`
+        );
+      });
+      it(`${collectionsEvent} event should be called if current player has no more cash to pay the fine`, () => {
+        const expectedCard = gameState.config.communityChestConfig.availableCards.find(
+          (c) => c.action === 'addfundsfromplayers'
+        );
+        sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
+        gameState.players[1].cash = 0;
+        eventBus.emit(inputEvent);
+
+        expect(collectionsSpy.callCount).to.equal(
+          1,
+          `${collectionsEvent} was not called`
+        );
       });
     });
   });

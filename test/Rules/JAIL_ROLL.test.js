@@ -96,7 +96,7 @@ describe('Rules -> JAIL_ROLL', () => {
         `${payFineEvent} event was called`
       );
     });
-    it(`should emit ${updatePositionWithRollEvent} event if player is not in jail`, () => {
+    it(`should emit ${updatePositionWithRollEvent} event if player is not in jail or bankrupt`, () => {
       gameState.turnValues = {
         roll: [1, 1],
       };
@@ -104,6 +104,28 @@ describe('Rules -> JAIL_ROLL', () => {
       expect(updatePositionWithRollSpy.callCount).to.equal(
         1,
         `${updatePositionWithRollEvent} event was not called`
+      );
+    });
+    it(`should not emit ${updatePositionWithRollEvent} event if player is in jail`, () => {
+      gameState.turnValues = {
+        roll: [1, 2],
+      };
+      gameState.currentPlayer.jailed = 0;
+      eventBus.emit(inputEvent);
+      expect(updatePositionWithRollSpy.callCount).to.equal(
+        0,
+        `${updatePositionWithRollEvent} event was called`
+      );
+    });
+    it(`should not emit ${updatePositionWithRollEvent} event if player is bankrupt`, () => {
+      gameState.turnValues = {
+        roll: [1, 1],
+      };
+      gameState.currentPlayer.bankrupt = true;
+      eventBus.emit(inputEvent);
+      expect(updatePositionWithRollSpy.callCount).to.equal(
+        0,
+        `${updatePositionWithRollEvent} event was called`
       );
     });
   });

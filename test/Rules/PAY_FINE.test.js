@@ -27,11 +27,13 @@ describe('Rules -> PAY_FINE', () => {
     sinon.restore();
   });
 
-  describe('moveRoll', () => {
+  describe('payFine', () => {
     const inputEvent = 'PAY_FINE';
-    const liquidationEvent = 'LIQUIDATION';
+    const collectionsEvent = 'COLLECTIONS';
+    const turnValuesUpdatedEvent = 'TURN_VALUES_UPDATED';
 
-    let liquidationStub;
+    let collectionsSpy;
+    let turnValuesUpdatedSpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -47,9 +49,11 @@ describe('Rules -> PAY_FINE', () => {
         roll: [1, 2],
         speedingCounter: 0,
       };
-      liquidationStub = sinon.stub();
+      collectionsSpy = sinon.stub();
+      turnValuesUpdatedSpy = sinon.spy();
 
-      eventBus.on(liquidationEvent, liquidationStub);
+      eventBus.on(collectionsEvent, collectionsSpy);
+      eventBus.on(turnValuesUpdatedEvent, turnValuesUpdatedSpy);
     });
 
     it('should make a call to the UI#payFine', () => {
@@ -77,17 +81,29 @@ describe('Rules -> PAY_FINE', () => {
         `Player did not lose $${config.fineAmount}`
       );
     });
-    it(`${liquidationEvent} event should be called if current player has no more cash to pay the fine`, () => {
+    it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
       gameState.currentPlayer.cash = 0;
-      liquidationStub.callsFake(() => {
-        gameState.currentPlayer.cash += 50;
-      });
-
       eventBus.emit(inputEvent);
 
-      expect(liquidationStub.callCount).to.equal(
+      expect(gameState.turnValues.subTurn).to.deep.equal(
+        {
+          player: gameState.currentPlayer,
+          charge: gameState.config.fineAmount,
+        },
+        `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+      );
+      expect(turnValuesUpdatedSpy.callCount).to.equal(
         1,
-        `${liquidationEvent} was not called`
+        `${turnValuesUpdatedEvent} was not called`
+      );
+    });
+    it(`${collectionsEvent} event should be called if current player has no more cash to pay the fine`, () => {
+      gameState.currentPlayer.cash = 0;
+      eventBus.emit(inputEvent);
+
+      expect(collectionsSpy.callCount).to.equal(
+        1,
+        `${collectionsEvent} was not called`
       );
     });
   });
