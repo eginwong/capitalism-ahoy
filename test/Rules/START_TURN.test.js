@@ -31,8 +31,13 @@ describe('Rules -> START_TURN', () => {
     const inputEvent = 'START_TURN';
     const turnValuesResetEvent = 'TURN_VALUES_RESET';
     const continueTurnEvent = 'CONTINUE_TURN';
+    const endTurnEvent = 'END_TURN';
+    const endGameEvent = 'END_GAME';
+
     let continueTurnSpy;
     let turnValuesResetSpy;
+    let endTurnSpy;
+    let endGameSpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -46,8 +51,13 @@ describe('Rules -> START_TURN', () => {
       );
       continueTurnSpy = sinon.spy();
       turnValuesResetSpy = sinon.spy();
+      endTurnSpy = sinon.spy();
+      endGameSpy = sinon.spy();
+
       eventBus.on(continueTurnEvent, continueTurnSpy);
       eventBus.on(turnValuesResetEvent, turnValuesResetSpy);
+      eventBus.on(endTurnEvent, endTurnSpy);
+      eventBus.on(endGameEvent, endGameSpy);
     });
 
     it(`should emit ${continueTurnEvent} event`, () => {
@@ -102,6 +112,35 @@ describe('Rules -> START_TURN', () => {
       expect(uiSpy.calledOnceWithExactly(gameState.currentPlayer)).to.equal(
         true,
         `UI method #playerDetails for ${inputEvent} was not called`
+      );
+    });
+    it('should end turn immediately if player is bankrupt', () => {
+      gameState.currentPlayer.bankrupt = true;
+      eventBus.emit(inputEvent);
+
+      expect(endTurnSpy.callCount).to.equal(
+        1,
+        `${endTurnEvent} event was not called when player was bankrupt`
+      );
+    });
+    it('should call UI#skipTurnForBankruptPlayer if player is bankrupt', () => {
+      gameState.currentPlayer.bankrupt = true;
+      const uiSpy = sinon.spy();
+      userInterface.skipTurnForBankruptPlayer = uiSpy;
+      eventBus.emit(inputEvent);
+
+      expect(uiSpy.calledOnceWithExactly(gameState.currentPlayer)).to.equal(
+        true,
+        `UI method #skipTurnForBankruptPlayer for ${inputEvent} was not called when player is bankrupt`
+      );
+    });
+    it(`should emit ${endGameEvent} event if game is over`, () => {
+      gameState.gameOver = true;
+      eventBus.emit(inputEvent);
+
+      expect(endGameSpy.callCount).to.equal(
+        1,
+        `${inputEvent} event did not end game`
       );
     });
   });

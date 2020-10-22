@@ -31,14 +31,24 @@ module.exports = {
       notify('TURN_VALUES_RESET');
     },
     ({ UI }, gameState) => UI.startTurn(gameState.currentPlayer),
-    // TODO: add bankruptcy check here and END_TURN if true
-    // TODO: problem if we keep player is that the turn order increments an extra time going onwards
+    ({ UI, notify }, gameState) => {
+      if (gameState.currentPlayer.bankrupt) {
+        UI.skipTurnForBankruptPlayer(gameState.currentPlayer);
+        notify('END_TURN');
+      }
+    },
     (_, gameState) =>
       (gameState.currentBoardProperty = require('../PropertyManagementService').getCurrentPlayerBoardProperty(
         gameState
       )),
     ({ UI }, gameState) => UI.playerDetails(gameState.currentPlayer),
-    ({ notify }) => notify('CONTINUE_TURN'),
+    ({ notify }, gameState) => {
+      if (gameState.gameOver) {
+        notify('END_GAME');
+      } else {
+        notify('CONTINUE_TURN');
+      }
+    },
   ],
   CONTINUE_TURN: [
     ({ notify, UI }, gameState) => {
@@ -52,12 +62,18 @@ module.exports = {
         UI.unknownAction();
       }
 
+      if (action === 'END_TURN' || action === 'END_GAME') return;
+
       // check if we can end turn or continue turn here
       const newlyInJail =
         gameState.turnValues.roll && gameState.currentPlayer.jailed === 0;
-      if (newlyInJail) {
+      if (
+        newlyInJail ||
+        gameState.currentPlayer.bankrupt ||
+        gameState.gameOver
+      ) {
         notify('END_TURN');
-      } else if (action !== 'END_TURN' && action !== 'END_GAME') {
+      } else {
         notify('CONTINUE_TURN');
       }
     },
@@ -116,7 +132,10 @@ module.exports = {
       }
     },
     ({ notify }, gameState) => {
-      if (gameState.currentPlayer.jailed === -1) {
+      if (
+        gameState.currentPlayer.jailed === -1 &&
+        !gameState.currentPlayer.bankrupt
+      ) {
         notify('UPDATE_POSITION_WITH_ROLL');
       }
     },
@@ -172,14 +191,17 @@ module.exports = {
   ],
   PAY_FINE: [
     ({ UI }) => UI.payFine(),
-    ({ UI, notify }, gameState) => {
-      // TODO: add extra check if bankrupt and out of the game
-      while (gameState.currentPlayer.cash < gameState.config.fineAmount) {
-        UI.playerShortOnFunds(
-          gameState.currentPlayer.cash,
-          gameState.config.fineAmount
-        );
-        notify('LIQUIDATION');
+    ({ notify }, gameState) => {
+      if (gameState.currentPlayer.cash < gameState.config.fineAmount) {
+        require('./updateTurnValues')({
+          subTurn: {
+            player: gameState.currentPlayer,
+            charge: gameState.config.fineAmount,
+          },
+        })(gameState);
+        notify('TURN_VALUES_UPDATED');
+
+        notify('COLLECTIONS');
       }
 
       require('../WealthService').decrement(
@@ -258,14 +280,19 @@ module.exports = {
     ({ UI, notify }, gameState) => {
       const boardProperty = gameState.currentBoardProperty;
 
-      while (gameState.currentPlayer.cash < boardProperty.price) {
-        UI.playerShortOnFunds(
-          gameState.currentPlayer.cash,
-          boardProperty.price
-        );
-        notify('LIQUIDATION');
+      if (gameState.currentPlayer.cash < boardProperty.price) {
+        require('./updateTurnValues')({
+          subTurn: {
+            player: gameState.currentPlayer,
+            charge: boardProperty.price,
+          },
+        })(gameState);
+        notify('TURN_VALUES_UPDATED');
+
+        notify('COLLECTIONS');
       }
-      // TODO: add cancel option here
+
+      if (gameState.currentPlayer.bankrupt) return;
 
       require('../WealthService').buyAsset(
         gameState.currentPlayer,
@@ -276,11 +303,12 @@ module.exports = {
         boardProperty,
         gameState.currentPlayer.id
       );
+
+      UI.propertyBought();
     },
-    ({ UI }) => UI.propertyBought(),
   ],
   PAY_RENT: [
-    ({ UI }, gameState) => {
+    ({ UI, notify }, gameState) => {
       const boardProperty = gameState.currentBoardProperty;
       const owner = gameState.players.find(
         (p) => p.id === boardProperty.ownedBy
@@ -291,13 +319,27 @@ module.exports = {
         boardProperty
       );
 
-      // TODO: WEALTHSERVICE: Check Liquidity
-      // TODO: add bankruptcy check to explain what will happen
+      if (gameState.currentPlayer.cash < rentAmount) {
+        require('./updateTurnValues')({
+          subTurn: {
+            player: gameState.currentPlayer,
+            charge: rentAmount,
+          },
+        })(gameState);
+        notify('TURN_VALUES_UPDATED');
+
+        notify('COLLECTIONS');
+      }
+
       // pay out what cash is leftover
+      let actualRentAmount =
+        rentAmount < gameState.currentPlayer.cash
+          ? rentAmount
+          : gameState.currentPlayer.cash;
       require('../WealthService').exchange(
         gameState.currentPlayer,
         owner,
-        rentAmount
+        actualRentAmount
       );
 
       UI.payingRent(gameState.currentPlayer, owner, rentAmount);
@@ -373,6 +415,36 @@ module.exports = {
   ],
   MORTGAGE: [
     ({ notify, UI }, gameState) => {
+      // can only mortgage or unmortgage properties with 0 buildings
+      const mortgageAbleProps = require('../PropertyManagementService')
+        .getMortgageableProperties(gameState)
+        .filter((p) => !p.mortgaged);
+      const propSelection = require('../PlayerActions').prompt(
+        { notify, UI },
+        gameState,
+        [...mortgageAbleProps.map((p) => p.name.toUpperCase()), 'CANCEL']
+      );
+
+      if (propSelection === 'CANCEL') return;
+
+      if (propSelection) {
+        const mortgageProp = mortgageAbleProps.find(
+          (p) => p.name.toUpperCase() === propSelection
+        );
+
+        require('../PropertyManagementService').mortgage(
+          gameState,
+          mortgageProp
+        );
+      } else {
+        UI.unknownAction();
+      }
+
+      notify('MORTGAGE');
+    },
+  ],
+  UNMORTGAGE: [
+    ({ notify, UI }, gameState) => {
       const player = gameState.currentPlayer;
       const {
         interestRate,
@@ -381,20 +453,19 @@ module.exports = {
 
       const INTEREST_RATE_MULTIPLIER = 1 + interestRate;
       // can only mortgage or unmortgage properties with 0 buildings
-      const mortgageAbleProps = require('../PropertyManagementService')
-        .getProperties(gameState)
-        .filter((p) => p.ownedBy === player.id && p.buildings === 0);
+      const unmortgageAbleProps = require('../PropertyManagementService')
+        .getMortgageableProperties(gameState)
+        .filter((p) => p.mortgaged);
       const propSelection = require('../PlayerActions').prompt(
         { notify, UI },
         gameState,
-        [...mortgageAbleProps.map((p) => p.name.toUpperCase()), 'CANCEL']
+        [...unmortgageAbleProps.map((p) => p.name.toUpperCase()), 'CANCEL']
       );
 
-      // TODO: DISPLAY DIFFERENTLY IF MORTGAGED OR NOT
       if (propSelection === 'CANCEL') return;
 
       if (propSelection) {
-        const mortgageProp = mortgageAbleProps.find(
+        const mortgageProp = unmortgageAbleProps.find(
           (p) => p.name.toUpperCase() === propSelection
         );
         if (
@@ -405,7 +476,7 @@ module.exports = {
         ) {
           UI.noCashMustLiquidate(gameState.currentPlayer);
         } else {
-          require('../PropertyManagementService').toggleMortgageOnProperty(
+          require('../PropertyManagementService').unmortgage(
             gameState,
             mortgageProp
           );
@@ -414,7 +485,7 @@ module.exports = {
         UI.unknownAction();
       }
 
-      notify('MORTGAGE');
+      notify('UNMORTGAGE');
     },
   ],
   RESOLVE_SPECIAL_PROPERTY: [
@@ -434,13 +505,25 @@ module.exports = {
           notify('JAIL');
           break;
         case 'luxurytax':
-          // potentially entering negative wealth here, will be resolved in subsequent rule
-          // TODO: WEALTHSERVICE: Check Liquidity
-          // TODO: add bankruptcy check to explain what will happen
-          // TODO: create a separate rule to handle decrement + liquidity and bankruptcy
+          const { luxuryTaxAmount } = gameState.config;
+
+          if (gameState.currentPlayer.cash < luxuryTaxAmount) {
+            require('./updateTurnValues')({
+              subTurn: {
+                player: gameState.currentPlayer,
+                charge: luxuryTaxAmount,
+              },
+            })(gameState);
+            notify('TURN_VALUES_UPDATED');
+
+            notify('COLLECTIONS');
+          }
+
+          if (gameState.currentPlayer.bankrupt) return;
+
           require('../WealthService').decrement(
             gameState.currentPlayer,
-            gameState.config.luxuryTaxAmount
+            luxuryTaxAmount
           );
           UI.luxuryTaxPaid(gameState.config.luxuryTaxAmount);
           break;
@@ -458,6 +541,7 @@ module.exports = {
     ({ UI, notify }, gameState) => {
       const FIXED = 'FIXED';
       const VARIABLE = 'VARIABLE';
+      const { incomeTaxAmount, incomeTaxRate } = gameState.config;
 
       const paymentSelection = require('../PlayerActions').prompt(
         { notify, UI },
@@ -465,20 +549,44 @@ module.exports = {
         [FIXED, VARIABLE]
       );
 
-      // potentially entering negative wealth here, will be resolved in subsequent rule
-      // TODO: WEALTHSERVICE: Check Liquidity
-      // TODO: add bankruptcy check to explain what will happen
       if (paymentSelection === FIXED) {
+        if (gameState.currentPlayer.cash < incomeTaxAmount) {
+          require('./updateTurnValues')({
+            subTurn: {
+              player: gameState.currentPlayer,
+              charge: incomeTaxAmount,
+            },
+          })(gameState);
+          notify('TURN_VALUES_UPDATED');
+
+          notify('COLLECTIONS');
+        }
+        if (gameState.currentPlayer.bankrupt) return;
+
         require('../WealthService').decrement(
           gameState.currentPlayer,
-          gameState.config.incomeTaxAmount
+          incomeTaxAmount
         );
-        UI.incomeTaxPaid(gameState.config.incomeTaxAmount);
+        UI.incomeTaxPaid(incomeTaxAmount);
       } else if (paymentSelection === VARIABLE) {
         const netWorth = require('../WealthService').calculateNetWorth(
           gameState.currentPlayer
         );
-        const fee = (gameState.config.incomeTaxRate * netWorth).toFixed(2);
+        const fee = (incomeTaxRate * netWorth).toFixed(2);
+
+        if (gameState.currentPlayer.cash < fee) {
+          require('./updateTurnValues')({
+            subTurn: {
+              player: gameState.currentPlayer,
+              charge: fee,
+            },
+          })(gameState);
+          notify('TURN_VALUES_UPDATED');
+
+          notify('COLLECTIONS');
+        }
+        if (gameState.currentPlayer.bankrupt) return;
+
         require('../WealthService').decrement(gameState.currentPlayer, fee);
         UI.incomeTaxPaid(fee);
       } else {
@@ -579,25 +687,69 @@ module.exports = {
           break;
         }
         case 'propertycharges': {
-          // TODO: check liquidation
           const houses = pmsService.getConstructedHouses(gameState);
           const hotels = pmsService.getConstructedHotels(gameState);
-          wealthService.decrement(
-            player,
-            houses * card.buildings + hotels * card.hotels
-          );
+          const charge = houses * card.buildings + hotels * card.hotels;
+
+          if (player.cash < charge) {
+            require('./updateTurnValues')({
+              subTurn: {
+                player: gameState.currentPlayer,
+                charge,
+              },
+            })(gameState);
+            notify('TURN_VALUES_UPDATED');
+
+            notify('COLLECTIONS');
+          }
+          if (gameState.currentPlayer.bankrupt) return;
+
+          wealthService.decrement(gameState.currentPlayer, charge);
           break;
         }
         case 'removefunds': {
-          // TODO: check liquidation
-          wealthService.decrement(player, card.amount);
+          if (player.cash < card.amount) {
+            require('./updateTurnValues')({
+              subTurn: {
+                player: gameState.currentPlayer,
+                charge: card.amount,
+              },
+            })(gameState);
+            notify('TURN_VALUES_UPDATED');
+
+            notify('COLLECTIONS');
+          }
+          if (gameState.currentPlayer.bankrupt) return;
+
+          wealthService.decrement(gameState.currentPlayer, card.amount);
           break;
         }
         case 'removefundstoplayers': {
-          // TODO: check liquidation
           for (let i = 0; i < gameState.players.length; i++) {
-            if (gameState.players[i].id !== player.id) {
-              wealthService.exchange(player, gameState.players[i], card.amount);
+            if (
+              gameState.players[i].id !== player.id &&
+              !gameState.players[i].bankrupt
+            ) {
+              if (player.cash < card.amount) {
+                require('./updateTurnValues')({
+                  subTurn: {
+                    player: player,
+                    charge: card.amount,
+                  },
+                })(gameState);
+                notify('TURN_VALUES_UPDATED');
+
+                notify('COLLECTIONS');
+              }
+              let amountOwed =
+                card.amount < gameState.currentPlayer.cash
+                  ? card.amount
+                  : gameState.currentPlayer.cash;
+              wealthService.exchange(
+                gameState.currentPlayer,
+                gameState.players[i],
+                amountOwed
+              );
             }
           }
           break;
@@ -651,25 +803,66 @@ module.exports = {
           break;
         }
         case 'propertycharges': {
-          // TODO: check liquidation
           const houses = pmsService.getConstructedHouses(gameState);
           const hotels = pmsService.getConstructedHotels(gameState);
-          wealthService.decrement(
-            player,
-            houses * card.buildings + hotels * card.hotels
-          );
+          const charge = houses * card.buildings + hotels * card.hotels;
+
+          if (player.cash < charge) {
+            require('./updateTurnValues')({
+              subTurn: {
+                player: gameState.currentPlayer,
+                charge,
+              },
+            })(gameState);
+            notify('TURN_VALUES_UPDATED');
+
+            notify('COLLECTIONS');
+          }
+
+          if (gameState.currentPlayer.bankrupt) return;
+
+          wealthService.decrement(player, charge);
           break;
         }
         case 'removefunds': {
-          // TODO: check liquidation
+          if (player.cash < card.amount) {
+            require('./updateTurnValues')({
+              subTurn: {
+                player: gameState.currentPlayer,
+                charge: card.amount,
+              },
+            })(gameState);
+            notify('TURN_VALUES_UPDATED');
+
+            notify('COLLECTIONS');
+          }
+          if (gameState.currentPlayer.bankrupt) return;
+
           wealthService.decrement(player, card.amount);
           break;
         }
         case 'addfundsfromplayers': {
-          // TODO: check liquidation
           for (let i = 0; i < gameState.players.length; i++) {
-            if (gameState.players[i].id !== player.id) {
-              wealthService.exchange(gameState.players[i], player, card.amount);
+            let targetPlayer = gameState.players[i];
+
+            if (targetPlayer.id !== player.id && !targetPlayer.bankrupt) {
+              if (targetPlayer.cash < card.amount) {
+                require('./updateTurnValues')({
+                  subTurn: {
+                    player: gameState.players[i],
+                    charge: card.amount,
+                  },
+                })(gameState);
+                notify('TURN_VALUES_UPDATED');
+
+                notify('COLLECTIONS');
+              }
+
+              let amountOwed =
+                card.amount < gameState.players[i].cash
+                  ? card.amount
+                  : gameState.players[i].cash;
+              wealthService.exchange(gameState.players[i], player, amountOwed);
             }
           }
           break;
@@ -703,7 +896,6 @@ module.exports = {
     },
   ],
   //   TRADE,
-  //   BANKRUPTCY: () => gameState.currentPlayerActions["END_TURN"].execute(),
   AUCTION: [
     ({ UI }) => UI.auctionInstructions(),
     ({ UI, notify }, gameState) => {
@@ -724,6 +916,7 @@ module.exports = {
       );
 
       const availablePlayers = gameState.players
+        .filter((p) => !p.bankrupt)
         .map((player) => ({
           ...player,
           liquidity: calculateLiquidity(
@@ -745,9 +938,7 @@ module.exports = {
           : { buyer: availablePlayers[0], price: baseCost };
       UI.wonAuction(buyer, price);
 
-      while (buyer.cash < price) {
-        UI.playerShortOnFunds(buyer.cash, price);
-
+      if (buyer.cash < price) {
         require('./updateTurnValues')({
           subTurn: {
             player: buyer,
@@ -756,22 +947,11 @@ module.exports = {
         })(gameState);
         notify('TURN_VALUES_UPDATED');
 
-        notify('LIQUIDATION');
-        // re-set winning player after liquidation is run
-        buyer = gameState.turnValues.subTurn.player;
-
-        require('./updateTurnValues')({
-          subTurn: null,
-        })(gameState);
-        notify('TURN_VALUES_UPDATED');
+        notify('COLLECTIONS');
       }
-      // TODO: prompt for unmortgage if mortgaged?
 
-      // need to reset values of winning player, otherwise the liquidation changes are not persisted
+      // need to reset values of winning player, otherwise the collections are not persisted
       let winningPlayer = gameState.players.find((p) => p.id === buyer.id);
-      winningPlayer.cash = buyer.cash;
-      winningPlayer.assets = buyer.assets;
-      winningPlayer.cards = buyer.cards;
 
       require('../WealthService').buyAsset(
         winningPlayer,
@@ -781,10 +961,142 @@ module.exports = {
           : boardProperty.price
       );
 
+      if (boardProperty.mortgaged) {
+        UI.auctionOfferUnmortgage(boardProperty);
+        // check prompt here
+        const unmortgage = require('../PlayerActions').prompt(
+          { UI },
+          gameState,
+          ['Y', 'N']
+        );
+
+        if (unmortgage === 'Y') {
+          require('../PropertyManagementService').unmortgage(
+            gameState,
+            boardProperty,
+            false
+          );
+        }
+      }
+
       require('../PropertyManagementService').changeOwner(
         boardProperty,
         winningPlayer.id
       );
+    },
+  ],
+  COLLECTIONS: [
+    ({ UI, notify }, gameState) => {
+      const { subTurn } = gameState.turnValues;
+      if (!subTurn) return;
+      if (!subTurn.player || !subTurn.charge) return;
+
+      const { player, charge } = subTurn;
+
+      const liquidity = require('../WealthService').calculateLiquidity(
+        gameState,
+        gameState.config.propertyConfig.properties,
+        player
+      );
+      if (liquidity < charge) {
+        notify('BANKRUPTCY');
+      } else {
+        while (player.cash < charge) {
+          UI.playerShortOnFunds(player.cash, charge);
+
+          notify('LIQUIDATION');
+        }
+      }
+      // update player
+      const updatedPlayer = gameState.players.find((p) => p.id === player.id);
+      updatedPlayer.cash = player.cash;
+      updatedPlayer.assets = player.assets;
+      updatedPlayer.cards = player.cards;
+    },
+    ({ notify }, gameState) => {
+      // returning to current player for regular game flow
+      require('./updateTurnValues')({
+        subTurn: null,
+      })(gameState);
+      notify('TURN_VALUES_UPDATED');
+    },
+  ],
+  BANKRUPTCY: [
+    ({ UI }, gameState) => {
+      require('../PlayerActions').prompt({ UI }, gameState, [
+        'End of the line. Declare bankruptcy?',
+      ]);
+      UI.playerLost(gameState.currentPlayer);
+
+      // must update the player from gamestate directly
+      gameState.players.find(
+        (p) => p.id === gameState.currentPlayer.id
+      ).bankrupt = true;
+      gameState.gameOver =
+        gameState.players.filter((p) => !p.bankrupt).length <= 1;
+    },
+    (_, gameState) => {
+      // discard all cards remaining
+      const player = gameState.currentPlayer;
+      if (player.cards.length === 0) return;
+
+      const { chanceConfig, communityChestConfig } = gameState.config;
+      while (player.cards.length > 0) {
+        const card = player.cards.pop();
+        if (card.type === 'chance') {
+          chanceConfig.discardedCards = require('../Components/Deck').discard(
+            card,
+            chanceConfig.discardedCards
+          );
+        }
+        if (card.type === 'communitychest') {
+          communityChestConfig.discardedCards = require('../Components/Deck').discard(
+            card,
+            communityChestConfig.discardedCards
+          );
+        }
+      }
+    },
+    (_, gameState) => {
+      // demolish all properties
+      let demoProps;
+      do {
+        demoProps = require('../PropertyManagementService').getDemoProperties(
+          gameState
+        );
+
+        demoProps.forEach((p) =>
+          require('../PropertyManagementService').demolish(gameState, p)
+        );
+      } while (demoProps.length !== 0);
+    },
+    (_, gameState) => {
+      // mortgage all remaining properties
+      const player = gameState.currentPlayer;
+      const mortgageAbleProps = require('../PropertyManagementService')
+        .getProperties(gameState)
+        .filter(
+          (p) => p.ownedBy === player.id && p.buildings === 0 && !p.mortgaged
+        );
+
+      for (let p of mortgageAbleProps) {
+        require('../PropertyManagementService').mortgage(gameState, p);
+      }
+    },
+    ({ notify }, gameState) => {
+      // short-circuit if possible
+      if (gameState.gameOver) return;
+
+      // auction off all remaining properties
+      const player = gameState.currentPlayer;
+      const playerProps = require('../PropertyManagementService')
+        .getProperties(gameState)
+        .filter((p) => p.ownedBy === player.id);
+
+      for (let prop of playerProps) {
+        gameState.currentBoardProperty = prop;
+        notify('AUCTION');
+      }
     },
   ],
 };

@@ -7,6 +7,7 @@ class GameState {
   players = [];
   currentBoardProperty = {};
   config;
+  gameOver = false;
 
   get currentPlayer() {
     // add override for intra-turn context switches

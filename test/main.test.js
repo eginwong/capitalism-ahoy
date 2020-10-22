@@ -29,6 +29,9 @@ describe('main', () => {
     let userInterface;
     let eventBus;
 
+    // re-usable constants
+    let startingCash;
+
     beforeEach(() => {
       gameState = new GameState();
       let createPlayer = createPlayerFactory();
@@ -39,6 +42,8 @@ describe('main', () => {
       gameState.config = cloneDeep(config);
       userInterface = mockUIFactory();
       eventBus = new EventEmitter();
+
+      startingCash = gameState.players[0].cash;
     });
 
     afterEach(() => {
@@ -181,7 +186,7 @@ describe('main', () => {
 
         expect(gameState.turn).equal(2, 'Incorrect turn value');
         expect(gameState.players[0].cash).to.equal(
-          1500 - 350 - 400 - 200 - 200 - 200 + 600,
+          startingCash - 350 - 400 - 200 - 200 - 200 + 600,
           "Player #1's cash did not change from purchase, renovating, and rental income"
         );
         expect(gameState.players[0].assets).to.equal(
@@ -189,69 +194,11 @@ describe('main', () => {
           "Player #1's assets did not change from purchase and renovating"
         );
         expect(gameState.players[1].cash).to.equal(
-          1500 - 600,
+          startingCash - 600,
           "Player #2's cash did not change from rental payment"
         );
       }
     );
-
-    // TODO: mortgage scenario
-    xit(
-      gwt`cold start | game is loaded | player must mortgage property to survive liquidation`,
-      () => {}
-    );
-
-    it(gwt`cold start | game is loaded | player caught speeding`, () => {
-      // arrange
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
-      const promptStubValues = [
-        '', // highest rolling player
-        '',
-        'ROLL_DICE',
-        'ROLL_DICE',
-        'FIXED',
-        'ROLL_DICE',
-        'END_GAME',
-      ];
-      userInterface.prompt = fillStub(promptStub, promptStubValues);
-
-      const diceStub = sinon.stub(Dice, 'roll');
-      const diceStubValues = [
-        [6],
-        [1],
-        [1, 1], // p1: community chest
-        [1, 1], // p1: income tax
-        [4, 4], // p1: speeding
-      ];
-      fillStub(diceStub, diceStubValues);
-
-      const expectedCard = gameState.config.chanceConfig.availableCards.find(
-        (c) => c.action === 'getoutofjailfree'
-      );
-      const deckDrawStub = sinon.stub(Deck, 'draw');
-      deckDrawStub.returns({ card: expectedCard, deck: [] });
-
-      require('../entities/Game')({
-        eventBus,
-        userInterface,
-        gameState,
-      });
-
-      expect(gameState.turn).equal(1, 'Incorrect turn value');
-      expect(gameState.players[0].position).to.equal(
-        10,
-        'Player #1 did not correctly go to jail for speeding'
-      );
-      expect(gameState.players[0].jailed).to.equal(
-        0,
-        "Player #1's jail status was not correctly set"
-      );
-      expect(gameState.players[0].cash).to.equal(
-        1500 - config.incomeTaxAmount,
-        "Player #1's cash was not correctly set"
-      );
-      expect(gameState.players[1].position).to.equal(0, 'Player #2 moved');
-    });
 
     it(
       gwt`cold start | game is loaded | player pays fine to get out of jail, can roll doubles and continue turn`,
@@ -312,7 +259,7 @@ describe('main', () => {
           'Player #1 did not correctly move to expected location after rolling doubles'
         );
         expect(gameState.players[0].cash).to.equal(
-          1500 -
+          startingCash -
             config.fineAmount -
             expectedFinalBoardProperty.price -
             config.incomeTaxAmount,
@@ -359,7 +306,7 @@ describe('main', () => {
         ];
         fillStub(diceStub, diceStubValues);
 
-        const expectedCommunityChestCard = gameState.config.chanceConfig.availableCards.find(
+        const expectedCommunityChestCard = gameState.config.communityChestConfig.availableCards.find(
           (c) => c.action === 'getoutofjailfree'
         );
         const expectedChanceCard = gameState.config.chanceConfig.availableCards.find(
@@ -387,7 +334,9 @@ describe('main', () => {
           'Player #1 did not correctly move to expected location after rolling doubles'
         );
         expect(gameState.players[0].cash).to.equal(
-          1500 - expectedFinalBoardProperty.price - config.incomeTaxAmount,
+          startingCash -
+            expectedFinalBoardProperty.price -
+            config.incomeTaxAmount,
           "Player #1's cash does not account for property purchase and income tax"
         );
       }
@@ -425,7 +374,7 @@ describe('main', () => {
 
         expect(gameState.turn).equal(0, 'Incorrect turn value');
         expect(gameState.players[0].cash).to.equal(
-          1500 - config.incomeTaxRate * 1500,
+          startingCash - config.incomeTaxRate * startingCash,
           "Player #1's cash does not account for variable income tax"
         );
       }
@@ -542,7 +491,7 @@ describe('main', () => {
           "Player #1's jail status was not correctly set"
         );
         expect(gameState.players[0].cash).to.equal(
-          1500 - config.luxuryTaxAmount,
+          startingCash - config.luxuryTaxAmount,
           "Player #1's incorrectly received GO money while getting caught for speeding"
         );
       }
@@ -702,11 +651,11 @@ describe('main', () => {
       });
 
       expect(gameState.players[0].cash).to.equal(
-        1500,
+        startingCash,
         "Player #1's cash was incorrectly deducted after losing the auction"
       );
       expect(gameState.players[1].cash).to.equal(
-        1500 - 50,
+        startingCash - 50,
         "Player #2's cash was not correctly deducted after winning the auction"
       );
       expect(gameState.players[1].assets).to.equal(
@@ -759,7 +708,7 @@ describe('main', () => {
         });
 
         expect(gameState.players[0].cash).to.equal(
-          1500,
+          startingCash,
           "Player #1's cash was incorrectly deducted after losing the auction"
         );
         expect(gameState.players[1].cash).to.equal(
@@ -771,6 +720,340 @@ describe('main', () => {
             orientalAve.price /
               gameState.config.propertyConfig.mortgageValueMultiplier,
           "Player #2's assets were not correctly added after winning the auction"
+        );
+      }
+    );
+
+    // TODO: hot start
+    it(gwt`cold start | game is loaded | player unmortgages a property`, () => {
+      // arrange
+      const promptStub = sinon.stub(PlayerActions, 'prompt');
+
+      const promptStubValues = [
+        '', // highest rolling player
+        '',
+        'ROLL_DICE',
+        'BUY_PROPERTY',
+        'END_TURN',
+        'ROLL_DICE', // p2
+        'BUY_PROPERTY',
+        'MANAGE_PROPERTIES',
+        'UNMORTGAGE',
+        'ORIENTAL AVENUE',
+        'CANCEL',
+        'CANCEL',
+        'CANCEL',
+        'END_GAME',
+      ];
+      userInterface.prompt = fillStub(promptStub, promptStubValues);
+
+      const diceStub = sinon.stub(Dice, 'roll');
+      const diceStubValues = [[6], [1], [1, 2], [1, 4]];
+      fillStub(diceStub, diceStubValues);
+
+      const orientalAve = gameState.config.propertyConfig.properties.find(
+        (p) => p.id === 'orientalave'
+      );
+      orientalAve.ownedBy = gameState.players[1].id;
+      orientalAve.mortgaged = true;
+      gameState.players[1].assets =
+        orientalAve.price /
+        gameState.config.propertyConfig.mortgageValueMultiplier;
+      const railRoad = gameState.config.propertyConfig.properties.find(
+        (p) => p.id === 'readingrailroad'
+      );
+
+      require('../entities/Game')({
+        eventBus,
+        userInterface,
+        gameState,
+      });
+
+      expect(gameState.players[1].cash).to.equal(
+        startingCash -
+          railRoad.price -
+          (orientalAve.price /
+            gameState.config.propertyConfig.mortgageValueMultiplier) *
+            (1 + gameState.config.propertyConfig.interestRate),
+        "Player #2's cash was not correctly deducted after buying the railroad and unmortgaging property"
+      );
+      expect(gameState.players[1].assets).to.equal(
+        orientalAve.price + railRoad.price,
+        "Player #2's assets were not correctly added after unmortgage"
+      );
+    });
+
+    // TODO: hot start
+    it(
+      gwt`cold start | game is loaded | player pays rent and goes bankrupt, game over`,
+      () => {
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+          'ROLL_DICE',
+          'BUY_PROPERTY',
+          'ROLL_DICE',
+          'BUY_PROPERTY',
+          'MANAGE_PROPERTIES',
+          'RENOVATE',
+          'Boardwalk',
+          'Park Place',
+          'Boardwalk',
+          'CANCEL',
+          'CANCEL',
+          'END_TURN',
+          'ROLL_DICE',
+          '',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+        const uiSpy = sinon.spy();
+        userInterface.gameOver = uiSpy;
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [[6], [1], [2, 2], [1, 1], [2, 3]];
+        fillStub(diceStub, diceStubValues);
+
+        userInterface.prompt = promptStub;
+
+        // preload starting point
+        gameState.players[0].position = 33;
+        gameState.players[1].position = 34;
+        gameState.players[1].cash = 500;
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        const player0Cash = startingCash - 350 - 400 - 200 - 200 - 200 + 500;
+        const player0Assets = 350 + 400 + 200 + 200 + 200;
+
+        expect(gameState.players[0].cash).to.equal(
+          player0Cash,
+          "Player #1's cash did not change from purchase, renovating, and rental income, with limited amount of rent"
+        );
+        expect(gameState.players[0].assets).to.equal(
+          player0Assets,
+          "Player #1's assets did not change from purchase and renovating"
+        );
+        expect(gameState.players[1].cash).to.equal(
+          0,
+          "Player #2's cash did not change from rental payment"
+        );
+        expect(gameState.players[1].bankrupt).to.equal(
+          true,
+          'Player #2 is not bankrupt'
+        );
+        expect(gameState.gameOver).to.equal(
+          true,
+          'Game is not over although only one player left playing'
+        );
+        expect(
+          uiSpy.calledOnceWithExactly(
+            gameState.players[0].name,
+            player0Assets + player0Cash
+          )
+        ).to.equal(
+          true,
+          'Player #1 did not win correctly after Player #2 went bankrupt'
+        );
+      }
+    );
+
+    // TODO: hot start
+    it(
+      gwt`cold start | game is loaded | other player pays community chest and goes bankrupt, game over short circuit`,
+      () => {
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+          'ROLL_DICE',
+          '',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+        const uiSpy = sinon.spy();
+        userInterface.gameOver = uiSpy;
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [[6], [1], [1, 1]];
+        fillStub(diceStub, diceStubValues);
+        const expectedCommunityChestCard = gameState.config.communityChestConfig.availableCards.find(
+          (c) => c.action === 'addfundsfromplayers'
+        );
+        const deckDrawStub = sinon.stub(Deck, 'draw');
+        deckDrawStub
+          .onCall(0)
+          .returns({ card: expectedCommunityChestCard, deck: [] });
+
+        userInterface.prompt = promptStub;
+
+        // preload starting point
+        gameState.players[1].cash = 40;
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        expect(gameState.players[0].cash).to.equal(
+          startingCash + 40,
+          "Player #1's cash did not change from community chest card"
+        );
+        expect(gameState.players[1].cash).to.equal(
+          0,
+          "Player #2's cash did not change from community chest card"
+        );
+        expect(gameState.players[1].bankrupt).to.equal(
+          true,
+          'Player #2 is not bankrupt'
+        );
+      }
+    );
+
+    // TODO: hot start
+    it(
+      gwt`cold start | game is loaded | player pays chance card and goes bankrupt, game over`,
+      () => {
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+          'ROLL_DICE',
+          '',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+        const uiSpy = sinon.spy();
+        userInterface.gameOver = uiSpy;
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [[6], [1], [3, 4]];
+        fillStub(diceStub, diceStubValues);
+        const expectedChanceCard = gameState.config.chanceConfig.availableCards.find(
+          (c) => c.action === 'removefundstoplayers'
+        );
+        const deckDrawStub = sinon.stub(Deck, 'draw');
+        deckDrawStub.onCall(0).returns({ card: expectedChanceCard, deck: [] });
+
+        userInterface.prompt = promptStub;
+
+        // preload starting point
+        gameState.players[0].cash = 40;
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        expect(gameState.players[0].cash).to.equal(
+          0,
+          "Player #1's cash did not change from chance card"
+        );
+        expect(gameState.players[1].cash).to.equal(
+          startingCash + 40,
+          "Player #2's cash did not change from chance card"
+        );
+        expect(gameState.players[0].bankrupt).to.equal(
+          true,
+          'Player #1 is not bankrupt'
+        );
+      }
+    );
+
+    // TODO: hot start
+    it(
+      gwt`cold start | game is loaded | player pays rent and goes bankrupt with properties, cards, and auction, game over`,
+      () => {
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+          'ROLL_DICE',
+          'BUY_PROPERTY',
+          'ROLL_DICE',
+          'BUY_PROPERTY',
+          'MANAGE_PROPERTIES',
+          'RENOVATE',
+          'Boardwalk',
+          'Park Place',
+          'Boardwalk',
+          'CANCEL',
+          'CANCEL',
+          'END_TURN',
+          'ROLL_DICE',
+          '',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+        const uiSpy = sinon.spy();
+        userInterface.gameOver = uiSpy;
+
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [[6], [1], [2, 2], [1, 1], [2, 3]];
+        fillStub(diceStub, diceStubValues);
+        const communityChestCard = gameState.config.communityChestConfig.availableCards.find(
+          (c) => c.action === 'getoutofjailfree'
+        );
+
+        userInterface.prompt = promptStub;
+
+        // preload starting point
+        gameState.players[0].position = 33;
+        gameState.players[1].position = 34;
+        gameState.players[1].cash = 500;
+        gameState.players[1].cards.push(communityChestCard);
+        const purpleGroup = 'Purple';
+        createMonopoly(gameState, purpleGroup, gameState.players[1].id);
+        const {
+          mortgageValueMultiplier,
+          properties,
+        } = gameState.config.propertyConfig;
+        const purpleProperties = properties.filter(
+          (p) => p.group === purpleGroup
+        );
+        purpleProperties[0].buildings = 1;
+        purpleProperties[1].mortgaged = true;
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        const player0Cash =
+          startingCash -
+          350 -
+          400 -
+          200 -
+          200 -
+          200 +
+          500 +
+          purpleProperties[0].houseCost / mortgageValueMultiplier +
+          purpleProperties[0].price / mortgageValueMultiplier;
+
+        console.dir(gameState.players);
+        expect(gameState.players[0].cash).to.equal(
+          player0Cash,
+          "Player #1's cash did not change from purchase, renovating, and rental income, with limited amount of rent"
+        );
+        expect(gameState.players[1].cash).to.equal(
+          0,
+          "Player #2's cash did not change from rental payment"
+        );
+        expect(gameState.players[1].bankrupt).to.equal(
+          true,
+          'Player #2 is not bankrupt'
+        );
+        expect(gameState.players[1].cards).to.deep.equal(
+          [],
+          'Player #2 has remaining cards after bankruptcy'
         );
       }
     );

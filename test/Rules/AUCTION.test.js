@@ -35,11 +35,11 @@ describe('Rules -> AUCTION', () => {
 
   describe('auction', () => {
     const inputEvent = 'AUCTION';
-    const liquidationEvent = 'LIQUIDATION';
     const turnValuesUpdatedEvent = 'TURN_VALUES_UPDATED';
+    const collectionsEvent = 'COLLECTIONS';
 
-    let liquidationStub;
     let turnValuesUpdatedSpy;
+    let collectionsSpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -51,11 +51,11 @@ describe('Rules -> AUCTION', () => {
           handler.bind(null, { notify, UI: userInterface }, gameState)
         )
       );
-      liquidationStub = sinon.stub();
       turnValuesUpdatedSpy = sinon.spy();
+      collectionsSpy = sinon.spy();
 
-      eventBus.on(liquidationEvent, liquidationStub);
       eventBus.on(turnValuesUpdatedEvent, turnValuesUpdatedSpy);
+      eventBus.on(collectionsEvent, collectionsSpy);
     });
 
     it('should make a call to the UI#auctionInstructions and UI#wonAuction', () => {
@@ -85,45 +85,6 @@ describe('Rules -> AUCTION', () => {
         `UI#wonAuction method for ${inputEvent} was not called`
       );
     });
-    it('should make a call to the UI#playerShortOnFunds', () => {
-      const uiSpy = sinon.spy();
-      userInterface.playerShortOnFunds = uiSpy;
-      const auctionPromptStub = sinon.stub(PlayerActions, 'auction');
-      const startingAssetValue = 300;
-      gameState.players[0].assets = startingAssetValue;
-      gameState.turnValues = {
-        subTurn: {},
-      };
-
-      const bidders = gameState.players.map((player) => ({
-        ...player,
-        liquidity: require('../../entities/WealthService').calculateLiquidity(
-          gameState,
-          gameState.config.propertyConfig.properties,
-          player
-        ),
-      }));
-      const expectedBuyer = bidders[0];
-      auctionPromptStub.returns({
-        buyer: expectedBuyer,
-        price: expectedBuyer.cash + 1,
-      });
-      liquidationStub.callsFake(() => {
-        gameState.turnValues.subTurn.player = {
-          id: bidders[0].id,
-          cash: bidders[0].cash + 1,
-          assets: bidders[0].assets,
-          cards: bidders[0].cards,
-        };
-        return;
-      });
-
-      eventBus.emit(inputEvent);
-      expect(uiSpy.calledOnce).to.equal(
-        true,
-        `UI#playerShortOnFunds method for ${inputEvent} was not called`
-      );
-    });
     it('should filter out players from the bid for auction if their liquidity is below the base cost', () => {
       const auctionPromptStub = sinon.stub(PlayerActions, 'auction');
       const startingCash =
@@ -147,6 +108,29 @@ describe('Rules -> AUCTION', () => {
       expect(auctionPromptStub.getCall(0).args[1]).to.deep.equal(
         [bidders[1], bidders[2]],
         `${inputEvent} event did not filter out players with funds below the minimum base cost as defined in the config`
+      );
+    });
+    it('should filter out players from the bid for auction if they are bankrupt', () => {
+      const auctionPromptStub = sinon.stub(PlayerActions, 'auction');
+      gameState.players[0].bankrupt = true;
+      const bidders = gameState.players.map((player) => ({
+        ...player,
+        liquidity: require('../../entities/WealthService').calculateLiquidity(
+          gameState,
+          gameState.config.propertyConfig.properties,
+          player
+        ),
+      }));
+      const expectedBuyer = bidders[1];
+      auctionPromptStub.returns({
+        buyer: expectedBuyer,
+        price: expectedBuyer.cash,
+      });
+
+      eventBus.emit(inputEvent);
+      expect(auctionPromptStub.getCall(0).args[1]).to.deep.equal(
+        [bidders[1], bidders[2]],
+        `${inputEvent} event did not filter out bankrupt players`
       );
     });
     it('should call auction with ui, eligible players, the property, and the base cost', () => {
@@ -180,7 +164,7 @@ describe('Rules -> AUCTION', () => {
         `${inputEvent} event did not pass the desired parameters to the auction prompt`
       );
     });
-    it(`should emit ${liquidationEvent} when winner is short on cash`, () => {
+    it(`should emit ${collectionsEvent} when winner is short on cash`, () => {
       const uiSpy = sinon.spy();
       userInterface.playerShortOnFunds = uiSpy;
       const auctionPromptStub = sinon.stub(PlayerActions, 'auction');
@@ -202,20 +186,11 @@ describe('Rules -> AUCTION', () => {
         buyer: expectedBuyer,
         price: expectedBuyer.cash + 1,
       });
-      liquidationStub.callsFake(() => {
-        gameState.turnValues.subTurn.player = {
-          id: bidders[0].id,
-          cash: bidders[0].cash + 1,
-          assets: bidders[0].assets,
-          cards: bidders[0].cards,
-        };
-        return;
-      });
 
       eventBus.emit(inputEvent);
-      expect(liquidationStub.calledOnce).to.equal(
+      expect(collectionsSpy.calledOnce).to.equal(
         true,
-        `${inputEvent} event did not call ${liquidationEvent} when winner is short on funds`
+        `${inputEvent} event did not call ${collectionsEvent} when winner is short on funds`
       );
     });
     it(`should emit ${turnValuesUpdatedEvent} when winner is short on cash to allow for subturn`, () => {
@@ -240,20 +215,11 @@ describe('Rules -> AUCTION', () => {
         buyer: expectedBuyer,
         price: expectedBuyer.cash + 1,
       });
-      liquidationStub.callsFake(() => {
-        gameState.turnValues.subTurn.player = {
-          id: bidders[0].id,
-          cash: bidders[0].cash + 1,
-          assets: bidders[0].assets,
-          cards: bidders[0].cards,
-        };
-        return;
-      });
 
       eventBus.emit(inputEvent);
       expect(turnValuesUpdatedSpy.callCount).to.equal(
-        2,
-        `${inputEvent} event did not call ${turnValuesUpdatedEvent} twice when winner was low on funds`
+        1,
+        `${inputEvent} event did not call ${turnValuesUpdatedEvent} when winner was low on funds`
       );
     });
     it('should purchase asset for the winning player', () => {
@@ -441,7 +407,8 @@ describe('Rules -> AUCTION', () => {
           'Winner of the auction did not pay out the expected bid price'
         );
       });
-      xit('prompts the winning player to unmortgage the property immediately on winning the auction', () => {
+      it('prompts the winning player to unmortgage the property immediately upon winning the auction', () => {
+        const startingCash = gameState.currentPlayer.cash;
         const auctionPromptStub = sinon.stub(PlayerActions, 'auction');
         const bidders = gameState.players.map((player) => ({
           ...player,
@@ -451,25 +418,68 @@ describe('Rules -> AUCTION', () => {
             player
           ),
         }));
-        const expectedBuyer = bidders[0];
-        auctionPromptStub.returns({
-          buyer: expectedBuyer,
-          price: expectedBuyer.cash,
-        });
         const testProperty = gameState.config.propertyConfig.properties.find(
           (p) => p.id === 'mediterraneanave'
         );
+        const expectedBuyer = bidders[0];
+        auctionPromptStub.returns({
+          buyer: expectedBuyer,
+          price: testProperty.price,
+        });
         testProperty.mortgaged = true;
         gameState.currentBoardProperty = testProperty;
+        const unmortgagePromptStub = sinon.stub(PlayerActions, 'prompt');
+        unmortgagePromptStub.onCall(0).returns('Y');
+
+        eventBus.emit(inputEvent);
+        expect(unmortgagePromptStub.callCount).to.equal(
+          1,
+          `Winner of the auction did not receive a prompt to unmortgage the property`
+        );
+        expect(gameState.players[0].assets).to.equal(
+          testProperty.price,
+          'Winner of the auction did not receive the asset value of the won property'
+        );
+        expect(gameState.players[0].cash).to.equal(
+          startingCash -
+            testProperty.price -
+            testProperty.price /
+              gameState.config.propertyConfig.mortgageValueMultiplier,
+          'Winner of the auction did not pay out the expected bid price + unmortgage fee'
+        );
+      });
+      it('prompts the winning player to unmortgage the property and is declined upon winning the auction', () => {
+        const startingCash = gameState.currentPlayer.cash;
+        const auctionPromptStub = sinon.stub(PlayerActions, 'auction');
+        const bidders = gameState.players.map((player) => ({
+          ...player,
+          liquidity: require('../../entities/WealthService').calculateLiquidity(
+            gameState,
+            gameState.config.propertyConfig.properties,
+            player
+          ),
+        }));
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.id === 'mediterraneanave'
+        );
+        const expectedBuyer = bidders[0];
+        auctionPromptStub.returns({
+          buyer: expectedBuyer,
+          price: testProperty.price,
+        });
+        testProperty.mortgaged = true;
+        gameState.currentBoardProperty = testProperty;
+        const unmortgagePromptStub = sinon.stub(PlayerActions, 'prompt');
+        unmortgagePromptStub.onCall(0).returns('N');
 
         eventBus.emit(inputEvent);
         expect(gameState.players[0].assets).to.equal(
           testProperty.price /
             gameState.config.propertyConfig.mortgageValueMultiplier,
-          'Winner of the auction did not receive the asset value of the won property'
+          'Winner of the auction did not receive the mortgaged asset value of the won property'
         );
         expect(gameState.players[0].cash).to.equal(
-          0,
+          startingCash - testProperty.price,
           'Winner of the auction did not pay out the expected bid price'
         );
       });
