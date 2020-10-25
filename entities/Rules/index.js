@@ -232,8 +232,15 @@ module.exports = {
     },
   ],
   END_GAME: [
-    // TODO: ARE YOU SURE? prompt y/n
     ({ UI }, gameState) => {
+      const finishGame =
+        gameState.gameOver ||
+        require('../PlayerActions').confirm(
+          { UI },
+          'Are you sure you want to end the game?'
+        );
+      if (!finishGame) return;
+
       const calcNetWorth = require('../WealthService').calculateNetWorth;
 
       const { name, netWorth } = gameState.players
@@ -944,15 +951,14 @@ module.exports = {
       );
 
       if (boardProperty.mortgaged) {
-        UI.auctionOfferUnmortgage(boardProperty);
-        // check prompt here
-        const unmortgage = require('../PlayerActions').prompt(
+        const unmortgage = require('../PlayerActions').confirm(
           { UI },
-          gameState,
-          ['Y', 'N']
+          `Would you like to unmortgage this property right now? If yes, you can save on the interest rate charge! The cost is $${
+            boardProperty.price / 2
+          }`
         );
 
-        if (unmortgage === 'Y') {
+        if (unmortgage) {
           require('../PropertyManagementService').unmortgage(
             gameState,
             boardProperty,

@@ -5,6 +5,7 @@ module.exports = function mockUIFactory() {
     startTurn: () => false,
     displayAvailableActions: () => false,
     prompt: () => true,
+    confirm: () => true,
     endTurn: () => true,
     rollingDice: () => true,
     rollDiceDisplay: () => true,
@@ -39,6 +40,5 @@ module.exports = function mockUIFactory() {
     wonAuction: () => true,
     skipTurnForBankruptPlayer: () => true,
     playerLost: () => true,
-    auctionOfferUnmortgage: () => true,
   };
 };

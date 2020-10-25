@@ -5,6 +5,7 @@ const mockUIFactory = require('../mocks/UI');
 
 const { GameState } = require('../../entities/GameState');
 const { createPlayerFactory } = require('../testutils');
+const PlayerActions = require('../../entities/PlayerActions');
 
 describe('Rules -> END_GAME', () => {
   let gameState;
@@ -44,6 +45,41 @@ describe('Rules -> END_GAME', () => {
       );
     });
 
+    it('should not continue with game over actions if player cancels', () => {
+      const uiSpy = sinon.spy();
+      userInterface.gameOver = uiSpy;
+      const confirmStub = sinon.stub(PlayerActions, 'confirm');
+      confirmStub.returns(false);
+
+      eventBus.emit(inputEvent);
+
+      expect(uiSpy.calledOnce).to.equal(
+        false,
+        `UI method for ${inputEvent} was called`
+      );
+    });
+    it('should not prompt player if game is over', () => {
+      gameState.gameOver = true;
+      const uiSpy = sinon.spy();
+      userInterface.confirm = uiSpy;
+
+      eventBus.emit(inputEvent);
+
+      expect(uiSpy.calledOnce).to.equal(
+        false,
+        `UI method for ${inputEvent} was called`
+      );
+    });
+    it('should prompt player if game is not over', () => {
+      const confirmStub = sinon.stub(PlayerActions, 'confirm');
+      confirmStub.returns(true);
+      eventBus.emit(inputEvent);
+
+      expect(confirmStub.calledOnce).to.equal(
+        true,
+        `UI method for ${inputEvent} was called`
+      );
+    });
     it('should make a call to the UI#gameOver', () => {
       const uiSpy = sinon.spy();
       userInterface.gameOver = uiSpy;

@@ -33,13 +33,17 @@ module.exports = class PlayerActions {
 
   static prompt({ UI }, gameState, actions = this.refresh(gameState)) {
     UI.displayAvailableActions(actions);
-
-    // TODO: inquirer
     // TODO: UI.prompt -> UI.selectFrom(actions: [String], msg: String) : String | String `el` <actions>
     const answer = UI.prompt(`Which action would you like to take?\n\n`);
     return actions.find(
       (action) => action.toUpperCase() === String(answer).toUpperCase()
     );
+  }
+
+  static confirm({ UI }, message) {
+    return UI.prompt(message, {
+      type: 'confirm',
+    });
   }
 
   // returns { buyer, price }

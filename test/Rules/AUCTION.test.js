@@ -395,6 +395,8 @@ describe('Rules -> AUCTION', () => {
         );
         testProperty.mortgaged = true;
         gameState.currentBoardProperty = testProperty;
+        const unmortgageConfirmStub = sinon.stub(PlayerActions, 'confirm');
+        unmortgageConfirmStub.onCall(0).returns(false);
 
         eventBus.emit(inputEvent);
         expect(gameState.players[0].assets).to.equal(
@@ -428,11 +430,11 @@ describe('Rules -> AUCTION', () => {
         });
         testProperty.mortgaged = true;
         gameState.currentBoardProperty = testProperty;
-        const unmortgagePromptStub = sinon.stub(PlayerActions, 'prompt');
-        unmortgagePromptStub.onCall(0).returns('Y');
+        const unmortgageConfirmStub = sinon.stub(PlayerActions, 'confirm');
+        unmortgageConfirmStub.onCall(0).returns(true);
 
         eventBus.emit(inputEvent);
-        expect(unmortgagePromptStub.callCount).to.equal(
+        expect(unmortgageConfirmStub.callCount).to.equal(
           1,
           `Winner of the auction did not receive a prompt to unmortgage the property`
         );
@@ -469,8 +471,8 @@ describe('Rules -> AUCTION', () => {
         });
         testProperty.mortgaged = true;
         gameState.currentBoardProperty = testProperty;
-        const unmortgagePromptStub = sinon.stub(PlayerActions, 'prompt');
-        unmortgagePromptStub.onCall(0).returns('N');
+        const unmortgageConfirmStub = sinon.stub(PlayerActions, 'confirm');
+        unmortgageConfirmStub.onCall(0).returns(false);
 
         eventBus.emit(inputEvent);
         expect(gameState.players[0].assets).to.equal(
