@@ -673,6 +673,25 @@ describe('PropertyManagementService', () => {
         PropertyManagementService.getMortgageableProperties(gameState)
       ).to.deep.equal([], 'Properties are returned when none are mortgageable');
     });
+    it('should return properties railroads or utilities if owned', () => {
+      const propertyGroup = 'Railroad';
+      const propertyGroup2 = 'Utilities';
+      createMonopoly(gameState, propertyGroup);
+      createMonopoly(gameState, propertyGroup2);
+      const expectedRailroadProperties = gameState.config.propertyConfig.properties.filter(
+        (p) => p.group === propertyGroup
+      );
+      const expectedUtilityProperties = gameState.config.propertyConfig.properties.filter(
+        (p) => p.group === propertyGroup2
+      );
+
+      expect(
+        PropertyManagementService.getMortgageableProperties(gameState)
+      ).to.deep.equal(
+        expectedUtilityProperties.concat(expectedRailroadProperties),
+        'Railroad and Utility Properties are not returned'
+      );
+    });
   });
   describe('getRenoProperties', () => {
     it('returns empty array if no houses or hotels remaining', () => {
