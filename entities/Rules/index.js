@@ -192,10 +192,11 @@ module.exports = {
   PAY_FINE: [
     ({ UI }) => UI.payFine(),
     ({ notify }, gameState) => {
-      if (gameState.currentPlayer.cash < gameState.config.fineAmount) {
+      let player = gameState.currentPlayer;
+      if (player.cash < gameState.config.fineAmount) {
         require('./updateTurnValues')({
           subTurn: {
-            player: gameState.currentPlayer,
+            playerId: player.id,
             charge: gameState.config.fineAmount,
           },
         })(gameState);
@@ -205,10 +206,10 @@ module.exports = {
       }
 
       require('../WealthService').decrement(
-        gameState.currentPlayer,
+        player,
         gameState.config.fineAmount
       );
-      gameState.currentPlayer.jailed = -1;
+      player.jailed = -1;
     },
   ],
   SPEEDING: [({ UI }) => UI.caughtSpeeding(), ({ notify }) => notify('JAIL')],
@@ -279,11 +280,12 @@ module.exports = {
   BUY_PROPERTY: [
     ({ UI, notify }, gameState) => {
       const boardProperty = gameState.currentBoardProperty;
+      let player = gameState.currentPlayer;
 
-      if (gameState.currentPlayer.cash < boardProperty.price) {
+      if (player.cash < boardProperty.price) {
         require('./updateTurnValues')({
           subTurn: {
-            player: gameState.currentPlayer,
+            playerId: player.id,
             charge: boardProperty.price,
           },
         })(gameState);
@@ -292,16 +294,13 @@ module.exports = {
         notify('COLLECTIONS');
       }
 
-      if (gameState.currentPlayer.bankrupt) return;
+      if (player.bankrupt) return;
 
-      require('../WealthService').buyAsset(
-        gameState.currentPlayer,
-        boardProperty.price
-      );
+      require('../WealthService').buyAsset(player, boardProperty.price);
 
       require('../PropertyManagementService').changeOwner(
         boardProperty,
-        gameState.currentPlayer.id
+        player.id
       );
 
       UI.propertyBought();
@@ -313,16 +312,17 @@ module.exports = {
       const owner = gameState.players.find(
         (p) => p.id === boardProperty.ownedBy
       );
+      let player = gameState.currentPlayer;
 
       const rentAmount = require('../PropertyManagementService').calculateRent(
         gameState,
         boardProperty
       );
 
-      if (gameState.currentPlayer.cash < rentAmount) {
+      if (player.cash < rentAmount) {
         require('./updateTurnValues')({
           subTurn: {
-            player: gameState.currentPlayer,
+            playerId: player.id,
             charge: rentAmount,
           },
         })(gameState);
@@ -333,16 +333,10 @@ module.exports = {
 
       // pay out what cash is leftover
       let actualRentAmount =
-        rentAmount < gameState.currentPlayer.cash
-          ? rentAmount
-          : gameState.currentPlayer.cash;
-      require('../WealthService').exchange(
-        gameState.currentPlayer,
-        owner,
-        actualRentAmount
-      );
+        rentAmount < player.cash ? rentAmount : player.cash;
+      require('../WealthService').exchange(player, owner, actualRentAmount);
 
-      UI.payingRent(gameState.currentPlayer, owner, rentAmount);
+      UI.payingRent(player, owner, rentAmount);
     },
   ],
   MANAGE_PROPERTIES: [
@@ -506,11 +500,12 @@ module.exports = {
           break;
         case 'luxurytax':
           const { luxuryTaxAmount } = gameState.config;
+          let player = gameState.currentPlayer;
 
-          if (gameState.currentPlayer.cash < luxuryTaxAmount) {
+          if (player.cash < luxuryTaxAmount) {
             require('./updateTurnValues')({
               subTurn: {
-                player: gameState.currentPlayer,
+                playerId: player.id,
                 charge: luxuryTaxAmount,
               },
             })(gameState);
@@ -519,12 +514,9 @@ module.exports = {
             notify('COLLECTIONS');
           }
 
-          if (gameState.currentPlayer.bankrupt) return;
+          if (player.bankrupt) return;
 
-          require('../WealthService').decrement(
-            gameState.currentPlayer,
-            luxuryTaxAmount
-          );
+          require('../WealthService').decrement(player, luxuryTaxAmount);
           UI.luxuryTaxPaid(gameState.config.luxuryTaxAmount);
           break;
         default:
@@ -542,6 +534,7 @@ module.exports = {
       const FIXED = 'FIXED';
       const VARIABLE = 'VARIABLE';
       const { incomeTaxAmount, incomeTaxRate } = gameState.config;
+      const player = gameState.currentPlayer;
 
       const paymentSelection = require('../PlayerActions').prompt(
         { notify, UI },
@@ -550,10 +543,10 @@ module.exports = {
       );
 
       if (paymentSelection === FIXED) {
-        if (gameState.currentPlayer.cash < incomeTaxAmount) {
+        if (player.cash < incomeTaxAmount) {
           require('./updateTurnValues')({
             subTurn: {
-              player: gameState.currentPlayer,
+              playerId: player.id,
               charge: incomeTaxAmount,
             },
           })(gameState);
@@ -561,23 +554,18 @@ module.exports = {
 
           notify('COLLECTIONS');
         }
-        if (gameState.currentPlayer.bankrupt) return;
+        if (player.bankrupt) return;
 
-        require('../WealthService').decrement(
-          gameState.currentPlayer,
-          incomeTaxAmount
-        );
+        require('../WealthService').decrement(player, incomeTaxAmount);
         UI.incomeTaxPaid(incomeTaxAmount);
       } else if (paymentSelection === VARIABLE) {
-        const netWorth = require('../WealthService').calculateNetWorth(
-          gameState.currentPlayer
-        );
+        const netWorth = require('../WealthService').calculateNetWorth(player);
         const fee = (incomeTaxRate * netWorth).toFixed(2);
 
-        if (gameState.currentPlayer.cash < fee) {
+        if (player.cash < fee) {
           require('./updateTurnValues')({
             subTurn: {
-              player: gameState.currentPlayer,
+              playerId: player.id,
               charge: fee,
             },
           })(gameState);
@@ -585,9 +573,9 @@ module.exports = {
 
           notify('COLLECTIONS');
         }
-        if (gameState.currentPlayer.bankrupt) return;
+        if (player.bankrupt) return;
 
-        require('../WealthService').decrement(gameState.currentPlayer, fee);
+        require('../WealthService').decrement(player, fee);
         UI.incomeTaxPaid(fee);
       } else {
         UI.unknownAction();
@@ -694,7 +682,7 @@ module.exports = {
           if (player.cash < charge) {
             require('./updateTurnValues')({
               subTurn: {
-                player: gameState.currentPlayer,
+                playerId: player.id,
                 charge,
               },
             })(gameState);
@@ -702,16 +690,16 @@ module.exports = {
 
             notify('COLLECTIONS');
           }
-          if (gameState.currentPlayer.bankrupt) return;
+          if (player.bankrupt) return;
 
-          wealthService.decrement(gameState.currentPlayer, charge);
+          wealthService.decrement(player, charge);
           break;
         }
         case 'removefunds': {
           if (player.cash < card.amount) {
             require('./updateTurnValues')({
               subTurn: {
-                player: gameState.currentPlayer,
+                playerId: player.id,
                 charge: card.amount,
               },
             })(gameState);
@@ -719,9 +707,9 @@ module.exports = {
 
             notify('COLLECTIONS');
           }
-          if (gameState.currentPlayer.bankrupt) return;
+          if (player.bankrupt) return;
 
-          wealthService.decrement(gameState.currentPlayer, card.amount);
+          wealthService.decrement(player, card.amount);
           break;
         }
         case 'removefundstoplayers': {
@@ -733,7 +721,7 @@ module.exports = {
               if (player.cash < card.amount) {
                 require('./updateTurnValues')({
                   subTurn: {
-                    player: player,
+                    playerId: player.id,
                     charge: card.amount,
                   },
                 })(gameState);
@@ -742,14 +730,8 @@ module.exports = {
                 notify('COLLECTIONS');
               }
               let amountOwed =
-                card.amount < gameState.currentPlayer.cash
-                  ? card.amount
-                  : gameState.currentPlayer.cash;
-              wealthService.exchange(
-                gameState.currentPlayer,
-                gameState.players[i],
-                amountOwed
-              );
+                card.amount < player.cash ? card.amount : player.cash;
+              wealthService.exchange(player, gameState.players[i], amountOwed);
             }
           }
           break;
@@ -779,7 +761,7 @@ module.exports = {
 
       // do the action
       if (card.action === 'getoutofjailfree') {
-        gameState.currentPlayer.cards.push(card);
+        player.cards.push(card);
         return;
       }
 
@@ -810,7 +792,7 @@ module.exports = {
           if (player.cash < charge) {
             require('./updateTurnValues')({
               subTurn: {
-                player: gameState.currentPlayer,
+                playerId: player.id,
                 charge,
               },
             })(gameState);
@@ -828,7 +810,7 @@ module.exports = {
           if (player.cash < card.amount) {
             require('./updateTurnValues')({
               subTurn: {
-                player: gameState.currentPlayer,
+                playerId: player.id,
                 charge: card.amount,
               },
             })(gameState);
@@ -836,7 +818,7 @@ module.exports = {
 
             notify('COLLECTIONS');
           }
-          if (gameState.currentPlayer.bankrupt) return;
+          if (player.bankrupt) return;
 
           wealthService.decrement(player, card.amount);
           break;
@@ -849,7 +831,7 @@ module.exports = {
               if (targetPlayer.cash < card.amount) {
                 require('./updateTurnValues')({
                   subTurn: {
-                    player: gameState.players[i],
+                    playerId: targetPlayer.id,
                     charge: card.amount,
                   },
                 })(gameState);
@@ -859,10 +841,10 @@ module.exports = {
               }
 
               let amountOwed =
-                card.amount < gameState.players[i].cash
+                card.amount < targetPlayer.cash
                   ? card.amount
-                  : gameState.players[i].cash;
-              wealthService.exchange(gameState.players[i], player, amountOwed);
+                  : targetPlayer.cash;
+              wealthService.exchange(targetPlayer, player, amountOwed);
             }
           }
           break;
@@ -941,7 +923,7 @@ module.exports = {
       if (buyer.cash < price) {
         require('./updateTurnValues')({
           subTurn: {
-            player: buyer,
+            playerId: buyer.id,
             charge: price,
           },
         })(gameState);
@@ -989,29 +971,22 @@ module.exports = {
     ({ UI, notify }, gameState) => {
       const { subTurn } = gameState.turnValues;
       if (!subTurn) return;
-      if (!subTurn.player || !subTurn.charge) return;
-
-      const { player, charge } = subTurn;
+      if (typeof subTurn.playerId !== 'number' || !subTurn.charge) return;
 
       const liquidity = require('../WealthService').calculateLiquidity(
         gameState,
         gameState.config.propertyConfig.properties,
-        player
+        gameState.currentPlayer
       );
-      if (liquidity < charge) {
+      if (liquidity < subTurn.charge) {
         notify('BANKRUPTCY');
       } else {
-        while (player.cash < charge) {
-          UI.playerShortOnFunds(player.cash, charge);
+        while (gameState.currentPlayer.cash < subTurn.charge) {
+          UI.playerShortOnFunds(gameState.currentPlayer.cash, subTurn.charge);
 
           notify('LIQUIDATION');
         }
       }
-      // update player
-      const updatedPlayer = gameState.players.find((p) => p.id === player.id);
-      updatedPlayer.cash = player.cash;
-      updatedPlayer.assets = player.assets;
-      updatedPlayer.cards = player.cards;
     },
     ({ notify }, gameState) => {
       // returning to current player for regular game flow

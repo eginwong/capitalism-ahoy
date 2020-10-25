@@ -332,7 +332,7 @@ describe('Rules -> CHANCE', () => {
           `${inputEvent} for a removefunds card decremented charge even though player is bankrupt`
         );
       });
-      it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
+      it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
         const expectedCard = gameState.config.chanceConfig.availableCards.find(
           (c) => c.action === 'removefunds'
         );
@@ -343,10 +343,10 @@ describe('Rules -> CHANCE', () => {
 
         expect(gameState.turnValues.subTurn).to.deep.equal(
           {
-            player: gameState.currentPlayer,
+            playerId: gameState.currentPlayer.id,
             charge: expectedCard.amount,
           },
-          `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+          `${turnValuesUpdatedEvent} event has the subturn player id and charge incorrectly set`
         );
         expect(turnValuesUpdatedSpy.callCount).to.equal(
           1,
@@ -438,7 +438,7 @@ describe('Rules -> CHANCE', () => {
           `${inputEvent} for a propertycharges card decremented charge even though player is bankrupt`
         );
       });
-      it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
+      it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
         const expectedCard = gameState.config.chanceConfig.availableCards.find(
           (c) => c.action === 'propertycharges'
         );
@@ -462,10 +462,10 @@ describe('Rules -> CHANCE', () => {
 
         expect(gameState.turnValues.subTurn).to.deep.equal(
           {
-            player: gameState.currentPlayer,
+            playerId: gameState.currentPlayer.id,
             charge: expectedHouseCharge,
           },
-          `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+          `${turnValuesUpdatedEvent} event has the subturn player id and charge incorrectly set`
         );
         expect(turnValuesUpdatedSpy.callCount).to.equal(
           1,
@@ -573,7 +573,7 @@ describe('Rules -> CHANCE', () => {
           `${inputEvent} for a removefundstoplayers card did not add correct remaining cash to player2 due to bankruptcy`
         );
       });
-      it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
+      it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
         const expectedCard = gameState.config.chanceConfig.availableCards.find(
           (c) => c.action === 'removefundstoplayers'
         );
@@ -584,10 +584,10 @@ describe('Rules -> CHANCE', () => {
 
         expect(gameState.turnValues.subTurn).to.deep.equal(
           {
-            player: gameState.currentPlayer,
+            playerId: gameState.currentPlayer.id,
             charge: expectedCard.amount,
           },
-          `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+          `${turnValuesUpdatedEvent} event has the subturn player id and charge incorrectly set`
         );
         expect(turnValuesUpdatedSpy.callCount).to.equal(
           gameState.players.length - 1,

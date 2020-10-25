@@ -208,7 +208,7 @@ describe('Rules -> COMMUNITY_CHEST', () => {
           `${inputEvent} for a removefunds card decremented charge even though player is bankrupt`
         );
       });
-      it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
+      it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
         const expectedCard = gameState.config.communityChestConfig.availableCards.find(
           (c) => c.action === 'removefunds'
         );
@@ -219,10 +219,10 @@ describe('Rules -> COMMUNITY_CHEST', () => {
 
         expect(gameState.turnValues.subTurn).to.deep.equal(
           {
-            player: gameState.currentPlayer,
+            playerId: gameState.currentPlayer.id,
             charge: expectedCard.amount,
           },
-          `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+          `${turnValuesUpdatedEvent} event has the subturn player id and charge incorrectly set`
         );
         expect(turnValuesUpdatedSpy.callCount).to.equal(
           1,
@@ -314,7 +314,7 @@ describe('Rules -> COMMUNITY_CHEST', () => {
           `${inputEvent} for a propertycharges card decremented charge even though player is bankrupt`
         );
       });
-      it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
+      it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
         const expectedCard = gameState.config.communityChestConfig.availableCards.find(
           (c) => c.action === 'propertycharges'
         );
@@ -338,10 +338,10 @@ describe('Rules -> COMMUNITY_CHEST', () => {
 
         expect(gameState.turnValues.subTurn).to.deep.equal(
           {
-            player: gameState.currentPlayer,
+            playerId: gameState.currentPlayer.id,
             charge: expectedHouseCharge,
           },
-          `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+          `${turnValuesUpdatedEvent} event has the subturn player id and charge incorrectly set`
         );
         expect(turnValuesUpdatedSpy.callCount).to.equal(
           1,
@@ -445,7 +445,7 @@ describe('Rules -> COMMUNITY_CHEST', () => {
           `${inputEvent} for a addfundsfromplayers card did not remove correct cash from player1`
         );
       });
-      it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
+      it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
         const expectedCard = gameState.config.communityChestConfig.availableCards.find(
           (c) => c.action === 'addfundsfromplayers'
         );
@@ -456,10 +456,10 @@ describe('Rules -> COMMUNITY_CHEST', () => {
 
         expect(gameState.turnValues.subTurn).to.deep.equal(
           {
-            player: gameState.players[1],
+            playerId: gameState.players[1].id,
             charge: expectedCard.amount,
           },
-          `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+          `${turnValuesUpdatedEvent} event has the subturn player id and charge incorrectly set`
         );
         expect(turnValuesUpdatedSpy.callCount).to.equal(
           1,

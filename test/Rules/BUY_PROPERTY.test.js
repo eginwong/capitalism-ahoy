@@ -108,7 +108,7 @@ describe('Rules -> BUY_PROPERTY', () => {
         `Player in bankrupt state should not have any operations occur`
       );
     });
-    it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
+    it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
       const property =
         gameState.config.propertyConfig.properties[TEST_PROPERTY];
       gameState.currentBoardProperty = property;
@@ -119,10 +119,10 @@ describe('Rules -> BUY_PROPERTY', () => {
       // tests setting the current player reference correctly
       expect(gameState.turnValues.subTurn).to.deep.equal(
         {
-          player: gameState.currentPlayer,
+          playerId: gameState.currentPlayer.id,
           charge: property.price,
         },
-        `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+        `${turnValuesUpdatedEvent} event has the subturn player id and charge incorrectly set`
       );
       expect(turnValuesUpdatedSpy.callCount).to.equal(
         1,

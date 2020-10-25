@@ -116,7 +116,7 @@ describe('Rules -> INCOME_TAX', () => {
           `UI method for ${inputEvent} to display fee was not called`
         );
       });
-      it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
+      it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
         const promptStub = sinon.stub(PlayerActions, 'prompt');
         promptStub.onCall(0).returns('FIXED');
         gameState.currentPlayer.cash = 0;
@@ -125,10 +125,10 @@ describe('Rules -> INCOME_TAX', () => {
 
         expect(gameState.turnValues.subTurn).to.deep.equal(
           {
-            player: gameState.currentPlayer,
+            playerId: gameState.currentPlayer.id,
             charge: gameState.config.incomeTaxAmount,
           },
-          `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+          `${turnValuesUpdatedEvent} event has the subturn player id and charge incorrectly set`
         );
         expect(turnValuesUpdatedSpy.callCount).to.equal(
           1,
@@ -221,7 +221,7 @@ describe('Rules -> INCOME_TAX', () => {
           `UI method for ${inputEvent} to display fee was not called`
         );
       });
-      it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
+      it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
         const promptStub = sinon.stub(PlayerActions, 'prompt');
         promptStub.onCall(0).returns('VARIABLE');
         gameState.currentPlayer.cash = 0;
@@ -234,10 +234,10 @@ describe('Rules -> INCOME_TAX', () => {
 
         expect(gameState.turnValues.subTurn).to.deep.equal(
           {
-            player: gameState.currentPlayer,
+            playerId: gameState.currentPlayer.id,
             charge: expectedFee,
           },
-          `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+          `${turnValuesUpdatedEvent} event has the subturn player id and charge incorrectly set`
         );
         expect(turnValuesUpdatedSpy.callCount).to.equal(
           1,
