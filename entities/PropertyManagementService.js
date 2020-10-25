@@ -152,11 +152,11 @@ module.exports = class PropertyManagementService {
 
     const mortgageableProperties = this.getMortgageableProperties(gameState);
 
-    if (mortgageableProperties.filter((p) => p.mortgaged).length > 0) {
+    if (mortgageableProperties.some((p) => p.mortgaged)) {
       availableActions.push('UNMORTGAGE');
     }
 
-    if (mortgageableProperties.filter((p) => !p.mortgaged).length > 0) {
+    if (mortgageableProperties.some((p) => !p.mortgaged)) {
       availableActions.push('MORTGAGE');
     }
 
