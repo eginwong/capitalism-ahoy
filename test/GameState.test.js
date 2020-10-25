@@ -51,7 +51,7 @@ describe('GameState', () => {
     ];
     gameState.turnValues = {
       subTurn: {
-        player: gameState.players[1],
+        playerId: gameState.players[1].id,
       },
     };
 

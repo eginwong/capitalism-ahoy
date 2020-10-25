@@ -55,10 +55,10 @@ module.exports = class PropertyManagementService {
         (optionalRentMultiplier ||
           (hasMonopoly ? doubleUtilityMultiplier : singleUtilityMultiplier));
     } else if (boardProperty.group === 'Railroad') {
-      const railroadCount = this.getProperties(gameState)
+      const playerOwnedRailroads = this.getProperties(gameState)
         .filter((p) => p.group === boardProperty.group)
         .filter((p) => p.ownedBy === playerIndex).length;
-      rentAmount = railRoadPricing[railroadCount - 1];
+      rentAmount = railRoadPricing[playerOwnedRailroads - 1];
 
       rentAmount = optionalRentMultiplier
         ? optionalRentMultiplier * rentAmount

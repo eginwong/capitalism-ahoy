@@ -148,7 +148,7 @@ describe('Rules -> PAY_RENT', () => {
         "Player's cash amount incorrectly decremented in rent exchange with limited funds"
       );
     });
-    it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
+    it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
       const ownerId = 1;
       const testProperty = gameState.config.propertyConfig.properties.find(
         (p) => p.id === 'balticave'
@@ -161,10 +161,10 @@ describe('Rules -> PAY_RENT', () => {
 
       expect(gameState.turnValues.subTurn).to.deep.equal(
         {
-          player: gameState.currentPlayer,
+          playerId: gameState.currentPlayer.id,
           charge: testProperty.rent,
         },
-        `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+        `${turnValuesUpdatedEvent} event has the subturn player id and charge incorrectly set`
       );
       expect(turnValuesUpdatedSpy.callCount).to.equal(
         1,

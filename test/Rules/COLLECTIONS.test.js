@@ -104,7 +104,7 @@ describe('Rules -> COLLECTIONS', () => {
       const arbitraryCharge = 10;
       gameState.currentPlayer.cash = 0;
       gameState.turnValues.subTurn = {
-        player: gameState.currentPlayer,
+        playerId: gameState.currentPlayer.id,
         charge: arbitraryCharge,
       };
       eventBus.emit(inputEvent);
@@ -119,7 +119,7 @@ describe('Rules -> COLLECTIONS', () => {
       gameState.currentPlayer.cash = 0;
       createMonopoly(gameState, 'Purple', gameState.currentPlayer.id);
       gameState.turnValues.subTurn = {
-        player: gameState.currentPlayer,
+        playerId: gameState.currentPlayer.id,
         charge: arbitraryCharge,
       };
       liquidationStub.callsFake(() => {
@@ -138,7 +138,7 @@ describe('Rules -> COLLECTIONS', () => {
       gameState.currentPlayer.cash = startingCash;
       createMonopoly(gameState, 'Purple', gameState.currentPlayer.id);
       gameState.turnValues.subTurn = {
-        player: gameState.currentPlayer,
+        playerId: gameState.currentPlayer.id,
         charge: arbitraryCharge,
       };
       liquidationStub.callsFake(() => {
@@ -152,7 +152,7 @@ describe('Rules -> COLLECTIONS', () => {
         uiSpy.calledOnceWithExactly(startingCash, arbitraryCharge)
       ).to.equal(
         true,
-        `${liquidationEvent} was called and the corresponding UI#PlayerShortOnCash was not called with correct parameters`
+        `${liquidationEvent} was called and the corresponding UI#playerShortOnFunds was not called with correct parameters`
       );
     });
     it(`calls the ${turnValuesUpdatedEvent} to nullify the sub turn value`, () => {

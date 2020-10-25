@@ -162,10 +162,10 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
 
       expect(gameState.turnValues.subTurn).to.deep.equal(
         {
-          player: gameState.currentPlayer,
+          playerId: gameState.currentPlayer.id,
           charge: gameState.config.luxuryTaxAmount,
         },
-        `${turnValuesUpdatedEvent} event has the subturn player and charge incorrectly set`
+        `${turnValuesUpdatedEvent} event has the subturn player id and charge incorrectly set`
       );
       expect(turnValuesUpdatedSpy.callCount).to.equal(
         1,
