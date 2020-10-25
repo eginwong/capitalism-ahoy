@@ -64,7 +64,7 @@ describe('Rules -> MANAGE_PROPERTIES', () => {
     });
 
     it(`should emit desired ${renovateEvent} event`, () => {
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(renovateEvent);
       promptStub.onCall(1).returns(cancelEvent);
       eventBus.emit(inputEvent);
@@ -74,7 +74,7 @@ describe('Rules -> MANAGE_PROPERTIES', () => {
       );
     });
     it(`should emit desired ${demolishEvent} event`, () => {
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(demolishEvent);
       promptStub.onCall(1).returns(cancelEvent);
       eventBus.emit(inputEvent);
@@ -84,30 +84,13 @@ describe('Rules -> MANAGE_PROPERTIES', () => {
       );
     });
     it(`should emit desired ${mortgageEvent} event`, () => {
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(mortgageEvent);
       promptStub.onCall(1).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(mortgageSpy.callCount).to.equal(
         1,
         `${mortgageEvent} was called ${mortgageSpy.callCount} times but expected to be 1 times`
-      );
-    });
-    it('should make a call to the UI#unknownAction if action input is not recognized', () => {
-      const uiSpy = sinon.spy();
-      userInterface.unknownAction = uiSpy;
-
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(undefined);
-      promptStub.onCall(1).returns(cancelEvent);
-      eventBus.emit(inputEvent);
-      expect(uiSpy.calledOnce).to.equal(
-        true,
-        `UI method for ${inputEvent} was not called`
-      );
-      expect(managePropertySpy.callCount).to.equal(
-        2,
-        'Unknown action did not trigger manage property event again'
       );
     });
   });

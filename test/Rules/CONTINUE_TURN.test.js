@@ -60,7 +60,7 @@ describe('Rules -> CONTINUE_TURN', () => {
     });
 
     it(`should emit desired ${rollDiceEvent} event`, () => {
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(rollDiceEvent);
       promptStub.onCall(1).returns(endTurnEvent);
       eventBus.emit(inputEvent);
@@ -69,27 +69,9 @@ describe('Rules -> CONTINUE_TURN', () => {
         `${rollDiceEvent} was called ${rollDiceSpy.callCount} times but expected to be 1 times`
       );
     });
-    it('should make a call to the UI#unknownAction if action input is not recognized', () => {
-      const uiSpy = sinon.spy();
-      userInterface.unknownAction = uiSpy;
-
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(undefined);
-      promptStub.onCall(1).returns(rollDiceEvent);
-      promptStub.onCall(2).returns(endTurnEvent);
-      eventBus.emit(inputEvent);
-      expect(uiSpy.calledOnce).to.equal(
-        true,
-        `UI method for ${inputEvent} was not called`
-      );
-      expect(continueTurnSpy.callCount).to.equal(
-        3,
-        `Unknown action did not trigger ${inputEvent} event again`
-      );
-    });
     it('should end turn if player is newly in jail', () => {
       gameState.currentPlayer.jailed = 0; // set player to jail
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(rollDiceEvent);
       eventBus.emit(inputEvent);
       expect(continueTurnSpy.callCount).to.equal(
@@ -98,7 +80,7 @@ describe('Rules -> CONTINUE_TURN', () => {
       );
     });
     it(`should not call ${inputEvent} if action is ${endTurnEvent}`, () => {
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(endTurnEvent);
       eventBus.emit(inputEvent);
       expect(continueTurnSpy.callCount).to.equal(
@@ -107,7 +89,7 @@ describe('Rules -> CONTINUE_TURN', () => {
       );
     });
     it(`should not call ${inputEvent} if action is ${endGameEvent}`, () => {
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(endGameEvent);
       eventBus.emit(inputEvent);
       expect(continueTurnSpy.callCount).to.equal(
@@ -117,7 +99,7 @@ describe('Rules -> CONTINUE_TURN', () => {
     });
     it(`should emit ${endTurnEvent} event if game is over`, () => {
       gameState.gameOver = true;
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(rollDiceEvent);
 
       eventBus.emit(inputEvent);
@@ -132,7 +114,7 @@ describe('Rules -> CONTINUE_TURN', () => {
     });
     it(`should emit ${endTurnEvent} event if player is bankrupt`, () => {
       gameState.currentPlayer.bankrupt = true;
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(rollDiceEvent);
 
       eventBus.emit(inputEvent);
@@ -146,7 +128,7 @@ describe('Rules -> CONTINUE_TURN', () => {
       );
     });
     it(`should not call ${inputEvent} if player is bankrupt`, () => {
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(rollDiceEvent);
       gameState.currentPlayer.bankrupt = true;
 

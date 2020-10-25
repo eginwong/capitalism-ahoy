@@ -219,13 +219,13 @@ describe('PlayerActions', () => {
         ),
       }));
 
-      const promptStub = sinon.stub(UI, 'prompt');
-      promptStub.onCall(0).returns('');
-      promptStub.onCall(1).returns('$1');
+      const promptStub = sinon.stub(PlayerActions, 'numberPrompt');
+      promptStub.onCall(0).returns(0);
+      promptStub.onCall(1).returns(1);
       promptStub.onCall(2).returns(`${testBaseCost}`);
       promptStub.onCall(3).returns(`${testBaseCost + 1}`);
-      promptStub.onCall(4).returns('');
-      promptStub.onCall(5).returns('');
+      promptStub.onCall(4).returns(0);
+      promptStub.onCall(5).returns(0);
 
       PlayerActions.auction(
         UI,
@@ -253,14 +253,14 @@ describe('PlayerActions', () => {
         ),
       }));
 
-      const promptStub = sinon.stub(UI, 'prompt');
-      promptStub.onCall(0).returns('');
+      const promptStub = sinon.stub(PlayerActions, 'numberPrompt');
+      promptStub.onCall(0).returns(0);
       promptStub.onCall(1).returns(`${testBaseCost + 1}`);
       promptStub.onCall(2).returns(`${testBaseCost + 2}`);
       promptStub.onCall(3).returns(`${testBaseCost + 3}`);
       promptStub.onCall(4).returns(`${testBaseCost + 4}`);
       promptStub.onCall(5).returns(`${testBaseCost + 5}`);
-      promptStub.onCall(6).returns(`0`);
+      promptStub.onCall(6).returns(0);
 
       PlayerActions.auction(
         UI,
@@ -296,10 +296,10 @@ describe('PlayerActions', () => {
       const playerOutOfAuctionUISpy = sinon.spy();
       UI.playerOutOfAuction = playerOutOfAuctionUISpy;
 
-      const promptStub = sinon.stub(UI, 'prompt');
-      promptStub.onCall(0).returns('');
+      const promptStub = sinon.stub(PlayerActions, 'numberPrompt');
+      promptStub.onCall(0).returns(0);
       promptStub.onCall(1).returns(`${testBaseCost + 1}`);
-      promptStub.onCall(2).returns('');
+      promptStub.onCall(2).returns(0);
 
       PlayerActions.auction(
         UI,
@@ -341,12 +341,12 @@ describe('PlayerActions', () => {
         ),
       }));
 
-      const promptStub = sinon.stub(UI, 'prompt');
-      promptStub.onCall(0).returns('');
+      const promptStub = sinon.stub(PlayerActions, 'numberPrompt');
+      promptStub.onCall(0).returns(0);
       promptStub.onCall(1).returns(`${testBaseCost + 1}`);
       promptStub.onCall(2).returns(`${testBaseCost + 2}`);
       promptStub.onCall(3).returns(`${testBaseCost + 3}`);
-      promptStub.onCall(4).returns(`0`);
+      promptStub.onCall(4).returns(0);
       const expectedWinner = playersWithLiquidity[1];
       const expectedCost = testBaseCost + 3;
 
@@ -377,7 +377,7 @@ describe('PlayerActions', () => {
         ),
       }));
 
-      const promptStub = sinon.stub(UI, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'numberPrompt');
       promptStub.onCall(0).returns('0.1abc');
       promptStub.onCall(1).returns(`-`);
       promptStub.onCall(2).returns(`${testBaseCost + 1}`);
@@ -411,12 +411,12 @@ describe('PlayerActions', () => {
         ),
       }));
 
-      const promptStub = sinon.stub(UI, 'prompt');
-      promptStub.onCall(0).returns('');
+      const promptStub = sinon.stub(PlayerActions, 'numberPrompt');
+      promptStub.onCall(0).returns(0);
       promptStub.onCall(1).returns(`${testBaseCost + 1}`);
       promptStub.onCall(2).returns(`${testBaseCost + 2}`);
       promptStub.onCall(3).returns(`${testBaseCost + 2}`);
-      promptStub.onCall(4).returns(`0`);
+      promptStub.onCall(4).returns(0);
       const expectedWinner = playersWithLiquidity[2];
       const expectedCost = testBaseCost + 2;
 
@@ -447,8 +447,8 @@ describe('PlayerActions', () => {
         ),
       }));
 
-      const promptStub = sinon.stub(UI, 'prompt');
-      promptStub.onCall(0).returns('');
+      const promptStub = sinon.stub(PlayerActions, 'numberPrompt');
+      promptStub.onCall(0).returns(0);
       promptStub.onCall(1).returns(`${testBaseCost + 1}`);
       promptStub.onCall(2).returns(`${playersWithLiquidity[2].liquidity + 1}`);
       const expectedWinner = playersWithLiquidity[1];
@@ -481,14 +481,14 @@ describe('PlayerActions', () => {
         ),
       }));
 
-      const promptStub = sinon.stub(UI, 'prompt');
-      promptStub.onCall(0).returns('');
+      const promptStub = sinon.stub(PlayerActions, 'numberPrompt');
+      promptStub.onCall(0).returns(0);
       promptStub.onCall(1).returns(`${testBaseCost + 1}`);
       promptStub.onCall(2).returns(`${testBaseCost + 2}`);
       promptStub.onCall(3).returns(`${testBaseCost + 3}`);
       promptStub.onCall(4).returns(`${testBaseCost + 4}`);
       promptStub.onCall(5).returns(`${testBaseCost + 5}`);
-      promptStub.onCall(6).returns(`0`);
+      promptStub.onCall(6).returns(0);
       const expectedWinner = playersWithLiquidity[1];
       const expectedCost = testBaseCost + 5;
 
@@ -502,40 +502,6 @@ describe('PlayerActions', () => {
       ).to.deep.equal(
         { buyer: expectedWinner, price: expectedCost },
         `Auction did not return buyer and expected cost`
-      );
-    });
-    it('accepts bid with $ in the input', () => {
-      const testBaseCost = 100;
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'mediterraneanave'
-      );
-      const UI = mockUIFactory();
-      const playersWithLiquidity = gameState.players.map((player) => ({
-        ...player,
-        liquidity: calculateLiquidity(
-          gameState,
-          gameState.config.propertyConfig.properties,
-          player
-        ),
-      }));
-
-      const promptStub = sinon.stub(UI, 'prompt');
-      promptStub.onCall(0).returns('');
-      promptStub.onCall(1).returns('');
-      promptStub.onCall(2).returns(`$${testBaseCost + 1}`);
-      const expectedWinner = playersWithLiquidity[2];
-      const expectedCost = testBaseCost + 1;
-
-      expect(
-        PlayerActions.auction(
-          UI,
-          playersWithLiquidity,
-          testProperty,
-          testBaseCost
-        )
-      ).to.deep.equal(
-        { buyer: expectedWinner, price: expectedCost },
-        `Auction did not accept input with a $ sign`
       );
     });
     it("returns player's highest bid even if the following round, they enter in an invalid bid", () => {
@@ -553,12 +519,12 @@ describe('PlayerActions', () => {
         ),
       }));
 
-      const promptStub = sinon.stub(UI, 'prompt');
-      promptStub.onCall(0).returns('');
+      const promptStub = sinon.stub(PlayerActions, 'numberPrompt');
+      promptStub.onCall(0).returns(0);
       promptStub.onCall(1).returns(`${testBaseCost + 1}`);
       promptStub.onCall(2).returns(`${testBaseCost + 2}`);
       promptStub.onCall(3).returns(`${testBaseCost + 1}`);
-      promptStub.onCall(4).returns('');
+      promptStub.onCall(4).returns(0);
       const expectedWinner = playersWithLiquidity[2];
       const expectedCost = testBaseCost + 2;
 

@@ -61,7 +61,7 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
       const property = config.propertyConfig.properties[TEST_PROPERTY];
       gameState.currentBoardProperty = property;
 
-      const playerActionsStub = sinon.stub(PlayerActions, 'prompt');
+      const playerActionsStub = sinon.stub(PlayerActions, 'select');
       playerActionsStub.returns(buyPropertyEvent);
 
       eventBus.emit(inputEvent);
@@ -77,10 +77,7 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
       gameState.currentBoardProperty = property;
       gameState.players[0].cash = 80;
 
-      const playerActionsStub = sinon.stub(PlayerActions, 'prompt');
-
-      const uiSpy = sinon.spy();
-      userInterface.unknownAction = uiSpy;
+      const playerActionsStub = sinon.stub(PlayerActions, 'select');
 
       eventBus.emit(inputEvent);
       expect(auctionSpy.calledOnce).to.equal(
@@ -97,30 +94,13 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
       const property = config.propertyConfig.properties[TEST_PROPERTY];
       gameState.currentBoardProperty = property;
 
-      const playerActionsStub = sinon.stub(PlayerActions, 'prompt');
+      const playerActionsStub = sinon.stub(PlayerActions, 'select');
       playerActionsStub.returns(buyPropertyEvent);
 
       eventBus.emit(inputEvent);
       expect(playerActionsStub.getCall(0).args[2]).to.deep.equal(
         [buyPropertyEvent, auctionEvent],
         `Prompt method for ${inputEvent} does not have expected options`
-      );
-    });
-    it('should re-run rule if prompt input is not understood', () => {
-      const property = config.propertyConfig.properties[TEST_PROPERTY];
-      gameState.currentBoardProperty = property;
-
-      const playerActionsStub = sinon.stub(PlayerActions, 'prompt');
-      playerActionsStub.onCall(0).returns(undefined);
-      playerActionsStub.onCall(1).returns(buyPropertyEvent);
-
-      const uiSpy = sinon.spy();
-      userInterface.unknownAction = uiSpy;
-
-      eventBus.emit(inputEvent);
-      expect(uiSpy.calledOnce).to.equal(
-        true,
-        `Prompt method for ${inputEvent} does not handle unknown action`
       );
     });
   });

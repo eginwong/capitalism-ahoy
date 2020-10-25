@@ -59,7 +59,7 @@ describe('Rules -> LIQUIDATION', () => {
     });
 
     it(`should emit desired ${managePropertiesEvent} event`, () => {
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(managePropertiesEvent);
       promptStub.onCall(1).returns(cancelEvent);
       eventBus.emit(inputEvent);
@@ -69,30 +69,13 @@ describe('Rules -> LIQUIDATION', () => {
       );
     });
     it(`should emit desired ${tradeEvent} event`, () => {
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(tradeEvent);
       promptStub.onCall(1).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(tradeSpy.callCount).to.equal(
         1,
         `${tradeEvent} was called ${tradeSpy.callCount} times but expected to be 1 times`
-      );
-    });
-    it('should make a call to the UI#unknownAction if action input is not recognized', () => {
-      const uiSpy = sinon.spy();
-      userInterface.unknownAction = uiSpy;
-
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(undefined);
-      promptStub.onCall(1).returns(cancelEvent);
-      eventBus.emit(inputEvent);
-      expect(uiSpy.calledOnce).to.equal(
-        true,
-        `UI method for ${inputEvent} was not called`
-      );
-      expect(liquidationSpy.callCount).to.equal(
-        2,
-        `Unknown action did not trigger ${inputEvent} event again`
       );
     });
   });

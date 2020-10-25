@@ -51,12 +51,11 @@ describe('Rules -> UNMORTGAGE', () => {
     });
 
     it(`should emit desired ${inputEvent} event`, () => {
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(false);
-      promptStub.onCall(1).returns(cancelEvent);
+      const promptStub = sinon.stub(PlayerActions, 'select');
+      promptStub.onCall(0).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(unmortgageSpy.callCount).to.equal(
-        2,
+        1,
         `${inputEvent} was called ${unmortgageSpy.callCount} times but expected to be 1 times`
       );
     });
@@ -68,7 +67,7 @@ describe('Rules -> UNMORTGAGE', () => {
       );
       expectedProperties[0].mortgaged = true;
 
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(promptStub.getCall(0).args[2]).to.deep.equal(
@@ -92,7 +91,7 @@ describe('Rules -> UNMORTGAGE', () => {
       expectedProperty.mortgaged = true;
       const originalMortgageState = expectedProperty.mortgaged;
 
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(expectedProperty.name.toUpperCase());
       promptStub.onCall(1).returns(cancelEvent);
       eventBus.emit(inputEvent);
@@ -114,10 +113,12 @@ describe('Rules -> UNMORTGAGE', () => {
       expectedProperty.mortgaged = true;
       const originalMortgageState = expectedProperty.mortgaged;
 
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(expectedProperty.name.toUpperCase());
       promptStub.onCall(1).returns(cancelEvent);
+
       eventBus.emit(inputEvent);
+
       expect(expectedProperty.mortgaged).to.equal(
         originalMortgageState,
         `${inputEvent} was called with valid property without sufficient funds and mortgage was toggled`
@@ -125,19 +126,6 @@ describe('Rules -> UNMORTGAGE', () => {
       expect(uiSpy.calledOnceWithExactly(gameState.currentPlayer)).to.equal(
         true,
         `UI method for ${inputEvent} was not called although player has insufficient funds`
-      );
-    });
-    it('should make a call to the UI#unknownAction if action input is not recognized', () => {
-      const uiSpy = sinon.spy();
-      userInterface.unknownAction = uiSpy;
-
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(false);
-      promptStub.onCall(1).returns(cancelEvent);
-      eventBus.emit(inputEvent);
-      expect(uiSpy.calledOnce).to.equal(
-        true,
-        `UI method for ${inputEvent} was not called`
       );
     });
   });

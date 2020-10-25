@@ -52,15 +52,11 @@ module.exports = {
   ],
   CONTINUE_TURN: [
     ({ notify, UI }, gameState) => {
-      const action = require('../PlayerActions').prompt(
+      const action = require('../PlayerActions').select(
         { notify, UI },
         gameState
       );
-      if (action) {
-        notify(action);
-      } else {
-        UI.unknownAction();
-      }
+      notify(action);
 
       if (action === 'END_TURN' || action === 'END_GAME') return;
 
@@ -236,7 +232,7 @@ module.exports = {
       const finishGame =
         gameState.gameOver ||
         require('../PlayerActions').confirm(
-          { UI },
+          UI,
           'Are you sure you want to end the game?'
         );
       if (!finishGame) return;
@@ -269,18 +265,13 @@ module.exports = {
       if (playerBuyingPower < boardProperty.price) {
         notify('AUCTION');
       } else {
-        const action = require('../PlayerActions').prompt(
+        const action = require('../PlayerActions').select(
           { notify, UI },
           gameState,
           ['BUY_PROPERTY', 'AUCTION']
         );
 
-        if (action) {
-          notify(action);
-        } else {
-          UI.unknownAction();
-          notify('RESOLVE_NEW_PROPERTY');
-        }
+        notify(action);
       }
     },
   ],
@@ -349,7 +340,7 @@ module.exports = {
   MANAGE_PROPERTIES: [
     // TODO: potentially refactor this prompt pattern
     ({ notify, UI }, gameState) => {
-      const action = require('../PlayerActions').prompt(
+      const action = require('../PlayerActions').select(
         { notify, UI },
         gameState,
         require('../PropertyManagementService').getAvailableManagementActions(
@@ -359,12 +350,7 @@ module.exports = {
 
       if (action === 'CANCEL') return;
 
-      if (action) {
-        notify(action);
-      } else {
-        UI.unknownAction();
-      }
-
+      notify(action);
       notify('MANAGE_PROPERTIES');
     },
   ],
@@ -373,7 +359,7 @@ module.exports = {
       const renoProps = require('../PropertyManagementService').getRenoProperties(
         gameState
       );
-      const propSelection = require('../PlayerActions').prompt(
+      const propSelection = require('../PlayerActions').select(
         { notify, UI },
         gameState,
         [...renoProps.map((p) => p.name), 'CANCEL']
@@ -381,12 +367,8 @@ module.exports = {
 
       if (propSelection === 'CANCEL') return;
 
-      if (propSelection) {
-        const propToReno = renoProps.find((p) => p.name === propSelection);
-        require('../PropertyManagementService').renovate(gameState, propToReno);
-      } else {
-        UI.unknownAction();
-      }
+      const propToReno = renoProps.find((p) => p.name === propSelection);
+      require('../PropertyManagementService').renovate(gameState, propToReno);
 
       notify('RENOVATE');
     },
@@ -396,7 +378,7 @@ module.exports = {
       const demoProps = require('../PropertyManagementService').getDemoProperties(
         gameState
       );
-      const propSelection = require('../PlayerActions').prompt(
+      const propSelection = require('../PlayerActions').select(
         { notify, UI },
         gameState,
         [...demoProps.map((p) => p.name), 'CANCEL']
@@ -404,12 +386,8 @@ module.exports = {
 
       if (propSelection === 'CANCEL') return;
 
-      if (propSelection) {
-        const propToReno = demoProps.find((p) => p.name === propSelection);
-        require('../PropertyManagementService').demolish(gameState, propToReno);
-      } else {
-        UI.unknownAction();
-      }
+      const propToReno = demoProps.find((p) => p.name === propSelection);
+      require('../PropertyManagementService').demolish(gameState, propToReno);
 
       notify('DEMOLISH');
     },
@@ -420,7 +398,7 @@ module.exports = {
       const mortgageAbleProps = require('../PropertyManagementService')
         .getMortgageableProperties(gameState)
         .filter((p) => !p.mortgaged);
-      const propSelection = require('../PlayerActions').prompt(
+      const propSelection = require('../PlayerActions').select(
         { notify, UI },
         gameState,
         [...mortgageAbleProps.map((p) => p.name.toUpperCase()), 'CANCEL']
@@ -428,18 +406,11 @@ module.exports = {
 
       if (propSelection === 'CANCEL') return;
 
-      if (propSelection) {
-        const mortgageProp = mortgageAbleProps.find(
-          (p) => p.name.toUpperCase() === propSelection
-        );
+      const mortgageProp = mortgageAbleProps.find(
+        (p) => p.name.toUpperCase() === propSelection
+      );
 
-        require('../PropertyManagementService').mortgage(
-          gameState,
-          mortgageProp
-        );
-      } else {
-        UI.unknownAction();
-      }
+      require('../PropertyManagementService').mortgage(gameState, mortgageProp);
 
       notify('MORTGAGE');
     },
@@ -457,7 +428,8 @@ module.exports = {
       const unmortgageAbleProps = require('../PropertyManagementService')
         .getMortgageableProperties(gameState)
         .filter((p) => p.mortgaged);
-      const propSelection = require('../PlayerActions').prompt(
+
+      const propSelection = require('../PlayerActions').select(
         { notify, UI },
         gameState,
         [...unmortgageAbleProps.map((p) => p.name.toUpperCase()), 'CANCEL']
@@ -465,25 +437,21 @@ module.exports = {
 
       if (propSelection === 'CANCEL') return;
 
-      if (propSelection) {
-        const mortgageProp = unmortgageAbleProps.find(
-          (p) => p.name.toUpperCase() === propSelection
-        );
-        if (
-          mortgageProp.mortgaged &&
-          player.cash <
-            (mortgageProp.price / mortgageValueMultiplier) *
-              INTEREST_RATE_MULTIPLIER
-        ) {
-          UI.noCashMustLiquidate(gameState.currentPlayer);
-        } else {
-          require('../PropertyManagementService').unmortgage(
-            gameState,
-            mortgageProp
-          );
-        }
+      const mortgageProp = unmortgageAbleProps.find(
+        (p) => p.name.toUpperCase() === propSelection
+      );
+      if (
+        mortgageProp.mortgaged &&
+        player.cash <
+          (mortgageProp.price / mortgageValueMultiplier) *
+            INTEREST_RATE_MULTIPLIER
+      ) {
+        UI.noCashMustLiquidate(gameState.currentPlayer);
       } else {
-        UI.unknownAction();
+        require('../PropertyManagementService').unmortgage(
+          gameState,
+          mortgageProp
+        );
       }
 
       notify('UNMORTGAGE');
@@ -543,7 +511,7 @@ module.exports = {
       const { incomeTaxAmount, incomeTaxRate } = gameState.config;
       const player = gameState.currentPlayer;
 
-      const paymentSelection = require('../PlayerActions').prompt(
+      const paymentSelection = require('../PlayerActions').select(
         { notify, UI },
         gameState,
         [FIXED, VARIABLE]
@@ -565,7 +533,7 @@ module.exports = {
 
         require('../WealthService').decrement(player, incomeTaxAmount);
         UI.incomeTaxPaid(incomeTaxAmount);
-      } else if (paymentSelection === VARIABLE) {
+      } else {
         const netWorth = require('../WealthService').calculateNetWorth(player);
         const fee = (incomeTaxRate * netWorth).toFixed(2);
 
@@ -584,15 +552,12 @@ module.exports = {
 
         require('../WealthService').decrement(player, fee);
         UI.incomeTaxPaid(fee);
-      } else {
-        UI.unknownAction();
-        notify('INCOME_TAX');
       }
     },
   ],
   LIQUIDATION: [
     ({ UI, notify }, gameState) => {
-      const liquidateOption = require('../PlayerActions').prompt(
+      const liquidateOption = require('../PlayerActions').select(
         { notify, UI },
         gameState,
         // TODO: be smart about what options are available to the user?
@@ -601,12 +566,7 @@ module.exports = {
 
       if (liquidateOption === 'CANCEL') return;
 
-      if (liquidateOption) {
-        notify(liquidateOption);
-      } else {
-        UI.unknownAction();
-      }
-
+      notify(liquidateOption);
       notify('LIQUIDATION');
     },
   ],
@@ -952,7 +912,7 @@ module.exports = {
 
       if (boardProperty.mortgaged) {
         const unmortgage = require('../PlayerActions').confirm(
-          { UI },
+          UI,
           `Would you like to unmortgage this property right now? If yes, you can save on the interest rate charge! The cost is $${
             boardProperty.price / 2
           }`
