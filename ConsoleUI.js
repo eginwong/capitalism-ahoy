@@ -1,6 +1,6 @@
 const chalk = require('chalk');
 
-const consoleUI = (function (readline) {
+const consoleUI = (function (enquirer) {
   return {
     startGame: () => console.log('\ngame has started'),
     startTurn: (player) =>
@@ -17,7 +17,14 @@ const consoleUI = (function (readline) {
           chalk.cyan(`${actions.join(', ')}`)
       ),
     displayPropertyDetails: (boardProperty) => console.dir(boardProperty),
-    prompt: readline.question,
+    prompt: async (message, options = {}) => {
+      return await enquirer.prompt({
+        type: 'input',
+        ...options, // will override type if passed
+        name: 'response',
+        message,
+      }).response;
+    },
     endTurn: () => console.log(chalk.bold.red('ENDING TURN')),
     rollingDice: () => console.log('🎲ROLLING🎲'),
     rollDiceDisplay: (shouldDisplay) =>
@@ -105,12 +112,6 @@ const consoleUI = (function (readline) {
       ),
     wonAuction: (player, price) =>
       console.log(`Property SOLD to ${player.name} for $${price}`),
-    auctionOfferUnmortgage: (property) =>
-      console.log(
-        `Would you like to unmortgage this property right now? If yes, you can save on the interest rate charge! The cost is $${
-          property.price / 2
-        }`
-      ),
     skipTurnForBankruptPlayer: (player) =>
       console.log(
         `Player ${player.name}'s turn is skipped as they are bankrupt and out of the game.`
@@ -120,6 +121,6 @@ const consoleUI = (function (readline) {
         `Insufficient funds. Player ${player.name} declares bankruptcy.`
       ),
   };
-})(require('readline-sync'));
+})(require('enquirer'));
 
 module.exports = { consoleUI };
