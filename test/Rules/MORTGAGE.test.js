@@ -51,12 +51,11 @@ describe('Rules -> MORTGAGE', () => {
     });
 
     it(`should emit desired ${inputEvent} event`, () => {
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(false);
-      promptStub.onCall(1).returns(cancelEvent);
+      const promptStub = sinon.stub(PlayerActions, 'select');
+      promptStub.onCall(0).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(mortgageSpy.callCount).to.equal(
-        2,
+        1,
         `${inputEvent} was called ${mortgageSpy.callCount} times but expected to be 1 times`
       );
     });
@@ -67,7 +66,7 @@ describe('Rules -> MORTGAGE', () => {
         (p) => p.group === propertyGroup
       );
 
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(promptStub.getCall(0).args[2]).to.deep.equal(
@@ -85,26 +84,13 @@ describe('Rules -> MORTGAGE', () => {
       );
       const originalMortgageState = expectedProperty.mortgaged;
 
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(expectedProperty.name.toUpperCase());
       promptStub.onCall(1).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(expectedProperty.mortgaged).to.equal(
         !originalMortgageState,
         `${inputEvent} was called with valid property and mortgage was not toggled`
-      );
-    });
-    it('should make a call to the UI#unknownAction if action input is not recognized', () => {
-      const uiSpy = sinon.spy();
-      userInterface.unknownAction = uiSpy;
-
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(false);
-      promptStub.onCall(1).returns(cancelEvent);
-      eventBus.emit(inputEvent);
-      expect(uiSpy.calledOnce).to.equal(
-        true,
-        `UI method for ${inputEvent} was not called`
       );
     });
   });

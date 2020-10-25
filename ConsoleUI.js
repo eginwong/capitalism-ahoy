@@ -54,7 +54,6 @@ const consoleUI = (function (enquirer) {
     payFine: () => console.log(`PAYING FINE 💸💸💸`),
     passGo: () => console.log(`PASSING GO!`),
     jail: () => console.log(`IN JAIL 🤩🤩🤩🤩🤩`),
-    unknownAction: () => console.error(`unknown action attempted`),
     gameOver: (name, netWorth) =>
       console.log(
         `Game ended. Winner is: 🎉${name}🎉 with a net worth of: ${netWorth}`

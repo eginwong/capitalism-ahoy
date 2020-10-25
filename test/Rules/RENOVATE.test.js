@@ -52,12 +52,11 @@ describe('Rules -> RENOVATE', () => {
     });
 
     it(`should emit desired ${inputEvent} event`, () => {
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(false);
-      promptStub.onCall(1).returns(cancelEvent);
+      const promptStub = sinon.stub(PlayerActions, 'select');
+      promptStub.onCall(0).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(renovateSpy.callCount).to.equal(
-        2,
+        1,
         `${inputEvent} was called ${renovateSpy.callCount} times but expected to be 1 times`
       );
     });
@@ -68,7 +67,7 @@ describe('Rules -> RENOVATE', () => {
         'getRenoProperties'
       );
       propMgmtServiceStub.onCall(0).returns([{ name: testPropertyName }]);
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(promptStub.getCall(0).args[2]).to.deep.equal(
@@ -86,26 +85,13 @@ describe('Rules -> RENOVATE', () => {
       );
       getRenoStub.returns([testProperty]);
       const renovateStub = sinon.stub(PropertyManagementService, 'renovate');
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(testProperty.name);
       promptStub.onCall(1).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(renovateStub.callCount).to.equal(
         1,
         `${inputEvent} was called with valid property and renovate method was called ${renovateStub.callCount} times but expected to be 1 times`
-      );
-    });
-    it('should make a call to the UI#unknownAction if action input is not recognized', () => {
-      const uiSpy = sinon.spy();
-      userInterface.unknownAction = uiSpy;
-
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
-      promptStub.onCall(0).returns(false);
-      promptStub.onCall(1).returns(cancelEvent);
-      eventBus.emit(inputEvent);
-      expect(uiSpy.calledOnce).to.equal(
-        true,
-        `UI method for ${inputEvent} was not called`
       );
     });
   });

@@ -20,7 +20,6 @@ module.exports = function mockUIFactory() {
     payFine: () => true,
     passGo: () => true,
     jail: () => true,
-    unknownAction: () => true,
     gameOver: () => true,
     displayPropertyDetails: () => true,
     propertyBought: () => true,

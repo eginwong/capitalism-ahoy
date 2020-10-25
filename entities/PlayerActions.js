@@ -40,9 +40,22 @@ module.exports = class PlayerActions {
     );
   }
 
-  static confirm({ UI }, message) {
+  static select({ UI }, gameState, actions = this.refresh(gameState)) {
+    return UI.prompt('Which action would you like to take?', {
+      type: 'select',
+      choices: actions,
+    });
+  }
+
+  static confirm(UI, message) {
     return UI.prompt(message, {
       type: 'confirm',
+    });
+  }
+
+  static numberPrompt(UI, message) {
+    return UI.prompt(message, {
+      type: 'number',
     });
   }
 
@@ -61,12 +74,12 @@ module.exports = class PlayerActions {
         UI.playersInAuction(biddingPlayers);
         for (let i = 0; i < biddingPlayers.length; i++) {
           UI.playerInAuction(biddingPlayers[i]);
-          let bid = UI.prompt(
+          let bid = PlayerActions.numberPrompt(
+            UI,
             `How much would you like to bid? Minimum bid is ${cost + 1} \n`
           );
 
-          // if a player enters "$__"
-          const bidParsed = parseInt(bid.replace(/[^0-9\.]+/g, ''), 10);
+          const bidParsed = parseInt(bid, 10);
           const biddingPlayer = biddingPlayers[i];
           if (
             isNaN(bidParsed) ||

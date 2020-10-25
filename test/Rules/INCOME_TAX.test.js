@@ -61,7 +61,7 @@ describe('Rules -> INCOME_TAX', () => {
     it('should make a call to the UI#incomeTaxPayment', () => {
       const uiSpy = sinon.spy();
       userInterface.incomeTaxPayment = uiSpy;
-      const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns('FIXED');
 
       eventBus.emit(inputEvent);
@@ -73,27 +73,9 @@ describe('Rules -> INCOME_TAX', () => {
       ).to.equal(true, `Initial UI method for ${inputEvent} was not called`);
     });
     describe('FIXED', () => {
-      it('should make a call to the UI#unknownAction if action input is not recognized', () => {
-        const uiSpy = sinon.spy();
-        userInterface.unknownAction = uiSpy;
-
-        const promptStub = sinon.stub(PlayerActions, 'prompt');
-        promptStub.onCall(0).returns(undefined);
-        promptStub.onCall(1).returns('FIXED');
-
-        eventBus.emit(inputEvent);
-        expect(uiSpy.calledOnce).to.equal(
-          true,
-          `UI method for ${inputEvent} was not called`
-        );
-        expect(incomeTaxSpy.callCount).to.equal(
-          2,
-          `Unknown action did not trigger ${inputEvent} event again`
-        );
-      });
       it('should decrease player cash by config incomeTaxAmount if player chooses FIXED', () => {
         const startingCash = gameState.currentPlayer.cash;
-        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStub = sinon.stub(PlayerActions, 'select');
         promptStub.onCall(0).returns('FIXED');
 
         eventBus.emit(inputEvent);
@@ -105,7 +87,7 @@ describe('Rules -> INCOME_TAX', () => {
       it('should make a call to the UI#incomeTaxPaid for FIXED', () => {
         const uiSpy = sinon.spy();
         userInterface.incomeTaxPaid = uiSpy;
-        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStub = sinon.stub(PlayerActions, 'select');
         promptStub.onCall(0).returns('FIXED');
 
         eventBus.emit(inputEvent);
@@ -117,7 +99,7 @@ describe('Rules -> INCOME_TAX', () => {
         );
       });
       it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
-        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStub = sinon.stub(PlayerActions, 'select');
         promptStub.onCall(0).returns('FIXED');
         gameState.currentPlayer.cash = 0;
 
@@ -136,7 +118,7 @@ describe('Rules -> INCOME_TAX', () => {
         );
       });
       it(`${collectionsEvent} event should be called if current player has no more cash to pay`, () => {
-        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStub = sinon.stub(PlayerActions, 'select');
         promptStub.onCall(0).returns('FIXED');
         gameState.currentPlayer.cash = 0;
         eventBus.emit(inputEvent);
@@ -147,7 +129,7 @@ describe('Rules -> INCOME_TAX', () => {
         );
       });
       it('should not update the ownership of the purchased asset or buy asset if player is bankrupt', () => {
-        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStub = sinon.stub(PlayerActions, 'select');
         promptStub.onCall(0).returns('FIXED');
         gameState.currentPlayer.cash = 0;
         const wealthServiceStub = sinon.stub(WealthService, 'decrement');
@@ -163,7 +145,7 @@ describe('Rules -> INCOME_TAX', () => {
     describe('VARIABLE', () => {
       it('should decrease player cash by config incomeTaxRate if player chooses VARIABLE', () => {
         const startingCash = gameState.currentPlayer.cash;
-        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStub = sinon.stub(PlayerActions, 'select');
         promptStub.onCall(0).returns('VARIABLE');
 
         eventBus.emit(inputEvent);
@@ -178,7 +160,7 @@ describe('Rules -> INCOME_TAX', () => {
         const startingCash = gameState.currentPlayer.cash;
         const assets = 11; // arbitrary value
         gameState.currentPlayer.assets = assets;
-        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStub = sinon.stub(PlayerActions, 'select');
         promptStub.onCall(0).returns('VARIABLE');
 
         eventBus.emit(inputEvent);
@@ -194,7 +176,7 @@ describe('Rules -> INCOME_TAX', () => {
         const startingCash = gameState.currentPlayer.cash;
         const assets = 11;
         gameState.currentPlayer.assets = assets;
-        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStub = sinon.stub(PlayerActions, 'select');
         promptStub.onCall(0).returns('VARIABLE');
 
         eventBus.emit(inputEvent);
@@ -209,7 +191,7 @@ describe('Rules -> INCOME_TAX', () => {
       it('should make a call to the UI#incomeTaxPaid for VARIABLE', () => {
         const uiSpy = sinon.spy();
         userInterface.incomeTaxPaid = uiSpy;
-        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStub = sinon.stub(PlayerActions, 'select');
         promptStub.onCall(0).returns('VARIABLE');
         const expectedFee = (
           gameState.config.incomeTaxRate * gameState.currentPlayer.cash
@@ -222,7 +204,7 @@ describe('Rules -> INCOME_TAX', () => {
         );
       });
       it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
-        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStub = sinon.stub(PlayerActions, 'select');
         promptStub.onCall(0).returns('VARIABLE');
         gameState.currentPlayer.cash = 0;
         gameState.currentPlayer.assets = 100;
@@ -245,7 +227,7 @@ describe('Rules -> INCOME_TAX', () => {
         );
       });
       it(`${collectionsEvent} event should be called if current player has no more cash to pay`, () => {
-        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStub = sinon.stub(PlayerActions, 'select');
         promptStub.onCall(0).returns('VARIABLE');
         gameState.currentPlayer.cash = 0;
         gameState.currentPlayer.assets = 100;
@@ -257,7 +239,7 @@ describe('Rules -> INCOME_TAX', () => {
         );
       });
       it('should not update the ownership of the purchased asset or buy asset if player is bankrupt', () => {
-        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptStub = sinon.stub(PlayerActions, 'select');
         promptStub.onCall(0).returns('VARIABLE');
         gameState.currentPlayer.cash = 0;
         gameState.currentPlayer.assets = 100;
