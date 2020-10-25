@@ -175,7 +175,7 @@ module.exports = class PropertyManagementService {
   static getMortgageableProperties(gameState) {
     const { properties } = gameState.config.propertyConfig;
     return properties.filter(
-      (p) => p.ownedBy === gameState.currentPlayer.id && p.buildings === 0
+      (p) => p.ownedBy === gameState.currentPlayer.id && !p.buildings
     );
   }
 

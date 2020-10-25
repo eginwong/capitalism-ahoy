@@ -1038,7 +1038,6 @@ describe('main', () => {
           purpleProperties[0].houseCost / mortgageValueMultiplier +
           purpleProperties[0].price / mortgageValueMultiplier;
 
-        console.dir(gameState.players);
         expect(gameState.players[0].cash).to.equal(
           player0Cash,
           "Player #1's cash did not change from purchase, renovating, and rental income, with limited amount of rent"

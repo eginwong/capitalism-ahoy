@@ -531,7 +531,6 @@ describe('Rules -> CHANCE', () => {
         gameState.players[2].bankrupt = true;
 
         eventBus.emit(inputEvent);
-        console.dir(gameState.currentPlayer.cash);
 
         expect(gameState.currentPlayer.cash).to.equal(
           startingCash - otherPlayersCount * expectedCard.amount,
