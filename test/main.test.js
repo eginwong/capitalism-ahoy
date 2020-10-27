@@ -56,9 +56,14 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
+
         const promptStubValues = [
           '', // highest rolling player
           '',
+        ];
+
+        const promptSelectStubValues = [
           'ROLL_DICE',
           'BUY_PROPERTY',
           'ROLL_DICE',
@@ -67,6 +72,10 @@ describe('main', () => {
           'END_GAME',
         ];
         userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
 
         const diceStub = sinon.stub(Dice, 'roll');
         const diceStubValues = [[6], [1], [3, 3], [1, 2]];
@@ -105,9 +114,13 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
+
         const promptStubValues = [
           '', // highest rolling player
           '',
+        ];
+        const promptSelectStubValues = [
           'ROLL_DICE',
           'BUY_PROPERTY',
           'END_TURN',
@@ -115,7 +128,12 @@ describe('main', () => {
           'END_TURN',
           'END_GAME',
         ];
+
         userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
 
         const diceStub = sinon.stub(Dice, 'roll');
         const diceStubValues = [[6], [1], [1, 2], [1, 2]];
@@ -147,9 +165,13 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
+
         const promptStubValues = [
           '', // highest rolling player
           '',
+        ];
+        const promptSelectStubValues = [
           'ROLL_DICE',
           'BUY_PROPERTY',
           'ROLL_DICE',
@@ -166,7 +188,12 @@ describe('main', () => {
           'END_TURN',
           'END_GAME',
         ];
+
         userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
 
         const diceStub = sinon.stub(Dice, 'roll');
         const diceStubValues = [[6], [1], [2, 2], [1, 1], [2, 3]];
@@ -205,10 +232,13 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
 
         const promptStubValues = [
           '', // highest rolling player
           '',
+        ];
+        const promptSelectStubValues = [
           'ROLL_DICE',
           'ROLL_DICE',
           'FIXED',
@@ -222,7 +252,12 @@ describe('main', () => {
           'ROLL_DICE',
           'END_GAME',
         ];
+
         userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
 
         const diceStub = sinon.stub(Dice, 'roll');
         const diceStubValues = [
@@ -274,10 +309,13 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
 
         const promptStubValues = [
           '', // highest rolling player
           '',
+        ];
+        const promptSelectStubValues = [
           'ROLL_DICE',
           'ROLL_DICE',
           'FIXED',
@@ -291,7 +329,12 @@ describe('main', () => {
           'ROLL_DICE',
           'END_GAME',
         ];
+
         userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
 
         const diceStub = sinon.stub(Dice, 'roll');
         const diceStubValues = [
@@ -348,15 +391,19 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
 
         const promptStubValues = [
           '', // highest rolling player
           '',
-          'ROLL_DICE',
-          'VARIABLE',
-          'END_GAME',
         ];
+        const promptSelectStubValues = ['ROLL_DICE', 'VARIABLE', 'END_GAME'];
+
         userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
 
         const diceStub = sinon.stub(Dice, 'roll');
         const diceStubValues = [
@@ -385,10 +432,13 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
 
         const promptStubValues = [
           '', // highest rolling player
           '',
+        ];
+        const promptSelectStubValues = [
           'ROLL_DICE',
           'ROLL_DICE',
           'FIXED',
@@ -401,7 +451,12 @@ describe('main', () => {
           'END_TURN',
           'END_GAME',
         ];
+
         userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
 
         const diceStub = sinon.stub(Dice, 'roll');
         const diceStubValues = [
@@ -445,16 +500,24 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
 
         const promptStubValues = [
           '', // highest rolling player
           '',
+        ];
+        const promptSelectStubValues = [
           'ROLL_DICE',
           'ROLL_DICE',
           'ROLL_DICE',
           'END_GAME',
         ];
+
         userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
 
         const diceStub = sinon.stub(Dice, 'roll');
         const diceStubValues = [
@@ -503,13 +566,16 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
+
         // highest rolling player
         promptStub.onCall(0).returns('');
         promptStub.onCall(1).returns('');
         // // player turn
-        promptStub.onCall(2).returns('ROLL_DICE');
-        promptStub.onCall(3).returns('END_GAME');
+        promptSelectStub.onCall(2).returns('ROLL_DICE');
+        promptSelectStub.onCall(3).returns('END_GAME');
         userInterface.prompt = promptStub;
+        userInterface.promptSelect = promptSelectStub;
 
         const diceStub = sinon.stub(Dice, 'roll');
         // highest rolling player
@@ -541,14 +607,18 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
 
         const promptStubValues = [
           '', // highest rolling player
           '',
-          'ROLL_DICE',
-          'END_GAME',
         ];
+        const promptSelectStubValues = ['ROLL_DICE', 'END_GAME'];
         userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
 
         const diceStub = sinon.stub(Dice, 'roll');
         const diceStubValues = [
@@ -581,10 +651,13 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
 
         const promptStubValues = [
           '', // highest rolling player
           '',
+        ];
+        const promptSelectStubValues = [
           'PAY_FINE',
           'MANAGE_PROPERTIES',
           'MORTGAGE',
@@ -594,7 +667,12 @@ describe('main', () => {
           'CANCEL',
           'END_GAME',
         ];
+
         userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
 
         const diceStub = sinon.stub(Dice, 'roll');
         const diceStubValues = [[6], [1]];
@@ -626,19 +704,29 @@ describe('main', () => {
     it(gwt`cold start | game is loaded | player auctions a property`, () => {
       // arrange
       const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptNumberStub = sinon.stub(PlayerActions, 'numberPrompt');
+      const promptSelectStub = sinon.stub(PlayerActions, 'select');
 
       const promptStubValues = [
         '', // highest rolling player
         '',
+      ];
+      const promptSelectStubValues = [
         'ROLL_DICE',
         'AUCTION',
-        '30',
-        '50',
-        '$40',
-        '',
+        // prompt number stub values
         'END_GAME',
       ];
+      const promptNumberStubValues = ['30', '50', '40', ''];
       userInterface.prompt = fillStub(promptStub, promptStubValues);
+      userInterface.promptNumber = fillStub(
+        promptNumberStub,
+        promptNumberStubValues
+      );
+      userInterface.promptSelect = fillStub(
+        promptSelectStub,
+        promptSelectStubValues
+      );
 
       const diceStub = sinon.stub(Dice, 'roll');
       const diceStubValues = [[6], [1], [1, 2]];
@@ -670,16 +758,16 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
+        const promptNumberStub = sinon.stub(PlayerActions, 'numberPrompt');
 
         const promptStubValues = [
           '', // highest rolling player
           '',
+        ];
+        const promptSelectStubValues = [
           'ROLL_DICE',
           'AUCTION',
-          '30',
-          '50',
-          '$40',
-          '',
           'MANAGE_PROPERTIES',
           'MORTGAGE',
           'ORIENTAL AVENUE',
@@ -688,7 +776,16 @@ describe('main', () => {
           'CANCEL',
           'END_GAME',
         ];
+        const promptNumberStubValues = ['30', '50', '40', ''];
         userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
+        userInterface.promptNumber = fillStub(
+          promptNumberStub,
+          promptNumberStubValues
+        );
 
         const diceStub = sinon.stub(Dice, 'roll');
         const diceStubValues = [[6], [1], [1, 2]];
@@ -728,10 +825,13 @@ describe('main', () => {
     it(gwt`cold start | game is loaded | player unmortgages a property`, () => {
       // arrange
       const promptStub = sinon.stub(PlayerActions, 'prompt');
+      const promptSelectStub = sinon.stub(PlayerActions, 'select');
 
       const promptStubValues = [
         '', // highest rolling player
         '',
+      ];
+      const promptSelectStubValues = [
         'ROLL_DICE',
         'BUY_PROPERTY',
         'END_TURN',
@@ -746,6 +846,10 @@ describe('main', () => {
         'END_GAME',
       ];
       userInterface.prompt = fillStub(promptStub, promptStubValues);
+      userInterface.promptSelect = fillStub(
+        promptSelectStub,
+        promptSelectStubValues
+      );
 
       const diceStub = sinon.stub(Dice, 'roll');
       const diceStubValues = [[6], [1], [1, 2], [1, 4]];
@@ -789,9 +893,13 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
+
         const promptStubValues = [
           '', // highest rolling player
           '',
+        ];
+        const promptSelectStubValues = [
           'ROLL_DICE',
           'BUY_PROPERTY',
           'ROLL_DICE',
@@ -808,6 +916,10 @@ describe('main', () => {
           '',
         ];
         userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
         const uiSpy = sinon.spy();
         userInterface.gameOver = uiSpy;
 
@@ -869,13 +981,18 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
+
         const promptStubValues = [
           '', // highest rolling player
           '',
-          'ROLL_DICE',
-          '',
         ];
+        const promptSelectStubValues = ['ROLL_DICE', ''];
         userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
         const uiSpy = sinon.spy();
         userInterface.gameOver = uiSpy;
 
@@ -922,13 +1039,18 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
+
         const promptStubValues = [
           '', // highest rolling player
           '',
-          'ROLL_DICE',
-          '',
         ];
+        const promptSelectStubValues = ['ROLL_DICE', ''];
         userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
         const uiSpy = sinon.spy();
         userInterface.gameOver = uiSpy;
 
@@ -973,9 +1095,13 @@ describe('main', () => {
       () => {
         // arrange
         const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
+
         const promptStubValues = [
           '', // highest rolling player
           '',
+        ];
+        const promptSelectStubValues = [
           'ROLL_DICE',
           'BUY_PROPERTY',
           'ROLL_DICE',
@@ -992,6 +1118,10 @@ describe('main', () => {
           '',
         ];
         userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
         const uiSpy = sinon.spy();
         userInterface.gameOver = uiSpy;
 

@@ -559,7 +559,6 @@ describe('PropertyManagementService', () => {
   describe('getAvailableManagementActions', () => {
     it('should return mortgage if unmortgaged properties are available', () => {
       const MORTGAGE_ACTION = 'MORTGAGE';
-      const CANCEL_ACTION = 'CANCEL';
       const propertyGroup = 'Purple';
       createMonopoly(gameState, propertyGroup);
 
@@ -571,18 +570,9 @@ describe('PropertyManagementService', () => {
         true,
         `Missing ${MORTGAGE_ACTION} in available property management actions`
       );
-      expect(
-        PropertyManagementService.getAvailableManagementActions(
-          gameState
-        ).includes(CANCEL_ACTION)
-      ).to.equal(
-        true,
-        `Missing ${CANCEL_ACTION} in available property management actions`
-      );
     });
     it('should return unmortgage if mortgaged properties are available', () => {
       const UNMORTGAGE_ACTION = 'UNMORTGAGE';
-      const CANCEL_ACTION = 'CANCEL';
       const propertyGroup = 'Purple';
       createMonopoly(gameState, propertyGroup);
       const expectedProperties = gameState.config.propertyConfig.properties.filter(
@@ -597,14 +587,6 @@ describe('PropertyManagementService', () => {
       ).to.equal(
         true,
         `Missing ${UNMORTGAGE_ACTION} in available property management actions`
-      );
-      expect(
-        PropertyManagementService.getAvailableManagementActions(
-          gameState
-        ).includes(CANCEL_ACTION)
-      ).to.equal(
-        true,
-        `Missing ${CANCEL_ACTION} in available property management actions`
       );
     });
     it('should return demolish if buildings are owned', () => {

@@ -31,32 +31,30 @@ module.exports = class PlayerActions {
     );
   }
 
-  static prompt({ UI }, gameState, actions = this.refresh(gameState)) {
-    UI.displayAvailableActions(actions);
+  static prompt({ UI }, message) {
     // TODO: UI.prompt -> UI.selectFrom(actions: [String], msg: String) : String | String `el` <actions>
-    const answer = UI.prompt(`Which action would you like to take?\n\n`);
-    return actions.find(
-      (action) => action.toUpperCase() === String(answer).toUpperCase()
-    );
+    UI.prompt(message);
   }
 
-  static select({ UI }, gameState, actions = this.refresh(gameState)) {
-    return UI.prompt('Which action would you like to take?', {
-      type: 'select',
-      choices: actions,
-    });
+  static select(UI, actions, options = {}) {
+    if (actions.length === 0) {
+      return 'CANCEL';
+    }
+
+    let index = UI.promptSelect(
+      actions,
+      'Which action would you like to take?',
+      options
+    );
+    return index > -1 ? actions[index] : 'CANCEL';
   }
 
   static confirm(UI, message) {
-    return UI.prompt(message, {
-      type: 'confirm',
-    });
+    return UI.promptConfirm(message);
   }
 
   static numberPrompt(UI, message) {
-    return UI.prompt(message, {
-      type: 'number',
-    });
+    return UI.promptNumber(message);
   }
 
   // returns { buyer, price }
@@ -79,18 +77,13 @@ module.exports = class PlayerActions {
             `How much would you like to bid? Minimum bid is ${cost + 1} \n`
           );
 
-          const bidParsed = parseInt(bid, 10);
           const biddingPlayer = biddingPlayers[i];
-          if (
-            isNaN(bidParsed) ||
-            bidParsed <= cost ||
-            bidParsed > biddingPlayer.liquidity
-          ) {
+          if (isNaN(bid) || bid <= cost || bid > biddingPlayer.liquidity) {
             UI.playerOutOfAuction(biddingPlayer);
             biddingPlayer.outOfAuction = true;
           } else {
             currentHighestBidPlayer = biddingPlayer;
-            cost = bidParsed;
+            cost = bid;
           }
         }
 

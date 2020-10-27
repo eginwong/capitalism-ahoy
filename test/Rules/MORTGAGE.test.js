@@ -69,10 +69,10 @@ describe('Rules -> MORTGAGE', () => {
       const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(cancelEvent);
       eventBus.emit(inputEvent);
-      expect(promptStub.getCall(0).args[2]).to.deep.equal(
-        [...expectedProperties.map((p) => p.name.toUpperCase()), 'CANCEL'],
+      expect(promptStub.getCall(0).args[1]).to.deep.equal(
+        expectedProperties.map((p) => p.name.toUpperCase()),
         `Unexpected prompt input for mortgage properties list: ${
-          promptStub.getCall(0).args[2]
+          promptStub.getCall(0).args[1]
         }`
       );
     });

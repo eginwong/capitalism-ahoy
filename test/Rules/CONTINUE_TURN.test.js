@@ -6,6 +6,8 @@ const mockUIFactory = require('../mocks/UI');
 const { GameState } = require('../../entities/GameState');
 const { createPlayerFactory } = require('../testutils');
 const PlayerActions = require('../../entities/PlayerActions');
+const config = require('../../config/monopolyConfiguration');
+const { cloneDeep } = require('lodash');
 
 describe('Rules -> CONTINUE_TURN', () => {
   let gameState;
@@ -19,6 +21,7 @@ describe('Rules -> CONTINUE_TURN', () => {
     userInterface = mockUIFactory();
     let createPlayer = createPlayerFactory();
     gameState.players = [createPlayer({ name: 'player1' })];
+    gameState.config = cloneDeep(config);
   });
 
   afterEach(() => {

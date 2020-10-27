@@ -18,12 +18,14 @@ module.exports = class PropertyManagementService {
   }
 
   static findProperty(gameState, id) {
-    return this.getProperties(gameState).find((prop) => prop.id === id);
+    return PropertyManagementService.getProperties(gameState).find(
+      (prop) => prop.id === id
+    );
   }
 
   static getCurrentPlayerBoardProperty(gameState) {
     const position = gameState.currentPlayer.position;
-    return this.getProperties(gameState).find(
+    return PropertyManagementService.getProperties(gameState).find(
       (prop) => prop.position === position
     );
   }
@@ -44,7 +46,7 @@ module.exports = class PropertyManagementService {
       const totalRoll =
         gameState.turnValues.roll[0] + gameState.turnValues.roll[1];
       // check number of utilities
-      const hasMonopoly = this.hasMonopoly(
+      const hasMonopoly = PropertyManagementService.hasMonopoly(
         gameState,
         boardProperty.group,
         playerIndex
@@ -55,7 +57,9 @@ module.exports = class PropertyManagementService {
         (optionalRentMultiplier ||
           (hasMonopoly ? doubleUtilityMultiplier : singleUtilityMultiplier));
     } else if (boardProperty.group === 'Railroad') {
-      const playerOwnedRailroads = this.getProperties(gameState)
+      const playerOwnedRailroads = PropertyManagementService.getProperties(
+        gameState
+      )
         .filter((p) => p.group === boardProperty.group)
         .filter((p) => p.ownedBy === playerIndex).length;
       rentAmount = railRoadPricing[playerOwnedRailroads - 1];
@@ -67,7 +71,7 @@ module.exports = class PropertyManagementService {
       if (boardProperty.buildings > 0) {
         rentAmount = boardProperty.multipliedRent[boardProperty.buildings - 1];
       } else {
-        const hasMonopoly = this.hasMonopoly(
+        const hasMonopoly = PropertyManagementService.hasMonopoly(
           gameState,
           boardProperty.group,
           playerIndex
@@ -142,7 +146,7 @@ module.exports = class PropertyManagementService {
   }
 
   static hasMonopoly(gameState, propertyGroup, playerId) {
-    return this.getProperties(gameState)
+    return PropertyManagementService.getProperties(gameState)
       .filter((p) => p.group === propertyGroup)
       .every((p) => p.ownedBy === playerId);
   }
@@ -150,7 +154,9 @@ module.exports = class PropertyManagementService {
   static getAvailableManagementActions(gameState) {
     let availableActions = [];
 
-    const mortgageableProperties = this.getMortgageableProperties(gameState);
+    const mortgageableProperties = PropertyManagementService.getMortgageableProperties(
+      gameState
+    );
 
     if (mortgageableProperties.some((p) => p.mortgaged)) {
       availableActions.push('UNMORTGAGE');
@@ -160,15 +166,14 @@ module.exports = class PropertyManagementService {
       availableActions.push('MORTGAGE');
     }
 
-    if (this.getRenoProperties(gameState).length > 0) {
+    if (PropertyManagementService.getRenoProperties(gameState).length > 0) {
       availableActions.push('RENOVATE');
     }
 
-    if (this.getDemoProperties(gameState).length > 0) {
+    if (PropertyManagementService.getDemoProperties(gameState).length > 0) {
       availableActions.push('DEMOLISH');
     }
 
-    availableActions.push('CANCEL');
     return availableActions;
   }
 
@@ -197,7 +202,7 @@ module.exports = class PropertyManagementService {
       .groupBy((p) => p.group) // { 'groupName': [properties] }
       .mapValues((properties) => ({
         properties,
-        hasMonopoly: this.hasMonopoly(
+        hasMonopoly: PropertyManagementService.hasMonopoly(
           gameState,
           properties[0].group,
           properties[0].ownedBy

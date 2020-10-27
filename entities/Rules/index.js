@@ -53,8 +53,11 @@ module.exports = {
   CONTINUE_TURN: [
     ({ notify, UI }, gameState) => {
       const action = require('../PlayerActions').select(
-        { notify, UI },
-        gameState
+        UI,
+        require('../PlayerActions').refresh(gameState),
+        {
+          cancel: false,
+        }
       );
       notify(action);
 
@@ -228,14 +231,17 @@ module.exports = {
     },
   ],
   END_GAME: [
-    ({ UI }, gameState) => {
+    ({ UI, notify }, gameState) => {
       const finishGame =
         gameState.gameOver ||
         require('../PlayerActions').confirm(
           UI,
           'Are you sure you want to end the game?'
         );
-      if (!finishGame) return;
+      if (!finishGame) {
+        notify('CONTINUE_TURN');
+        return;
+      }
 
       const calcNetWorth = require('../WealthService').calculateNetWorth;
 
@@ -266,9 +272,11 @@ module.exports = {
         notify('AUCTION');
       } else {
         const action = require('../PlayerActions').select(
-          { notify, UI },
-          gameState,
-          ['BUY_PROPERTY', 'AUCTION']
+          UI,
+          ['BUY_PROPERTY', 'AUCTION'],
+          {
+            cancel: false,
+          }
         );
 
         notify(action);
@@ -341,8 +349,7 @@ module.exports = {
     // TODO: potentially refactor this prompt pattern
     ({ notify, UI }, gameState) => {
       const action = require('../PlayerActions').select(
-        { notify, UI },
-        gameState,
+        UI,
         require('../PropertyManagementService').getAvailableManagementActions(
           gameState
         )
@@ -359,10 +366,10 @@ module.exports = {
       const renoProps = require('../PropertyManagementService').getRenoProperties(
         gameState
       );
+
       const propSelection = require('../PlayerActions').select(
-        { notify, UI },
-        gameState,
-        [...renoProps.map((p) => p.name), 'CANCEL']
+        UI,
+        renoProps.map((p) => p.name)
       );
 
       if (propSelection === 'CANCEL') return;
@@ -378,10 +385,10 @@ module.exports = {
       const demoProps = require('../PropertyManagementService').getDemoProperties(
         gameState
       );
+
       const propSelection = require('../PlayerActions').select(
-        { notify, UI },
-        gameState,
-        [...demoProps.map((p) => p.name), 'CANCEL']
+        UI,
+        demoProps.map((p) => p.name)
       );
 
       if (propSelection === 'CANCEL') return;
@@ -398,10 +405,10 @@ module.exports = {
       const mortgageAbleProps = require('../PropertyManagementService')
         .getMortgageableProperties(gameState)
         .filter((p) => !p.mortgaged);
+
       const propSelection = require('../PlayerActions').select(
-        { notify, UI },
-        gameState,
-        [...mortgageAbleProps.map((p) => p.name.toUpperCase()), 'CANCEL']
+        UI,
+        mortgageAbleProps.map((p) => p.name.toUpperCase())
       );
 
       if (propSelection === 'CANCEL') return;
@@ -430,9 +437,8 @@ module.exports = {
         .filter((p) => p.mortgaged);
 
       const propSelection = require('../PlayerActions').select(
-        { notify, UI },
-        gameState,
-        [...unmortgageAbleProps.map((p) => p.name.toUpperCase()), 'CANCEL']
+        UI,
+        unmortgageAbleProps.map((p) => p.name.toUpperCase())
       );
 
       if (propSelection === 'CANCEL') return;
@@ -512,9 +518,11 @@ module.exports = {
       const player = gameState.currentPlayer;
 
       const paymentSelection = require('../PlayerActions').select(
-        { notify, UI },
-        gameState,
-        [FIXED, VARIABLE]
+        UI,
+        [FIXED, VARIABLE],
+        {
+          cancel: false,
+        }
       );
 
       if (paymentSelection === FIXED) {
@@ -556,12 +564,11 @@ module.exports = {
     },
   ],
   LIQUIDATION: [
-    ({ UI, notify }, gameState) => {
+    ({ UI, notify }) => {
       const liquidateOption = require('../PlayerActions').select(
-        { notify, UI },
-        gameState,
+        UI,
         // TODO: be smart about what options are available to the user?
-        ['MANAGE_PROPERTIES', 'TRADE', 'CANCEL']
+        ['MANAGE_PROPERTIES', 'TRADE']
       );
 
       if (liquidateOption === 'CANCEL') return;
@@ -964,9 +971,10 @@ module.exports = {
   ],
   BANKRUPTCY: [
     ({ UI }, gameState) => {
-      require('../PlayerActions').prompt({ UI }, gameState, [
-        'End of the line. Declare bankruptcy?',
-      ]);
+      require('../PlayerActions').prompt(
+        { UI },
+        'End of the line. Declare bankruptcy?'
+      );
       UI.playerLost(gameState.currentPlayer);
 
       // must update the player from gamestate directly

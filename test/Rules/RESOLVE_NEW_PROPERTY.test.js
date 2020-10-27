@@ -98,7 +98,7 @@ describe('Rules -> RESOLVE_NEW_PROPERTY', () => {
       playerActionsStub.returns(buyPropertyEvent);
 
       eventBus.emit(inputEvent);
-      expect(playerActionsStub.getCall(0).args[2]).to.deep.equal(
+      expect(playerActionsStub.getCall(0).args[1]).to.deep.equal(
         [buyPropertyEvent, auctionEvent],
         `Prompt method for ${inputEvent} does not have expected options`
       );
