@@ -148,49 +148,16 @@ describe('PlayerActions', () => {
   });
 
   describe('prompt', () => {
-    it('displays available player actions if no action are passed', () => {
-      const UI = mockUIFactory();
-      const displayAvailableActionsUISpy = sinon.spy();
-      UI.displayAvailableActions = displayAvailableActionsUISpy;
-      const actions = PlayerActions.refresh(gameState);
-
-      PlayerActions.prompt({ UI }, gameState);
-      expect(
-        displayAvailableActionsUISpy.calledOnceWithExactly(actions)
-      ).to.equal(true, 'Display Available Actions is not called');
-    });
-    it('displays input actions when parameter is passed', () => {
-      const UI = mockUIFactory();
-      const displayAvailableActionsUISpy = sinon.spy();
-      UI.displayAvailableActions = displayAvailableActionsUISpy;
-      const actions = ['FAKE ACTION', 'SECOND ACTION'];
-
-      PlayerActions.prompt({ UI }, gameState, actions);
-      expect(
-        displayAvailableActionsUISpy.calledOnceWithExactly(actions)
-      ).to.equal(true, 'Display Available Actions is not called');
-    });
     it('prompts the user for input', () => {
       const UI = mockUIFactory();
       const promptUISpy = sinon.spy();
       UI.prompt = promptUISpy;
+      const message = 'whee';
 
-      PlayerActions.prompt({ UI }, gameState);
-      expect(
-        promptUISpy.calledOnceWithExactly(
-          `Which action would you like to take?\n\n`
-        )
-      ).to.equal(true, 'Prompt was not called exactly once');
-    });
-    it('returns corresponding action if action exists', () => {
-      const UI = mockUIFactory();
-      const promptUIStub = sinon.stub();
-      promptUIStub.returns('ROLL_DICE');
-      UI.prompt = promptUIStub;
-
-      expect(PlayerActions.prompt({ UI }, gameState)).to.equal(
-        'ROLL_DICE',
-        'Corresponding action is not retrieved'
+      PlayerActions.prompt({ UI }, message);
+      expect(promptUISpy.calledOnceWithExactly(message)).to.equal(
+        true,
+        'Prompt was not called exactly once'
       );
     });
     it('returns undefined if action does not exist', () => {
@@ -200,6 +167,106 @@ describe('PlayerActions', () => {
       UI.prompt = promptUIStub;
 
       expect(PlayerActions.prompt({ UI }, gameState)).to.be.undefined;
+    });
+  });
+  describe('numberPrompt', () => {
+    it('prompts the user for input', () => {
+      const UI = mockUIFactory();
+      const numberPromptUISpy = sinon.spy();
+      UI.promptNumber = numberPromptUISpy;
+      const message = 'whee';
+
+      PlayerActions.numberPrompt(UI, message);
+      expect(numberPromptUISpy.calledOnceWithExactly(message)).to.equal(
+        true,
+        'Prompt was not called exactly once'
+      );
+    });
+  });
+  describe('confirm', () => {
+    it('prompts the user for input', () => {
+      const UI = mockUIFactory();
+      const confirmUISpy = sinon.spy();
+      UI.promptConfirm = confirmUISpy;
+      const message = 'whee';
+
+      PlayerActions.confirm(UI, message);
+      expect(confirmUISpy.calledOnceWithExactly(message)).to.equal(
+        true,
+        'Prompt was not called exactly once'
+      );
+    });
+  });
+  describe('select', () => {
+    it('prompts the user for input', () => {
+      const UI = mockUIFactory();
+      const promptSelectUISpy = sinon.spy();
+      UI.promptSelect = promptSelectUISpy;
+      const actions = [1, 2, 3];
+
+      PlayerActions.select(UI, actions);
+      expect(
+        promptSelectUISpy.calledOnceWithExactly(
+          actions,
+          'Which action would you like to take?',
+          {}
+        )
+      ).to.equal(true, 'Prompt was not called exactly once');
+    });
+    it('prompts the user for input with optional params', () => {
+      const UI = mockUIFactory();
+      const promptSelectUISpy = sinon.spy();
+      UI.promptSelect = promptSelectUISpy;
+      const actions = [1, 2, 3];
+      const options = {
+        cancel: false,
+      };
+
+      PlayerActions.select(UI, actions, options);
+      expect(
+        promptSelectUISpy.calledOnceWithExactly(
+          actions,
+          'Which action would you like to take?',
+          options
+        )
+      ).to.equal(true, 'Prompt was not called exactly once');
+    });
+    it('returns if action exists', () => {
+      const UI = mockUIFactory();
+      const promptSelectUIStub = sinon.stub();
+      UI.promptSelect = promptSelectUIStub;
+      const chosenOption = 1;
+      promptSelectUIStub.returns(chosenOption);
+      const actions = [1, 2, 3];
+
+      expect(PlayerActions.select(UI, actions)).to.equal(
+        actions[chosenOption],
+        `select did not return corresponding action given the index selection`
+      );
+    });
+    it('returns cancel if action does not exist', () => {
+      const UI = mockUIFactory();
+      const promptSelectUIStub = sinon.stub();
+      UI.promptSelect = promptSelectUIStub;
+      const chosenOption = -1;
+      promptSelectUIStub.returns(chosenOption);
+      const actions = [1, 2, 3];
+
+      expect(PlayerActions.select(UI, actions)).to.equal(
+        'CANCEL',
+        `select did not return cancel given the -1 selection`
+      );
+    });
+    it('returns cancel if actions contains no entries', () => {
+      const UI = mockUIFactory();
+      const promptSelectUIStub = sinon.stub();
+      UI.promptSelect = promptSelectUIStub;
+      const actions = [];
+
+      expect(PlayerActions.select(UI, actions)).to.equal(
+        'CANCEL',
+        `select did not return cancel given no actions`
+      );
     });
   });
 
@@ -358,7 +425,7 @@ describe('PlayerActions', () => {
           testBaseCost
         )
       ).to.deep.equal(
-        { buyer: expectedWinner, price: expectedCost },
+        { buyer: expectedWinner, price: expectedCost.toString() },
         `Auction did not filter out players from the auction`
       );
     });
@@ -392,7 +459,7 @@ describe('PlayerActions', () => {
           testBaseCost
         )
       ).to.deep.equal(
-        { buyer: expectedWinner, price: expectedCost },
+        { buyer: expectedWinner, price: expectedCost.toString() },
         `Auction did not eliminate non-numerical input`
       );
     });
@@ -428,7 +495,7 @@ describe('PlayerActions', () => {
           testBaseCost
         )
       ).to.deep.equal(
-        { buyer: expectedWinner, price: expectedCost },
+        { buyer: expectedWinner, price: expectedCost.toString() },
         `Auction did not filter out player bid that is below minimum bidding cost`
       );
     });
@@ -462,7 +529,7 @@ describe('PlayerActions', () => {
           testBaseCost
         )
       ).to.deep.equal(
-        { buyer: expectedWinner, price: expectedCost },
+        { buyer: expectedWinner, price: expectedCost.toString() },
         `Auction did not filter out player bid that is above player liquidity`
       );
     });
@@ -500,7 +567,7 @@ describe('PlayerActions', () => {
           testBaseCost
         )
       ).to.deep.equal(
-        { buyer: expectedWinner, price: expectedCost },
+        { buyer: expectedWinner, price: expectedCost.toString() },
         `Auction did not return buyer and expected cost`
       );
     });
@@ -536,7 +603,7 @@ describe('PlayerActions', () => {
           testBaseCost
         )
       ).to.deep.equal(
-        { buyer: expectedWinner, price: expectedCost },
+        { buyer: expectedWinner, price: expectedCost.toString() },
         `Auction did not return highest player's bid even though their subsequent bid was not accepted`
       );
     });

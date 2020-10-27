@@ -3,9 +3,10 @@ module.exports = function mockUIFactory() {
   return {
     startGame: () => true,
     startTurn: () => false,
-    displayAvailableActions: () => false,
     prompt: () => true,
-    confirm: () => true,
+    promptConfirm: () => true,
+    promptNumber: () => true,
+    promptSelect: () => true,
     endTurn: () => true,
     rollingDice: () => true,
     rollDiceDisplay: () => true,

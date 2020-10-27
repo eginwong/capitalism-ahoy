@@ -1,6 +1,6 @@
 const chalk = require('chalk');
 
-const consoleUI = (function (enquirer) {
+const consoleUI = (function (readline) {
   return {
     startGame: () => console.log('\ngame has started'),
     startTurn: (player) =>
@@ -11,20 +11,11 @@ const consoleUI = (function (enquirer) {
     // UI: remove active class from all players
     // UI: toggle active class on that player
     // UI: maybe animate player token?
-    displayAvailableActions: (actions) =>
-      console.log(
-        chalk.magenta(`AVAILABLE ACTIONS: `) +
-          chalk.cyan(`${actions.join(', ')}`)
-      ),
     displayPropertyDetails: (boardProperty) => console.dir(boardProperty),
-    prompt: async (message, options = {}) => {
-      return await enquirer.prompt({
-        type: 'input',
-        ...options, // will override type if passed
-        name: 'response',
-        message,
-      }).response;
-    },
+    promptConfirm: readline.keyInYNStrict,
+    promptNumber: readline.questionInt,
+    promptSelect: readline.keyInSelect,
+    prompt: readline.question,
     endTurn: () => console.log(chalk.bold.red('ENDING TURN')),
     rollingDice: () => console.log('🎲ROLLING🎲'),
     rollDiceDisplay: (shouldDisplay) =>
@@ -120,6 +111,6 @@ const consoleUI = (function (enquirer) {
         `Insufficient funds. Player ${player.name} declares bankruptcy.`
       ),
   };
-})(require('enquirer'));
+})(require('readline-sync'));
 
 module.exports = { consoleUI };

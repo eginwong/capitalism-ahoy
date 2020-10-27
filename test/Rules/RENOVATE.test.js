@@ -70,10 +70,10 @@ describe('Rules -> RENOVATE', () => {
       const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(cancelEvent);
       eventBus.emit(inputEvent);
-      expect(promptStub.getCall(0).args[2]).to.deep.equal(
-        [testPropertyName, 'CANCEL'],
+      expect(promptStub.getCall(0).args[1]).to.deep.equal(
+        [testPropertyName],
         `Unexpected prompt input for reno properties list: ${
-          promptStub.getCall(0).args[2]
+          promptStub.getCall(0).args[1]
         }`
       );
     });
