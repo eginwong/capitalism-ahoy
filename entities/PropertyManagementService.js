@@ -6,6 +6,9 @@ const { _ } = require('lodash');
  *   Defines a model and associated metadata for a property.
  */
 module.exports = class PropertyManagementService {
+  static FIXED_INCOME_TAX = 'FIXED';
+  static VARIABLE_INCOME_TAX = 'VARIABLE';
+
   static getProperties(gameState) {
     return gameState.config.propertyConfig.properties;
   }
