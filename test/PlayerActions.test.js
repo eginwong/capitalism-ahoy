@@ -354,8 +354,8 @@ describe('PlayerActions', () => {
           player
         ),
       }));
-      const auctionPropertyInfoUISpy = sinon.spy();
-      UI.auctionPropertyInfo = auctionPropertyInfoUISpy;
+      const displayPropertyDetailsUISpy = sinon.spy();
+      UI.displayPropertyDetails = displayPropertyDetailsUISpy;
       const playersInAuctionUISpy = sinon.spy();
       UI.playersInAuction = playersInAuctionUISpy;
       const playerInAuctionUISpy = sinon.spy();
@@ -374,7 +374,7 @@ describe('PlayerActions', () => {
         testProperty,
         testBaseCost
       );
-      expect(auctionPropertyInfoUISpy.calledOnce).to.equal(
+      expect(displayPropertyDetailsUISpy.calledOnce).to.equal(
         true,
         `Game did not announce the property to be auctioned`
       );

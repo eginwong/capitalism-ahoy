@@ -33,7 +33,6 @@ module.exports = function mockUIFactory() {
     drewCard: () => true,
     getOutOfJailFreeCardUsed: () => true,
     auctionInstructions: () => true,
-    auctionPropertyInfo: () => true,
     playersInAuction: () => true,
     playerInAuction: () => true,
     playerOutOfAuction: () => true,

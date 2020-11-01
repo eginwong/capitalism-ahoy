@@ -68,7 +68,7 @@ module.exports = class PlayerActions {
       biddingPlayers = players.slice();
       // while players are still in the running
       while (biddingPlayers.length > 1) {
-        UI.auctionPropertyInfo(property);
+        UI.displayPropertyDetails(property);
         UI.playersInAuction(biddingPlayers);
         for (let i = 0; i < biddingPlayers.length; i++) {
           UI.playerInAuction(biddingPlayers[i]);

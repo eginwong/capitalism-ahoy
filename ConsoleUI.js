@@ -9,7 +9,41 @@ const consoleUI = (function (readline) {
     // UI: remove active class from all players
     // UI: toggle active class on that player
     // UI: maybe animate player token?
-    displayPropertyDetails: (boardProperty) => console.dir(boardProperty),
+    displayPropertyDetails: (boardProperty) => {
+      // TODO: add color here
+      console.log(
+        `  ${boardProperty.name}, position: ${boardProperty.position}`
+      );
+      if (boardProperty.group === 'Railroad') {
+        console.log(
+          `  Price 💰: $${boardProperty.price}${
+            boardProperty.mortgaged ? ' - mortgaged' : ''
+          }\n  Group: ${
+            boardProperty.group
+          }\n  Rent: depends on # of railroads owned`
+        );
+      } else if (boardProperty.group === 'Utilities') {
+        console.log(
+          `  Price 💰: $${boardProperty.price}${
+            boardProperty.mortgaged ? ' - mortgaged' : ''
+          }\n  Group: ${
+            boardProperty.group
+          }\n  Rent: # of utilities owned * 🎲🎲`
+        );
+      } else {
+        console.log(
+          `  Price 💰: $${boardProperty.price}${
+            boardProperty.mortgaged ? ' - mortgaged' : ''
+          }\n  Group: ${boardProperty.group}${
+            boardProperty.buildings > 0 ? ` - ${boardProperty.buildings}🏠` : ''
+          }\n  Rent: $${
+            boardProperty.rent
+          }; with 🏠:${boardProperty.multipliedRent.map(
+            (r) => ` $${r}`
+          )}\n  🏠 Cost: $${boardProperty.houseCost}`
+        );
+      }
+    },
     promptConfirm: readline.keyInYNStrict,
     promptNumber: readline.questionInt,
     promptSelect: readline.keyInSelect,
@@ -83,12 +117,8 @@ const consoleUI = (function (readline) {
       ),
     auctionInstructions: () =>
       console.log(
-        'AUCTION: The rules are as follows: All players who can afford the property will continue to bid in rounds until there is one winner. Players take turns inputting their bids each round. If a player bids nothing or a bid below the current bidding cost, that player is out of the auction. At least one player must bid to exit the auction.'
+        'AUCTION: The rules are as follows: All players who can afford the property will continue to bid in rounds until there is one winner. Players take turns inputting their bids each round. If a player bids nothing or a bid below the current bidding cost, that player is out of the auction. At least one player must bid to exit the auction.\n'
       ),
-    auctionPropertyInfo: (property) => {
-      console.log(`AUCTION: ${property.name}`);
-      console.dir(property);
-    },
     playersInAuction: (players) => {
       let playerInfo = `PLAYERS IN AUCTION: `;
 
