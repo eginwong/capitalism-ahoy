@@ -512,20 +512,22 @@ module.exports = {
         gameState.config.incomeTaxRate * 100
       ),
     ({ UI, notify }, gameState) => {
-      const FIXED = 'FIXED';
-      const VARIABLE = 'VARIABLE';
+      const {
+        FIXED_INCOME_TAX,
+        VARIABLE_INCOME_TAX,
+      } = require('../PropertyManagementService');
       const { incomeTaxAmount, incomeTaxRate } = gameState.config;
       const player = gameState.currentPlayer;
 
       const paymentSelection = require('../PlayerActions').select(
         UI,
-        [FIXED, VARIABLE],
+        [FIXED_INCOME_TAX, VARIABLE_INCOME_TAX],
         {
           cancel: false,
         }
       );
 
-      if (paymentSelection === FIXED) {
+      if (paymentSelection === FIXED_INCOME_TAX) {
         if (player.cash < incomeTaxAmount) {
           require('./updateTurnValues')({
             subTurn: {
