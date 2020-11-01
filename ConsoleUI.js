@@ -4,9 +4,7 @@ const consoleUI = (function (readline) {
   return {
     startGame: () => console.log('\ngame has started'),
     startTurn: (player) =>
-      console.log(
-        chalk.bgBlack.whiteBright(`STARTING TURN FOR PLAYER: ${player.name}`)
-      ),
+      console.log(`\nSTARTING TURN FOR PLAYER: ${player.name}`),
     // UI: get list of dom objects that represent player
     // UI: remove active class from all players
     // UI: toggle active class on that player
@@ -41,7 +39,12 @@ const consoleUI = (function (readline) {
           `Landed on ${boardProperty.name} (${boardProperty.group})`
         )
       ),
-    playerDetails: (player) => console.dir(player),
+    playerDetails: (player) =>
+      console.log(
+        `Position: ${player.position}${
+          player.jailed !== -1 ? ' - 🔒' : ''
+        }\n💸: $${player.cash}${player.cards.length !== 0 ? ', 🃏' : ''}`
+      ),
     payFine: () => console.log(`PAYING FINE 💸💸💸`),
     passGo: () => console.log(`PASSING GO!`),
     jail: () => console.log(`IN JAIL 🤩🤩🤩🤩🤩`),
