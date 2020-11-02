@@ -1,6 +1,23 @@
 const chalk = require('chalk');
 
 const consoleUI = (function (readline) {
+  const colorMap = {
+    Purple: chalk.bgMagenta('Purple'),
+    Red: chalk.bgRed('Red'),
+    Orange: chalk.bgRedBright('Orange'),
+    Violet: chalk.bgMagentaBright('Violet'),
+    'Dark Green': chalk.bgGreen('Dark Green'),
+    'Dark Blue': chalk.bgBlue('Dark Blue'),
+    'Light Green': chalk.bgGreenBright('Light Green'),
+    Railroad: chalk.bgBlack.white('Railroad'),
+    Utilities: chalk.bgCyan('Utilities'),
+    Yellow: chalk.bgYellow('Yellow'),
+  };
+
+  function mapPropertyGroupToColor(prop) {
+    return `${colorMap[prop.group]} ${prop.name}`;
+  }
+
   return {
     startGame: () => console.log('\ngame has started'),
     startTurn: (player) =>
@@ -10,33 +27,31 @@ const consoleUI = (function (readline) {
     // UI: toggle active class on that player
     // UI: maybe animate player token?
     displayPropertyDetails: (boardProperty) => {
-      // TODO: add color here
       console.log(
-        `  ${boardProperty.name}, position: ${boardProperty.position}`
+        `  ${mapPropertyGroupToColor(boardProperty)}, position: ${
+          boardProperty.position
+        }`
       );
       if (boardProperty.group === 'Railroad') {
         console.log(
           `  Price 💰: $${boardProperty.price}${
             boardProperty.mortgaged ? ' - mortgaged' : ''
-          }\n  Group: ${
-            boardProperty.group
           }\n  Rent: depends on # of railroads owned`
         );
       } else if (boardProperty.group === 'Utilities') {
         console.log(
           `  Price 💰: $${boardProperty.price}${
             boardProperty.mortgaged ? ' - mortgaged' : ''
-          }\n  Group: ${
-            boardProperty.group
           }\n  Rent: # of utilities owned * 🎲🎲`
         );
       } else {
         console.log(
           `  Price 💰: $${boardProperty.price}${
             boardProperty.mortgaged ? ' - mortgaged' : ''
-          }\n  Group: ${boardProperty.group}${
+          }${
             boardProperty.buildings > 0 ? ` - ${boardProperty.buildings}🏠` : ''
-          }\n  Rent: $${
+          }
+          \n  Rent: $${
             boardProperty.rent
           }; with 🏠:${boardProperty.multipliedRent.map(
             (r) => ` $${r}`
