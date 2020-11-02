@@ -46,6 +46,7 @@ module.exports = class PlayerActions {
       'Which action would you like to take?',
       options
     );
+    // if player selects 'Cancel' from the prompt, an index of -1 is returned
     return index > -1 ? actions[index] : 'CANCEL';
   }
 
