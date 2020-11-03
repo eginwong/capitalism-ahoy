@@ -1,21 +1,59 @@
-const chalk = require('chalk');
+const c = require('ansi-colors');
 
 const consoleUI = (function (readline) {
   const colorMap = {
-    Purple: chalk.bgMagenta('Purple'),
-    Red: chalk.bgRed('Red'),
-    Orange: chalk.bgRedBright('Orange'),
-    Violet: chalk.bgMagentaBright('Violet'),
-    'Dark Green': chalk.bgGreen('Dark Green'),
-    'Dark Blue': chalk.bgBlue('Dark Blue'),
-    'Light Green': chalk.bgGreenBright('Light Green'),
-    Railroad: chalk.bgBlack.white('Railroad'),
-    Utilities: chalk.bgCyan('Utilities'),
-    Yellow: chalk.bgYellow('Yellow'),
+    Purple: c.bgMagenta('Purple'),
+    Red: c.bgRed('Red'),
+    Orange: c.bgRedBright('Orange'),
+    Violet: c.bgMagentaBright('Violet'),
+    'Dark Green': c.bgGreen('Dark Green'),
+    'Dark Blue': c.bgBlue('Dark Blue'),
+    'Light Green': c.bgGreenBright('Light Green'),
+    Railroad: c.bgBlack.white('Railroad'),
+    Utilities: c.bgCyan('Utilities'),
+    Yellow: c.bgYellow('Yellow'),
   };
 
   function mapPropertyGroupToColor(prop) {
     return `${colorMap[prop.group]} ${prop.name}`;
+  }
+
+  function mapPropertyShortDisplay(prop) {
+    return `${mapPropertyGroupToColor(prop)} - 💰: $${prop.price}${
+      prop.mortgaged ? ' | mortgaged' : ''
+    }${prop.buildings > 0 ? ' | ' + prop.buildings + '🏠' : ''}${
+      prop.rent > 0 ? ' | Rent: $' + prop.rent : ''
+    }
+    ${
+      prop.multipliedRent
+        ? ' | with 🏠:' + prop.multipliedRent.map((r) => ' $' + r)
+        : ''
+    }`;
+  }
+
+  function mapPropertyLongDisplay(prop) {
+    let display = `  ${mapPropertyGroupToColor(prop)}, position: ${
+      prop.position
+    }\n`;
+
+    if (prop.group === 'Railroad') {
+      display += `  | Price 💰: ${c.bold('$' + prop.price)}${
+        prop.mortgaged ? ' - mortgaged' : ''
+      }\n  | Rent: depends on # of railroads owned`;
+    } else if (prop.group === 'Utilities') {
+      display += `  | Price 💰: ${c.bold('$' + prop.price)}${
+        prop.mortgaged ? ' - mortgaged' : ''
+      }\n  | Rent: # of utilities owned * 🎲🎲`;
+    } else {
+      display += `  | Price 💰: ${c.bold('$' + prop.price)}${
+        prop.mortgaged ? ' - mortgaged' : ''
+      }${prop.buildings > 0 ? ` - ${prop.buildings}🏠` : ''}\n  | Rent: $${
+        prop.rent
+      }; with 🏠:${prop.multipliedRent.map((r) => ` $${r}`)}\n  | 🏠 Cost: $${
+        prop.houseCost
+      }`;
+    }
+    return display;
   }
 
   return {
@@ -26,57 +64,26 @@ const consoleUI = (function (readline) {
     // UI: remove active class from all players
     // UI: toggle active class on that player
     // UI: maybe animate player token?
-    displayPropertyDetails: (boardProperty) => {
-      console.log(
-        `  ${mapPropertyGroupToColor(boardProperty)}, position: ${
-          boardProperty.position
-        }`
-      );
-      if (boardProperty.group === 'Railroad') {
-        console.log(
-          `  Price 💰: $${boardProperty.price}${
-            boardProperty.mortgaged ? ' - mortgaged' : ''
-          }\n  Rent: depends on # of railroads owned`
-        );
-      } else if (boardProperty.group === 'Utilities') {
-        console.log(
-          `  Price 💰: $${boardProperty.price}${
-            boardProperty.mortgaged ? ' - mortgaged' : ''
-          }\n  Rent: # of utilities owned * 🎲🎲`
-        );
-      } else {
-        console.log(
-          `  Price 💰: $${boardProperty.price}${
-            boardProperty.mortgaged ? ' - mortgaged' : ''
-          }${
-            boardProperty.buildings > 0 ? ` - ${boardProperty.buildings}🏠` : ''
-          }
-          \n  Rent: $${
-            boardProperty.rent
-          }; with 🏠:${boardProperty.multipliedRent.map(
-            (r) => ` $${r}`
-          )}\n  🏠 Cost: $${boardProperty.houseCost}`
-        );
-      }
-    },
+    displayPropertyDetails: (boardProperty) =>
+      console.log(mapPropertyLongDisplay(boardProperty)),
     promptConfirm: readline.keyInYNStrict,
     promptNumber: readline.questionInt,
     promptSelect: readline.keyInSelect,
     prompt: readline.question,
-    endTurn: () => console.log(chalk.bold.red('ENDING TURN')),
+    endTurn: () => console.log(c.bold.red('ENDING TURN')),
     rollingDice: () => console.log('🎲ROLLING🎲'),
     rollDiceDisplay: (shouldDisplay) =>
       shouldDisplay
-        ? console.log(chalk.dim.greenBright(`"DISPLAY" ROLL_DICE action`))
-        : console.log(chalk.grey(`"GREY OUT" ROLL_DICE action`)),
+        ? console.log(c.dim.greenBright(`"DISPLAY" ROLL_DICE action`))
+        : console.log(c.grey(`"GREY OUT" ROLL_DICE action`)),
     payFineDisplay: (shouldDisplay) =>
       shouldDisplay
-        ? console.log(chalk.dim.greenBright(`"DISPLAY" PAY_FINE action`))
-        : console.log(chalk.grey(`"GREY OUT" PAY_FINE action`)),
+        ? console.log(c.dim.greenBright(`"DISPLAY" PAY_FINE action`))
+        : console.log(c.grey(`"GREY OUT" PAY_FINE action`)),
     endTurnDisplay: (shouldDisplay) =>
       shouldDisplay
-        ? console.log(chalk.dim.greenBright(`"DISPLAY" END_TURN action`))
-        : console.log(chalk.grey(`"GREY OUT" END_TURN action`)),
+        ? console.log(c.dim.greenBright(`"DISPLAY" END_TURN action`))
+        : console.log(c.grey(`"GREY OUT" END_TURN action`)),
     diceRollResults: (roll1, roll2) =>
       console.log(`ROLLED: 🎲${roll1}, 🎲${roll2}`),
     rollNormalDice: () => console.log('EVENT: NORMAL 🎲🎲🎲'),
@@ -84,15 +91,15 @@ const consoleUI = (function (readline) {
     caughtSpeeding: () => console.log('CAUGHT SPEEDING'),
     playerMovement: (boardProperty) =>
       console.log(
-        chalk.bgBlack.whiteBright(
+        c.bgBlack.whiteBright(
           `Landed on ${boardProperty.name} (${boardProperty.group})`
         )
       ),
     playerDetails: (player) =>
       console.log(
-        `Position: ${player.position}${
+        `  | Position: ${player.position}${
           player.jailed !== -1 ? ' - 🔒' : ''
-        }\n💸: $${player.cash}${player.cards.length !== 0 ? ', 🃏' : ''}`
+        }\n  | 💸: $${player.cash}${player.cards.length !== 0 ? ', 🃏' : ''}`
       ),
     payFine: () => console.log(`PAYING FINE 💸💸💸`),
     passGo: () => console.log(`PASSING GO!`),
@@ -158,6 +165,7 @@ const consoleUI = (function (readline) {
       console.log(
         `Insufficient funds. Player ${player.name} declares bankruptcy.`
       ),
+    mapPropertyShortDisplay,
   };
 })(require('readline-sync'));
 

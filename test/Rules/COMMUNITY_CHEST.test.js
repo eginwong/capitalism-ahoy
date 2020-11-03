@@ -87,18 +87,22 @@ describe('Rules -> COMMUNITY_CHEST', () => {
     });
     it('should replace available cards if available cards are empty', () => {
       let { availableCards } = gameState.config.communityChestConfig;
-      const deckReplaceAvailableCardsSpy = sinon.spy(
-        Deck,
-        'replaceAvailableCards'
-      );
       gameState.config.communityChestConfig.discardedCards = availableCards;
       gameState.config.communityChestConfig.availableCards = [];
 
       eventBus.emit(inputEvent);
 
-      expect(deckReplaceAvailableCardsSpy.calledOnce).to.equal(
-        true,
-        `${inputEvent} did not replace available cards in the deck when empty`
+      expect(
+        gameState.config.communityChestConfig.availableCards.length
+      ).not.to.equal(
+        0,
+        'Did not correctly replace deck of available cards back onto game state'
+      );
+      expect(
+        gameState.config.communityChestConfig.discardedCards.length
+      ).to.equal(
+        1,
+        'Did not correctly replace deck of discard cards back onto game state'
       );
     });
     it("should add getoutofjailfree card to the current player's cards and not call discard", () => {

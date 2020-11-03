@@ -41,13 +41,34 @@ module.exports = class PlayerActions {
       return 'CANCEL';
     }
 
+    // for each action that is only a string, transform into object with name/value
+    // that also takes out underscores
+    const objectifiedActions = actions.map(
+      // need to put value first, or else it will be modified by the replace
+      (a, index) =>
+        typeof a === 'string'
+          ? { display: a.replace('_', ' '), value: actions[index] }
+          : a
+    );
+
     let index = UI.promptSelect(
-      actions,
+      objectifiedActions.map((a) => a.display),
       'Which action would you like to take?',
       options
     );
     // if player selects 'Cancel' from the prompt, an index of -1 is returned
-    return index > -1 ? actions[index] : 'CANCEL';
+    return index > -1 ? objectifiedActions[index].value : 'CANCEL';
+  }
+
+  static selectProperties(UI, properties) {
+    // transforms properties into selection targets
+    return PlayerActions.select(
+      UI,
+      properties.map((p) => ({
+        display: UI.mapPropertyShortDisplay(p),
+        value: p,
+      }))
+    );
   }
 
   static confirm(UI, message) {

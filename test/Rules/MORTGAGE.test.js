@@ -59,7 +59,7 @@ describe('Rules -> MORTGAGE', () => {
         `${inputEvent} was called ${mortgageSpy.callCount} times but expected to be 1 times`
       );
     });
-    it(`should call prompt with names of available mortgage properties`, () => {
+    it(`should call prompt with display and value of available mortgage properties`, () => {
       const propertyGroup = 'Purple';
       createMonopoly(gameState, propertyGroup);
       const expectedProperties = gameState.config.propertyConfig.properties.filter(
@@ -70,7 +70,7 @@ describe('Rules -> MORTGAGE', () => {
       promptStub.onCall(0).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(promptStub.getCall(0).args[1]).to.deep.equal(
-        expectedProperties.map((p) => p.name.toUpperCase()),
+        expectedProperties.map((p) => ({ display: true, value: p })),
         `Unexpected prompt input for mortgage properties list: ${
           promptStub.getCall(0).args[1]
         }`
@@ -85,7 +85,7 @@ describe('Rules -> MORTGAGE', () => {
       const originalMortgageState = expectedProperty.mortgaged;
 
       const promptStub = sinon.stub(PlayerActions, 'select');
-      promptStub.onCall(0).returns(expectedProperty.name.toUpperCase());
+      promptStub.onCall(0).returns(expectedProperty);
       promptStub.onCall(1).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(expectedProperty.mortgaged).to.equal(

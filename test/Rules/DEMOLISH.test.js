@@ -62,16 +62,22 @@ describe('Rules -> DEMOLISH', () => {
     });
     it(`should call prompt with names of available demo properties`, () => {
       const testPropertyName = 'testProperty';
+      const testProperty = { name: testPropertyName };
       const propMgmtServiceStub = sinon.stub(
         PropertyManagementService,
         'getDemoProperties'
       );
-      propMgmtServiceStub.onCall(0).returns([{ name: testPropertyName }]);
+      propMgmtServiceStub.onCall(0).returns([testProperty]);
       const promptStub = sinon.stub(PlayerActions, 'select');
       promptStub.onCall(0).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(promptStub.getCall(0).args[1]).to.deep.equal(
-        [testPropertyName],
+        [
+          {
+            display: true,
+            value: testProperty,
+          },
+        ],
         `Unexpected prompt input for demo properties list: ${
           promptStub.getCall(0).args[1]
         }`

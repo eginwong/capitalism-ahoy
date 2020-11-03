@@ -88,26 +88,26 @@ describe('Rules -> CHANCE', () => {
     });
     it('should replace available cards if available cards are empty', () => {
       let { availableCards } = gameState.config.chanceConfig;
-      const deckReplaceAvailableCardsSpy = sinon.spy(
-        Deck,
-        'replaceAvailableCards'
-      );
+
       gameState.config.chanceConfig.discardedCards = availableCards;
       gameState.config.chanceConfig.availableCards = [];
 
       eventBus.emit(inputEvent);
 
-      expect(deckReplaceAvailableCardsSpy.calledOnce).to.equal(
-        true,
-        `${inputEvent} did not replace available cards in the deck when empty`
+      expect(gameState.config.chanceConfig.availableCards.length).not.to.equal(
+        0,
+        'Did not correctly replace deck of available cards back onto game state'
+      );
+      expect(gameState.config.chanceConfig.discardedCards.length).to.equal(
+        1,
+        'Did not correctly replace deck of discard cards back onto game state'
       );
     });
     it("should add getoutofjailfree card to the current player's cards and not call discard", () => {
       const expectedCard = gameState.config.chanceConfig.availableCards.find(
         (c) => c.action === 'getoutofjailfree'
       );
-      const deckDrawStub = sinon.stub(Deck, 'draw');
-      deckDrawStub.returns({ card: expectedCard, deck: [] });
+      sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
 
       eventBus.emit(inputEvent);
 
