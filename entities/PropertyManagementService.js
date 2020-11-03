@@ -35,7 +35,7 @@ module.exports = class PropertyManagementService {
 
   static calculateRent(gameState, boardProperty) {
     let rentAmount = boardProperty.rent;
-    const playerIndex = gameState.players[boardProperty.ownedBy].id;
+    const playerIndex = boardProperty.ownedBy;
     const {
       singleUtilityMultiplier,
       doubleUtilityMultiplier,
@@ -161,12 +161,12 @@ module.exports = class PropertyManagementService {
       gameState
     );
 
-    if (mortgageableProperties.some((p) => p.mortgaged)) {
-      availableActions.push('UNMORTGAGE');
-    }
-
     if (mortgageableProperties.some((p) => !p.mortgaged)) {
       availableActions.push('MORTGAGE');
+    }
+
+    if (mortgageableProperties.some((p) => p.mortgaged)) {
+      availableActions.push('UNMORTGAGE');
     }
 
     if (PropertyManagementService.getRenoProperties(gameState).length > 0) {

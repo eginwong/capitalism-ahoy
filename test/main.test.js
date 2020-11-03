@@ -171,6 +171,14 @@ describe('main', () => {
           '', // highest rolling player
           '',
         ];
+
+        const boardwalkProp = gameState.config.propertyConfig.properties.find(
+          (p) => p.id === 'boardwalk'
+        );
+        const parkPlaceProp = gameState.config.propertyConfig.properties.find(
+          (p) => p.id === 'parkplace'
+        );
+
         const promptSelectStubValues = [
           'ROLL_DICE',
           'BUY_PROPERTY',
@@ -178,9 +186,9 @@ describe('main', () => {
           'BUY_PROPERTY',
           'MANAGE_PROPERTIES',
           'RENOVATE',
-          'Boardwalk',
-          'Park Place',
-          'Boardwalk',
+          boardwalkProp,
+          parkPlaceProp,
+          boardwalkProp,
           'CANCEL',
           'CANCEL',
           'END_TURN',
@@ -657,11 +665,16 @@ describe('main', () => {
           '', // highest rolling player
           '',
         ];
+
+        const mediterraneanAveProp = gameState.config.propertyConfig.properties.find(
+          (p) => p.id === 'mediterraneanave'
+        );
+
         const promptSelectStubValues = [
           'PAY_FINE',
           'MANAGE_PROPERTIES',
           'MORTGAGE',
-          'MEDITERRANEAN AVENUE',
+          mediterraneanAveProp,
           'CANCEL',
           'CANCEL',
           'CANCEL',
@@ -765,12 +778,17 @@ describe('main', () => {
           '', // highest rolling player
           '',
         ];
+
+        const orientalAveProp = gameState.config.propertyConfig.properties.find(
+          (p) => p.id === 'orientalave'
+        );
+
         const promptSelectStubValues = [
           'ROLL_DICE',
           'AUCTION',
           'MANAGE_PROPERTIES',
           'MORTGAGE',
-          'ORIENTAL AVENUE',
+          orientalAveProp,
           'CANCEL',
           'CANCEL',
           'CANCEL',
@@ -831,6 +849,11 @@ describe('main', () => {
         '', // highest rolling player
         '',
       ];
+
+      const orientalAveProp = gameState.config.propertyConfig.properties.find(
+        (p) => p.id === 'orientalave'
+      );
+
       const promptSelectStubValues = [
         'ROLL_DICE',
         'BUY_PROPERTY',
@@ -839,7 +862,7 @@ describe('main', () => {
         'BUY_PROPERTY',
         'MANAGE_PROPERTIES',
         'UNMORTGAGE',
-        'ORIENTAL AVENUE',
+        orientalAveProp,
         'CANCEL',
         'CANCEL',
         'CANCEL',
@@ -899,6 +922,14 @@ describe('main', () => {
           '', // highest rolling player
           '',
         ];
+
+        const boardwalkProp = gameState.config.propertyConfig.properties.find(
+          (p) => p.id === 'boardwalk'
+        );
+        const parkPlaceProp = gameState.config.propertyConfig.properties.find(
+          (p) => p.id === 'parkplace'
+        );
+
         const promptSelectStubValues = [
           'ROLL_DICE',
           'BUY_PROPERTY',
@@ -906,9 +937,9 @@ describe('main', () => {
           'BUY_PROPERTY',
           'MANAGE_PROPERTIES',
           'RENOVATE',
-          'Boardwalk',
-          'Park Place',
-          'Boardwalk',
+          boardwalkProp,
+          parkPlaceProp,
+          boardwalkProp,
           'CANCEL',
           'CANCEL',
           'END_TURN',
@@ -1101,6 +1132,14 @@ describe('main', () => {
           '', // highest rolling player
           '',
         ];
+
+        const boardwalkProp = gameState.config.propertyConfig.properties.find(
+          (p) => p.id === 'boardwalk'
+        );
+        const parkPlaceProp = gameState.config.propertyConfig.properties.find(
+          (p) => p.id === 'parkplace'
+        );
+
         const promptSelectStubValues = [
           'ROLL_DICE',
           'BUY_PROPERTY',
@@ -1108,9 +1147,9 @@ describe('main', () => {
           'BUY_PROPERTY',
           'MANAGE_PROPERTIES',
           'RENOVATE',
-          'Boardwalk',
-          'Park Place',
-          'Boardwalk',
+          boardwalkProp,
+          parkPlaceProp,
+          boardwalkProp,
           'CANCEL',
           'CANCEL',
           'END_TURN',

@@ -73,7 +73,7 @@ describe('Rules -> UNMORTGAGE', () => {
       expect(promptStub.getCall(0).args[1]).to.deep.equal(
         expectedProperties
           .filter((p) => p.mortgaged)
-          .map((p) => p.name.toUpperCase()),
+          .map((p) => ({ display: true, value: p })),
         `Unexpected prompt input for unmortgage properties list: ${
           promptStub.getCall(0).args[2]
         }`
@@ -89,7 +89,7 @@ describe('Rules -> UNMORTGAGE', () => {
       const originalMortgageState = expectedProperty.mortgaged;
 
       const promptStub = sinon.stub(PlayerActions, 'select');
-      promptStub.onCall(0).returns(expectedProperty.name.toUpperCase());
+      promptStub.onCall(0).returns(expectedProperty);
       promptStub.onCall(1).returns(cancelEvent);
       eventBus.emit(inputEvent);
       expect(expectedProperty.mortgaged).to.equal(
@@ -111,7 +111,7 @@ describe('Rules -> UNMORTGAGE', () => {
       const originalMortgageState = expectedProperty.mortgaged;
 
       const promptStub = sinon.stub(PlayerActions, 'select');
-      promptStub.onCall(0).returns(expectedProperty.name.toUpperCase());
+      promptStub.onCall(0).returns(expectedProperty);
       promptStub.onCall(1).returns(cancelEvent);
 
       eventBus.emit(inputEvent);

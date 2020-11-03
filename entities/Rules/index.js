@@ -367,15 +367,13 @@ module.exports = {
         gameState
       );
 
-      const propSelection = require('../PlayerActions').select(
+      const renoProp = require('../PlayerActions').selectProperties(
         UI,
-        renoProps.map((p) => p.name)
+        renoProps
       );
 
-      if (propSelection === 'CANCEL') return;
-
-      const propToReno = renoProps.find((p) => p.name === propSelection);
-      require('../PropertyManagementService').renovate(gameState, propToReno);
+      if (renoProp === 'CANCEL') return;
+      require('../PropertyManagementService').renovate(gameState, renoProp);
 
       notify('RENOVATE');
     },
@@ -386,15 +384,13 @@ module.exports = {
         gameState
       );
 
-      const propSelection = require('../PlayerActions').select(
+      const demoProp = require('../PlayerActions').selectProperties(
         UI,
-        demoProps.map((p) => p.name)
+        demoProps
       );
 
-      if (propSelection === 'CANCEL') return;
-
-      const propToReno = demoProps.find((p) => p.name === propSelection);
-      require('../PropertyManagementService').demolish(gameState, propToReno);
+      if (demoProp === 'CANCEL') return;
+      require('../PropertyManagementService').demolish(gameState, demoProp);
 
       notify('DEMOLISH');
     },
@@ -406,18 +402,16 @@ module.exports = {
         .getMortgageableProperties(gameState)
         .filter((p) => !p.mortgaged);
 
-      const propSelection = require('../PlayerActions').select(
+      const propSelection = require('../PlayerActions').selectProperties(
         UI,
-        mortgageAbleProps.map((p) => p.name.toUpperCase())
+        mortgageAbleProps
       );
 
       if (propSelection === 'CANCEL') return;
-
-      const mortgageProp = mortgageAbleProps.find(
-        (p) => p.name.toUpperCase() === propSelection
+      require('../PropertyManagementService').mortgage(
+        gameState,
+        propSelection
       );
-
-      require('../PropertyManagementService').mortgage(gameState, mortgageProp);
 
       notify('MORTGAGE');
     },
@@ -436,27 +430,24 @@ module.exports = {
         .getMortgageableProperties(gameState)
         .filter((p) => p.mortgaged);
 
-      const propSelection = require('../PlayerActions').select(
+      const propSelection = require('../PlayerActions').selectProperties(
         UI,
-        unmortgageAbleProps.map((p) => p.name.toUpperCase())
+        unmortgageAbleProps
       );
 
       if (propSelection === 'CANCEL') return;
 
-      const mortgageProp = unmortgageAbleProps.find(
-        (p) => p.name.toUpperCase() === propSelection
-      );
       if (
-        mortgageProp.mortgaged &&
+        propSelection.mortgaged &&
         player.cash <
-          (mortgageProp.price / mortgageValueMultiplier) *
+          (propSelection.price / mortgageValueMultiplier) *
             INTEREST_RATE_MULTIPLIER
       ) {
         UI.noCashMustLiquidate(gameState.currentPlayer);
       } else {
         require('../PropertyManagementService').unmortgage(
           gameState,
-          mortgageProp
+          propSelection
         );
       }
 
@@ -585,10 +576,12 @@ module.exports = {
       const pmsService = require('../PropertyManagementService');
       const wealthService = require('../WealthService');
       const player = gameState.currentPlayer;
-      let cardConfig = gameState.config.chanceConfig;
-      if (cardConfig.availableCards.length === 0) {
-        cardConfig = replaceAvailableCards(cardConfig);
+      if (gameState.config.chanceConfig.availableCards.length === 0) {
+        gameState.config.chanceConfig = replaceAvailableCards(
+          gameState.config.chanceConfig
+        );
       }
+      let cardConfig = gameState.config.chanceConfig;
       const { card, deck } = draw(cardConfig.availableCards);
       cardConfig.availableCards = deck;
 
@@ -724,12 +717,14 @@ module.exports = {
       const { draw, replaceAvailableCards } = require('../Components/Deck');
       const pmsService = require('../PropertyManagementService');
       const wealthService = require('../WealthService');
-      let cardConfig = gameState.config.communityChestConfig;
       const player = gameState.currentPlayer;
-
-      if (cardConfig.availableCards.length === 0) {
-        cardConfig = replaceAvailableCards(cardConfig);
+      if (gameState.config.communityChestConfig.availableCards.length === 0) {
+        gameState.config.communityChestConfig = replaceAvailableCards(
+          gameState.config.communityChestConfig
+        );
       }
+      let cardConfig = gameState.config.communityChestConfig;
+
       const { card, deck } = draw(cardConfig.availableCards);
       cardConfig.availableCards = deck;
 
@@ -957,6 +952,7 @@ module.exports = {
         notify('BANKRUPTCY');
       } else {
         while (gameState.currentPlayer.cash < subTurn.charge) {
+          // TODO: what if they mortgage themselves INTO bankruptcy? either we disable unmortgage/renovate/trade as an option OR we move bankruptcy check here
           UI.playerShortOnFunds(gameState.currentPlayer.cash, subTurn.charge);
 
           notify('LIQUIDATION');

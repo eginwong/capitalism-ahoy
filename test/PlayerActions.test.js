@@ -202,7 +202,7 @@ describe('PlayerActions', () => {
       const UI = mockUIFactory();
       const promptSelectUISpy = sinon.spy();
       UI.promptSelect = promptSelectUISpy;
-      const actions = [1, 2, 3];
+      const actions = ['1', '2', '3'];
 
       PlayerActions.select(UI, actions);
       expect(
@@ -217,7 +217,7 @@ describe('PlayerActions', () => {
       const UI = mockUIFactory();
       const promptSelectUISpy = sinon.spy();
       UI.promptSelect = promptSelectUISpy;
-      const actions = [1, 2, 3];
+      const actions = ['1', '2', '3'];
       const options = {
         cancel: false,
       };
@@ -237,11 +237,69 @@ describe('PlayerActions', () => {
       UI.promptSelect = promptSelectUIStub;
       const chosenOption = 1;
       promptSelectUIStub.returns(chosenOption);
-      const actions = [1, 2, 3];
+      const actions = ['1', '2', '3'];
 
       expect(PlayerActions.select(UI, actions)).to.equal(
         actions[chosenOption],
         `select did not return corresponding action given the index selection`
+      );
+    });
+    it('returns if value of action when actions are objects with display and value params', () => {
+      const UI = mockUIFactory();
+      const promptSelectUIStub = sinon.stub();
+      UI.promptSelect = promptSelectUIStub;
+      const chosenOption = 1;
+      promptSelectUIStub.returns(chosenOption);
+      const actions = [
+        {
+          display: 'fine wine',
+          value: {
+            name: 'fine wine',
+            price: 10,
+          },
+        },
+        {
+          display: 'fine cheese',
+          value: {
+            name: 'fine cheese',
+            price: 100,
+          },
+        },
+        {
+          display: 'fine taco',
+          value: {
+            name: 'fine taco',
+            price: 40,
+          },
+        },
+      ];
+
+      expect(PlayerActions.select(UI, actions)).to.equal(
+        actions[chosenOption].value,
+        `select did not return corresponding action given the index selection`
+      );
+    });
+    it('returns if actions are strings without underscore(_)', () => {
+      const UI = mockUIFactory();
+      const promptSelectUIStub = sinon.stub();
+      UI.promptSelect = promptSelectUIStub;
+      const chosenOption = 1;
+      promptSelectUIStub.returns(chosenOption);
+      const actions = ['1_1', '2_2', '3_3'];
+
+      expect(PlayerActions.select(UI, actions)).to.equal(
+        actions[chosenOption],
+        `select did not return corresponding action given the index selection`
+      );
+      expect(
+        promptSelectUIStub.calledOnceWithExactly(
+          actions.map((a) => a.replace('_', ' ')),
+          'Which action would you like to take?',
+          {}
+        )
+      ).to.equal(
+        true,
+        'Prompt Select did not remove the underscores from the string input'
       );
     });
     it('returns cancel if action does not exist', () => {
@@ -267,6 +325,42 @@ describe('PlayerActions', () => {
         'CANCEL',
         `select did not return cancel given no actions`
       );
+    });
+  });
+  describe('selectProperties', () => {
+    it('calls the select method', () => {
+      const UI = mockUIFactory();
+      const promptSelectUISpy = sinon.spy();
+      UI.promptSelect = promptSelectUISpy;
+      const actions = ['1', '2', '3'];
+
+      PlayerActions.selectProperties(UI, actions);
+      expect(promptSelectUISpy.calledOnce).to.equal(
+        true,
+        'Prompt was not called exactly once'
+      );
+    });
+    it('maps the properties with the UI#mapPropertyShortDisplay', () => {
+      const UI = mockUIFactory();
+      const selectStub = sinon.stub(PlayerActions, 'select');
+
+      const mapPropertyShortDisplayUIStub = sinon.stub();
+      UI.mapPropertyShortDisplay = mapPropertyShortDisplayUIStub;
+      mapPropertyShortDisplayUIStub.returns(true);
+      const actions = ['1', '2', '3'];
+
+      PlayerActions.selectProperties(UI, actions);
+      expect(mapPropertyShortDisplayUIStub.callCount).to.equal(
+        actions.length,
+        `UI#mapPropertyShortDisplay was not called ${actions.length} times`
+      );
+
+      expect(
+        selectStub.calledOnceWithExactly(
+          UI,
+          actions.map((a) => ({ display: true, value: a }))
+        )
+      ).to.equal(true, `Did not call method with correctly mapped parameters`);
     });
   });
 

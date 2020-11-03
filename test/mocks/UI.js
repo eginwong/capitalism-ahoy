@@ -39,5 +39,6 @@ module.exports = function mockUIFactory() {
     wonAuction: () => true,
     skipTurnForBankruptPlayer: () => true,
     playerLost: () => true,
+    mapPropertyShortDisplay: () => true,
   };
 };
