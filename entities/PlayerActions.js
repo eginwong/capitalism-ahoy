@@ -16,7 +16,8 @@ const ACTIONS = {
     !!gameState.turnValues.roll && gameState.turnValues.speedingCounter === 0,
   MANAGE_PROPERTIES: (gameState, player = gameState.currentPlayer) =>
     getProperties(gameState).some((p) => p.ownedBy === player.id),
-  // INITIATE_TRADE
+  PLAYER_INFO: () => true,
+  // TRADE
   END_GAME: () => true,
 };
 

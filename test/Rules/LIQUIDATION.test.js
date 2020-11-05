@@ -33,11 +33,13 @@ describe('Rules -> LIQUIDATION', () => {
     const inputEvent = 'LIQUIDATION';
     const managePropertiesEvent = 'MANAGE_PROPERTIES';
     const tradeEvent = 'TRADE';
+    const playerInfoEvent = 'PLAYER_INFO';
     const cancelEvent = 'CANCEL';
 
     let liquidationSpy;
     let managePropertiesSpy;
     let tradeSpy;
+    let playerInfoSpy;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -52,10 +54,12 @@ describe('Rules -> LIQUIDATION', () => {
       liquidationSpy = sinon.spy();
       managePropertiesSpy = sinon.spy();
       tradeSpy = sinon.spy();
+      playerInfoSpy = sinon.spy();
 
       eventBus.on(inputEvent, liquidationSpy);
       eventBus.on(managePropertiesEvent, managePropertiesSpy);
       eventBus.on(tradeEvent, tradeSpy);
+      eventBus.on(playerInfoEvent, playerInfoSpy);
     });
 
     it(`should emit desired ${managePropertiesEvent} event`, () => {
@@ -76,6 +80,16 @@ describe('Rules -> LIQUIDATION', () => {
       expect(tradeSpy.callCount).to.equal(
         1,
         `${tradeEvent} was called ${tradeSpy.callCount} times but expected to be 1 times`
+      );
+    });
+    it(`should emit desired ${playerInfoEvent} event`, () => {
+      const promptStub = sinon.stub(PlayerActions, 'select');
+      promptStub.onCall(0).returns(playerInfoEvent);
+      promptStub.onCall(1).returns(cancelEvent);
+      eventBus.emit(inputEvent);
+      expect(playerInfoSpy.callCount).to.equal(
+        1,
+        `${playerInfoEvent} was called ${playerInfoSpy.callCount} times but expected to be 1 times`
       );
     });
   });

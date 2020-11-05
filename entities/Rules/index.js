@@ -558,11 +558,11 @@ module.exports = {
   ],
   LIQUIDATION: [
     ({ UI, notify }) => {
-      const liquidateOption = require('../PlayerActions').select(
-        UI,
-        // TODO: be smart about what options are available to the user?
-        ['MANAGE_PROPERTIES', 'TRADE']
-      );
+      const liquidateOption = require('../PlayerActions').select(UI, [
+        'MANAGE_PROPERTIES',
+        'TRADE',
+        'PLAYER_INFO',
+      ]);
 
       if (liquidateOption === 'CANCEL') return;
 
@@ -965,6 +965,20 @@ module.exports = {
         subTurn: null,
       })(gameState);
       notify('TURN_VALUES_UPDATED');
+    },
+  ],
+  PLAYER_INFO: [
+    ({ UI }, gameState) => {
+      const props = require('../PropertyManagementService').getProperties(
+        gameState
+      );
+      UI.showPlayerTable(
+        gameState.players.map((p) => ({
+          ...p,
+          properties: props.filter((prop) => prop.ownedBy === p.id),
+        })),
+        props
+      );
     },
   ],
   BANKRUPTCY: [

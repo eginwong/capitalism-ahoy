@@ -145,6 +145,22 @@ describe('PlayerActions', () => {
         );
       });
     });
+    describe('END_GAME', () => {
+      it('always returns', () => {
+        expect(PlayerActions.refresh(gameState)).to.contain(
+          'END_GAME',
+          'END_GAME action is not available'
+        );
+      });
+    });
+    describe('PLAYER_INFO', () => {
+      it('always returns', () => {
+        expect(PlayerActions.refresh(gameState)).to.contain(
+          'PLAYER_INFO',
+          'PLAYER_INFO action is not available'
+        );
+      });
+    });
   });
 
   describe('prompt', () => {

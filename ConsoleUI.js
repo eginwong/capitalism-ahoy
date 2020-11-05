@@ -1,4 +1,5 @@
 const c = require('ansi-colors');
+const Table = require('cli-table3');
 
 const consoleUI = (function (readline) {
   const colorMap = {
@@ -166,6 +167,36 @@ const consoleUI = (function (readline) {
         `Insufficient funds. Player ${player.name} declares bankruptcy.`
       ),
     mapPropertyShortDisplay,
+    showPlayerTable: (players, properties) => {
+      const propertyText = (prop) => {
+        return `${mapPropertyGroupToColor(prop)} - 💰: $${prop.price}${
+          prop.mortgaged ? ' | ' + c.red('mortgaged') : ''
+        }${prop.buildings > 0 ? ' | ' + prop.buildings + '🏠' : ''}`;
+      };
+
+      let cliTable = new Table();
+      cliTable.push(['', 'position', 'cash', 'assets', 'properties']);
+
+      players.forEach((p) => {
+        cliTable.push([
+          `${p.name} ${p.jailed !== -1 ? '🔒' : ''}${p.bankrurpt ? '💀' : ''}`,
+          `${p.position} (${
+            properties.find((prop) => prop.position === p.position).name
+          })`,
+          `${c.green('$' + p.cash)}`,
+          `${c.green('$' + p.assets)}`,
+          `${
+            p.properties.length !== 0
+              ? p.properties
+                  .map(propertyText)
+                  .reduce((prev, curr) => `${prev}\n${curr}`)
+              : ''
+          }`,
+        ]);
+      });
+
+      console.log(cliTable.toString());
+    },
   };
 })(require('readline-sync'));
 
