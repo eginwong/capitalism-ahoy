@@ -40,5 +40,6 @@ module.exports = function mockUIFactory() {
     skipTurnForBankruptPlayer: () => true,
     playerLost: () => true,
     mapPropertyShortDisplay: () => true,
+    showPlayerTable: () => true,
   };
 };
