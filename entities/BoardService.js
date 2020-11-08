@@ -8,6 +8,12 @@ module.exports = class BoardSevice {
     );
   }
 
+  static getPropertyAtPosition(gameState, player) {
+    return PropertyManagementService.getProperties(gameState).find(
+      (prop) => prop.position === player.position
+    );
+  }
+
   // Takes into consideration only the nearest properties forward of the player's current position.
   static nearestPropertyByGroupToPlayer(gameState, propertyGroup) {
     const propertiesInGroup = PropertyManagementService.getPropertiesInPropertyGroup(

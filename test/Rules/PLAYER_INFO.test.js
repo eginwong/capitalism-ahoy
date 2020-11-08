@@ -50,15 +50,19 @@ describe('Rules -> PLAYER_INFO', () => {
       const uiSpy = sinon.spy();
       userInterface.showPlayerTable = uiSpy;
       const allProperties = gameState.config.propertyConfig.properties;
+      const goProperty = allProperties.find((p) => p.id === 'go');
+
       const expectedPlayersInput = gameState.players.map((p) => ({
         ...p,
+        playerBoardSpace: goProperty,
         properties: allProperties.filter((prop) => prop.ownedBy === p.id),
       }));
 
       eventBus.emit(inputEvent);
-      expect(
-        uiSpy.calledOnceWithExactly(expectedPlayersInput, allProperties)
-      ).to.equal(true, `Initial UI method for ${inputEvent} was not called`);
+      expect(uiSpy.calledOnceWithExactly(expectedPlayersInput)).to.equal(
+        true,
+        `Initial UI method for ${inputEvent} was not called`
+      );
     });
   });
 });
