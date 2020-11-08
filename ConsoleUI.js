@@ -188,8 +188,9 @@ const consoleUI = (function (readline) {
       cliTable.push(['', 'position', 'cash', 'assets', 'properties']);
 
       players.forEach((p) => {
+        // !~ fancy use of tilde operator: https://wsvincent.com/javascript-tilde/ for reference
         cliTable.push([
-          `${p.name} ${p.jailed !== -1 ? '🔒' : ''}${p.bankrupt ? '💀' : ''}`,
+          `${p.name} ${!~p.jailed ? '🔒' : ''}${p.bankrupt ? '💀' : ''}`,
           `${p.position} (${p.playerBoardSpace.name})`,
           `${c.green('$' + p.cash)}`,
           `${c.green('$' + p.assets)}`,
