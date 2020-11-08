@@ -972,12 +972,13 @@ module.exports = {
       const props = require('../PropertyManagementService').getProperties(
         gameState
       );
+      const { getPropertyAtPosition } = require('../BoardService');
       UI.showPlayerTable(
         gameState.players.map((p) => ({
           ...p,
+          playerBoardSpace: getPropertyAtPosition(gameState, p),
           properties: props.filter((prop) => prop.ownedBy === p.id),
-        })),
-        props
+        }))
       );
     },
   ],

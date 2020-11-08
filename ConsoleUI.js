@@ -16,11 +16,11 @@ const consoleUI = (function (readline) {
   };
 
   function mapPropertyGroupToColor(prop) {
-    return `${colorMap[prop.group]} ${prop.name}`;
+    return `${colorMap[prop.group]}`;
   }
 
   function mapPropertyShortDisplay(prop) {
-    return `${mapPropertyGroupToColor(prop)} - 💰: $${prop.price}${
+    return `${mapPropertyGroupToColor(prop)} ${prop.name} - 💰: $${prop.price}${
       prop.mortgaged ? ' | mortgaged' : ''
     }${prop.buildings > 0 ? ' | ' + prop.buildings + '🏠' : ''}${
       prop.rent > 0 ? ' | Rent: $' + prop.rent : ''
@@ -33,7 +33,7 @@ const consoleUI = (function (readline) {
   }
 
   function mapPropertyLongDisplay(prop) {
-    let display = `  ${mapPropertyGroupToColor(prop)}, position: ${
+    let display = `  ${mapPropertyGroupToColor(prop)} ${prop.name}, position: ${
       prop.position
     }\n`;
 
@@ -167,11 +167,21 @@ const consoleUI = (function (readline) {
         `Insufficient funds. Player ${player.name} declares bankruptcy.`
       ),
     mapPropertyShortDisplay,
-    showPlayerTable: (players, properties) => {
+    showPlayerTable: (players) => {
       const propertyText = (prop) => {
-        return `${mapPropertyGroupToColor(prop)} - 💰: $${prop.price}${
+        return `${mapPropertyGroupToColor(prop)}${
+          prop.buildings === 5
+            ? ' 🏨'
+            : prop.buildings > 0
+            ? ' ' +
+              Array(prop.buildings)
+                .fill()
+                .map((_) => '🏠')
+                .join('')
+            : ''
+        } ${prop.name} - 💰: $${prop.price}${
           prop.mortgaged ? ' | ' + c.red('mortgaged') : ''
-        }${prop.buildings > 0 ? ' | ' + prop.buildings + '🏠' : ''}`;
+        }`;
       };
 
       let cliTable = new Table();
@@ -179,10 +189,8 @@ const consoleUI = (function (readline) {
 
       players.forEach((p) => {
         cliTable.push([
-          `${p.name} ${p.jailed !== -1 ? '🔒' : ''}${p.bankrurpt ? '💀' : ''}`,
-          `${p.position} (${
-            properties.find((prop) => prop.position === p.position).name
-          })`,
+          `${p.name} ${p.jailed !== -1 ? '🔒' : ''}${p.bankrupt ? '💀' : ''}`,
+          `${p.position} (${p.playerBoardSpace.name})`,
           `${c.green('$' + p.cash)}`,
           `${c.green('$' + p.assets)}`,
           `${

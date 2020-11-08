@@ -34,6 +34,24 @@ describe('BoardService', () => {
     });
   });
 
+  describe('getPropertyAtPosition', () => {
+    it("should retrieve property of player's position", () => {
+      const targetPlayer = gameState.players[0];
+      const arbitraryPosition = 12;
+      targetPlayer.position = arbitraryPosition;
+      const expectedProperty = gameState.config.propertyConfig.properties.find(
+        (p) => p.position === arbitraryPosition
+      );
+
+      expect(
+        BoardService.getPropertyAtPosition(gameState, targetPlayer)
+      ).to.deep.equal(
+        expectedProperty,
+        "Incorrectly returns board space at the given player's position"
+      );
+    });
+  });
+
   describe('nearestPropertyByGroupToPlayer', () => {
     it('should return property closest to player by property group when property is before GO', () => {
       const startingPlayerPosition = 10;
