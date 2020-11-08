@@ -485,6 +485,101 @@ describe('Rules -> AUCTION', () => {
           'Winner of the auction did not pay out the expected bid price'
         );
       });
+      it('does not prompt the winning player to unmortgage the property if liquidity does not allow', () => {
+        const auctionPromptStub = sinon.stub(PlayerActions, 'auction');
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.id === 'mediterraneanave'
+        );
+        testProperty.mortgaged = true;
+        gameState.players[0].cash = testProperty.price;
+        const bidders = gameState.players.map((player) => ({
+          ...player,
+          liquidity: require('../../entities/WealthService').calculateLiquidity(
+            gameState,
+            gameState.config.propertyConfig.properties,
+            player
+          ),
+        }));
+        const expectedBuyer = bidders[0];
+        auctionPromptStub.returns({
+          buyer: expectedBuyer,
+          price: testProperty.price,
+        });
+        gameState.currentBoardProperty = testProperty;
+        const unmortgageConfirmStub = sinon.stub(PlayerActions, 'confirm');
+
+        eventBus.emit(inputEvent);
+        expect(unmortgageConfirmStub.calledOnce).to.equal(
+          false,
+          'Unmortgage prompt was offered although winner could not afford to unmortgage'
+        );
+      });
+      it(`should emit ${collectionsEvent} when winner is short on cash to unmortgage property`, () => {
+        const auctionPromptStub = sinon.stub(PlayerActions, 'auction');
+        const bidders = gameState.players.map((player) => ({
+          ...player,
+          liquidity: require('../../entities/WealthService').calculateLiquidity(
+            gameState,
+            gameState.config.propertyConfig.properties,
+            player
+          ),
+        }));
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.id === 'mediterraneanave'
+        );
+        testProperty.mortgaged = true;
+        gameState.players[0].cash = testProperty.price;
+        const assetValue = 300;
+        gameState.players[0].assets = assetValue;
+        const expectedBuyer = bidders[0];
+        auctionPromptStub.returns({
+          buyer: expectedBuyer,
+          price: testProperty.price,
+        });
+        gameState.currentBoardProperty = testProperty;
+
+        const unmortgageConfirmStub = sinon.stub(PlayerActions, 'confirm');
+        unmortgageConfirmStub.onCall(0).returns(true);
+
+        eventBus.emit(inputEvent);
+        expect(collectionsSpy.calledOnce).to.equal(
+          true,
+          `${inputEvent} event did not call ${collectionsEvent} when winner is short on funds`
+        );
+      });
+      it(`should emit ${turnValuesUpdatedEvent} when winner is short on cash to unmortgage property, allow for subturn`, () => {
+        const auctionPromptStub = sinon.stub(PlayerActions, 'auction');
+        const bidders = gameState.players.map((player) => ({
+          ...player,
+          liquidity: require('../../entities/WealthService').calculateLiquidity(
+            gameState,
+            gameState.config.propertyConfig.properties,
+            player
+          ),
+        }));
+        const testProperty = gameState.config.propertyConfig.properties.find(
+          (p) => p.id === 'mediterraneanave'
+        );
+        testProperty.mortgaged = true;
+        gameState.players[0].cash = testProperty.price;
+        const assetValue = 300;
+        gameState.players[0].assets = assetValue;
+        const expectedBuyer = bidders[0];
+        auctionPromptStub.returns({
+          buyer: expectedBuyer,
+          price: testProperty.price,
+        });
+        gameState.currentBoardProperty = testProperty;
+
+        const unmortgageConfirmStub = sinon.stub(PlayerActions, 'confirm');
+        unmortgageConfirmStub.onCall(0).returns(true);
+
+        eventBus.emit(inputEvent);
+        expect(turnValuesUpdatedSpy.callCount).to.equal(
+          1,
+          `${inputEvent} event did not call ${turnValuesUpdatedEvent} when winner was low on funds`
+        );
+      });
     });
   });
 });

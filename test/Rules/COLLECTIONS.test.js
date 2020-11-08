@@ -34,7 +34,7 @@ describe('Rules -> COLLECTIONS', () => {
     const liquidationEvent = 'LIQUIDATION';
     const turnValuesUpdatedEvent = 'TURN_VALUES_UPDATED';
 
-    let bankruptcySpy;
+    let bankruptcyStub;
     let liquidationStub;
     let turnValuesUpdatedSpy;
 
@@ -53,12 +53,12 @@ describe('Rules -> COLLECTIONS', () => {
         speedingCounter: 0,
       };
 
-      bankruptcySpy = sinon.spy();
+      bankruptcyStub = sinon.stub();
       liquidationStub = sinon.stub();
       turnValuesUpdatedSpy = sinon.spy();
 
       eventBus.on(liquidationEvent, liquidationStub);
-      eventBus.on(bankruptcyEvent, bankruptcySpy);
+      eventBus.on(bankruptcyEvent, bankruptcyStub);
       eventBus.on(turnValuesUpdatedEvent, turnValuesUpdatedSpy);
     });
 
@@ -69,7 +69,7 @@ describe('Rules -> COLLECTIONS', () => {
         0,
         `${liquidationEvent} was called even though there is no sub turn value`
       );
-      expect(bankruptcySpy.callCount).to.equal(
+      expect(bankruptcyStub.callCount).to.equal(
         0,
         `${bankruptcyEvent} was called even though there is no sub turn value`
       );
@@ -82,7 +82,7 @@ describe('Rules -> COLLECTIONS', () => {
         0,
         `${liquidationEvent} was called even though there is no sub turn value`
       );
-      expect(bankruptcySpy.callCount).to.equal(
+      expect(bankruptcyStub.callCount).to.equal(
         0,
         `${bankruptcyEvent} was called even though there is no sub turn value`
       );
@@ -95,7 +95,7 @@ describe('Rules -> COLLECTIONS', () => {
         0,
         `${liquidationEvent} was called even though there is no sub turn value`
       );
-      expect(bankruptcySpy.callCount).to.equal(
+      expect(bankruptcyStub.callCount).to.equal(
         0,
         `${bankruptcyEvent} was called even though there is no sub turn value`
       );
@@ -107,15 +107,45 @@ describe('Rules -> COLLECTIONS', () => {
         playerId: gameState.currentPlayer.id,
         charge: arbitraryCharge,
       };
+      bankruptcyStub.callsFake(() => {
+        gameState.currentPlayer.bankrupt = true;
+      });
       eventBus.emit(inputEvent);
 
-      expect(bankruptcySpy.callCount).to.equal(
+      expect(bankruptcyStub.callCount).to.equal(
+        1,
+        `${bankruptcyEvent} was not called`
+      );
+    });
+    it(`calls the ${bankruptcyEvent} when liquidity is less than the charge after liquidation`, () => {
+      const arbitraryCharge = 60;
+      gameState.currentPlayer.cash = 0;
+      const propertyGroup = 'Purple';
+      createMonopoly(gameState, propertyGroup, gameState.currentPlayer.id);
+      gameState.turnValues.subTurn = {
+        playerId: gameState.currentPlayer.id,
+        charge: arbitraryCharge,
+      };
+      liquidationStub.callsFake(() => {
+        gameState.currentPlayer.cash += 57;
+        gameState.config.propertyConfig.properties
+          .filter((p) => p.group === propertyGroup)
+          .forEach((p) => {
+            p.mortgaged = true;
+          });
+      });
+      bankruptcyStub.callsFake(() => {
+        gameState.currentPlayer.bankrupt = true;
+      });
+      eventBus.emit(inputEvent);
+
+      expect(bankruptcyStub.callCount).to.equal(
         1,
         `${bankruptcyEvent} was not called`
       );
     });
     it(`calls the ${liquidationEvent} while the player's cash is less than the charge`, () => {
-      const arbitraryCharge = 10;
+      const arbitraryCharge = 50;
       gameState.currentPlayer.cash = 0;
       createMonopoly(gameState, 'Purple', gameState.currentPlayer.id);
       gameState.turnValues.subTurn = {

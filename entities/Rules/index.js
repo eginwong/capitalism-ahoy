@@ -905,24 +905,38 @@ module.exports = {
 
       // need to reset values of winning player, otherwise the collections are not persisted
       let winningPlayer = gameState.players.find((p) => p.id === buyer.id);
+      const boardPropertyMortgagePrice =
+        boardProperty.price / mortgageValueMultiplier;
 
       require('../WealthService').buyAsset(
         winningPlayer,
         price,
         boardProperty.mortgaged
-          ? boardProperty.price / mortgageValueMultiplier
+          ? boardPropertyMortgagePrice
           : boardProperty.price
       );
 
-      if (boardProperty.mortgaged) {
+      const winnerHasFundsToUnmortgage =
+        buyer.liquidity - price > boardPropertyMortgagePrice;
+      if (boardProperty.mortgaged && winnerHasFundsToUnmortgage) {
         const unmortgage = require('../PlayerActions').confirm(
           UI,
-          `Would you like to unmortgage this property right now? If yes, you can save on the interest rate charge! The cost is $${
-            boardProperty.price / 2
-          }`
+          `Would you like to unmortgage this property right now? If yes, you can save on the interest rate charge! The cost is $${boardPropertyMortgagePrice}`
         );
 
         if (unmortgage) {
+          if (winningPlayer.cash < boardPropertyMortgagePrice) {
+            require('./updateTurnValues')({
+              subTurn: {
+                playerId: winningPlayer.id,
+                charge: boardPropertyMortgagePrice,
+              },
+            })(gameState);
+            notify('TURN_VALUES_UPDATED');
+
+            notify('COLLECTIONS');
+          }
+
           require('../PropertyManagementService').unmortgage(
             gameState,
             boardProperty,
@@ -940,21 +954,26 @@ module.exports = {
   COLLECTIONS: [
     ({ UI, notify }, gameState) => {
       const { subTurn } = gameState.turnValues;
+      const { calculateLiquidity } = require('../WealthService');
       if (!subTurn) return;
       if (typeof subTurn.playerId !== 'number' || !subTurn.charge) return;
 
-      const liquidity = require('../WealthService').calculateLiquidity(
-        gameState,
-        gameState.config.propertyConfig.properties,
-        gameState.currentPlayer
-      );
-      if (liquidity < subTurn.charge) {
-        notify('BANKRUPTCY');
-      } else {
-        while (gameState.currentPlayer.cash < subTurn.charge) {
-          // TODO: what if they mortgage themselves INTO bankruptcy? either we disable unmortgage/renovate/trade as an option OR we move bankruptcy check here
-          UI.playerShortOnFunds(gameState.currentPlayer.cash, subTurn.charge);
+      let liquidity;
 
+      while (
+        gameState.currentPlayer.cash < subTurn.charge &&
+        !gameState.currentPlayer.bankrupt
+      ) {
+        liquidity = calculateLiquidity(
+          gameState,
+          gameState.config.propertyConfig.properties,
+          gameState.currentPlayer
+        );
+
+        if (liquidity < subTurn.charge) {
+          notify('BANKRUPTCY');
+        } else {
+          UI.playerShortOnFunds(gameState.currentPlayer.cash, subTurn.charge);
           notify('LIQUIDATION');
         }
       }
