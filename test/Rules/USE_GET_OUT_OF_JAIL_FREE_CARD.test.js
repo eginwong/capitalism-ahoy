@@ -4,7 +4,11 @@ const sinon = require('sinon');
 const mockUIFactory = require('../mocks/UI');
 
 const { GameState } = require('../../entities/GameState');
-const { createPlayerFactory } = require('../testutils');
+const {
+  createPlayerFactory,
+  getChanceCard,
+  getCommunityChestCard,
+} = require('../testutils');
 const config = require('../../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
 
@@ -50,9 +54,7 @@ describe('Rules -> USE_GET_OUT_OF_JAIL_FREE_CARD', () => {
     it('should make a call to the UI#getOutOfJailFreeCardUsed', () => {
       const uiSpy = sinon.spy();
       userInterface.getOutOfJailFreeCardUsed = uiSpy;
-      const expectedCard = gameState.config.communityChestConfig.availableCards.find(
-        (c) => c.action === 'getoutofjailfree'
-      );
+      const expectedCard = getCommunityChestCard(gameState, 'getoutofjailfree');
       gameState.currentPlayer.cards.push(expectedCard);
 
       eventBus.emit(inputEvent);
@@ -62,9 +64,7 @@ describe('Rules -> USE_GET_OUT_OF_JAIL_FREE_CARD', () => {
       );
     });
     it(`should set player free from jail`, () => {
-      const expectedCard = gameState.config.communityChestConfig.availableCards.find(
-        (c) => c.action === 'getoutofjailfree'
-      );
+      const expectedCard = getCommunityChestCard(gameState, 'getoutofjailfree');
       gameState.currentPlayer.cards.push(expectedCard);
 
       eventBus.emit(inputEvent);
@@ -73,10 +73,8 @@ describe('Rules -> USE_GET_OUT_OF_JAIL_FREE_CARD', () => {
         'Player is still in jail after using the get out of jail free card'
       );
     });
-    it(`the get out of jail free card is discarded into the communit chest discard`, () => {
-      const expectedCard = gameState.config.communityChestConfig.availableCards.find(
-        (c) => c.action === 'getoutofjailfree'
-      );
+    it(`the get out of jail free card is discarded into the community chest discard`, () => {
+      const expectedCard = getCommunityChestCard(gameState, 'getoutofjailfree');
       gameState.currentPlayer.cards.push(expectedCard);
       eventBus.emit(inputEvent);
       expect(
@@ -86,10 +84,8 @@ describe('Rules -> USE_GET_OUT_OF_JAIL_FREE_CARD', () => {
         `Card was not correctly discarded into community chest`
       );
     });
-    it(`the get out of jail free card is discarded into the communit chest discard`, () => {
-      const expectedCard = gameState.config.chanceConfig.availableCards.find(
-        (c) => c.action === 'getoutofjailfree'
-      );
+    it(`the get out of jail free card is discarded into the chance discard`, () => {
+      const expectedCard = getChanceCard(gameState, 'getoutofjailfree');
       gameState.currentPlayer.cards.push(expectedCard);
       eventBus.emit(inputEvent);
       expect(gameState.config.chanceConfig.discardedCards).to.deep.equal(

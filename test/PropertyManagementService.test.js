@@ -925,6 +925,108 @@ describe('PropertyManagementService', () => {
       ).to.deep.equal([], 'Properties returned that have 0 buildings');
     });
   });
+  describe('getPlayerProperties', () => {
+    it('should return the properties of the current player if optional player param is not passed', () => {
+      const propertyGroup = 'Purple';
+      createMonopoly(gameState, propertyGroup);
+      const expectedTradeablePropertiesOfGroup = gameState.config.propertyConfig.properties.filter(
+        (p) => p.group === propertyGroup
+      );
+      const propertyGroup2 = 'Violet';
+      createMonopoly(gameState, propertyGroup2);
+      const expectedUntradeablePropertiesOfGroup = gameState.config.propertyConfig.properties.filter(
+        (p) => p.group === propertyGroup2
+      );
+      expectedUntradeablePropertiesOfGroup[0].buildings = 1;
+
+      expect(
+        PropertyManagementService.getPlayerProperties(gameState)
+      ).to.deep.equal(
+        {
+          untradeableProps: expectedUntradeablePropertiesOfGroup,
+          tradeableProps: expectedTradeablePropertiesOfGroup,
+        },
+        'Properties are not returned for default current player'
+      );
+    });
+    it('should return railroads and utilities under tradeable properties of the current player', () => {
+      const propertyGroup = 'Utilities';
+      const propertyGroup2 = 'Railroad';
+      createMonopoly(gameState, propertyGroup);
+      createMonopoly(gameState, propertyGroup2);
+      const expectedTradeablePropertiesOfGroup = gameState.config.propertyConfig.properties.filter(
+        (p) => p.group === propertyGroup || p.group === propertyGroup2
+      );
+
+      expect(
+        PropertyManagementService.getPlayerProperties(gameState)
+      ).to.deep.equal(
+        {
+          untradeableProps: [],
+          tradeableProps: expectedTradeablePropertiesOfGroup,
+        },
+        'Properties are not returned for default current player for railroad and utilities'
+      );
+    });
+    it('should return the tradeable properties of the param player', () => {
+      const targetPlayer = gameState.players[1];
+      const propertyGroup1 = 'Purple';
+      const propertyGroup2 = 'Light Green';
+      createMonopoly(gameState, propertyGroup1, targetPlayer.id);
+      createMonopoly(gameState, propertyGroup2, targetPlayer.id);
+      const expectedPropertiesOfGroup1 = gameState.config.propertyConfig.properties.filter(
+        (p) => p.group === propertyGroup1
+      );
+      const expectedPropertiesOfGroup2 = gameState.config.propertyConfig.properties.filter(
+        (p) => p.group === propertyGroup2
+      );
+
+      expect(
+        PropertyManagementService.getPlayerProperties(gameState, targetPlayer)
+          .tradeableProps
+      ).to.deep.equal(
+        [...expectedPropertiesOfGroup1, ...expectedPropertiesOfGroup2],
+        'Properties that are not tradeable are returned for input player'
+      );
+    });
+    it('should return the properties of the param player', () => {
+      const targetPlayer = gameState.players[1];
+      const propertyGroup1 = 'Purple';
+      const propertyGroup2 = 'Light Green';
+      createMonopoly(gameState, propertyGroup1, targetPlayer.id);
+      createMonopoly(gameState, propertyGroup2, targetPlayer.id);
+      const expectedPropertiesOfGroup1 = gameState.config.propertyConfig.properties.filter(
+        (p) => p.group === propertyGroup1
+      );
+      const expectedPropertiesOfGroup2 = gameState.config.propertyConfig.properties.filter(
+        (p) => p.group === propertyGroup2
+      );
+      expectedPropertiesOfGroup2[0].buildings = 1;
+
+      expect(
+        PropertyManagementService.getPlayerProperties(gameState, targetPlayer)
+      ).to.deep.equal(
+        {
+          tradeableProps: expectedPropertiesOfGroup1,
+          untradeableProps: expectedPropertiesOfGroup2,
+        },
+        'Properties that are not returned for input player'
+      );
+    });
+    it('should not return properties if none are owned', () => {
+      const playerProps = PropertyManagementService.getPlayerProperties(
+        gameState
+      );
+      expect(playerProps.tradeableProps).to.deep.equal(
+        [],
+        'Properties are returned when no tradeable properties are owned'
+      );
+      expect(playerProps.untradeableProps).to.deep.equal(
+        [],
+        'Properties are returned when no untradeable properties are owned'
+      );
+    });
+  });
   describe('getConstructedHouses', () => {
     it('returns empty array if no buildings are owned', () => {
       expect(

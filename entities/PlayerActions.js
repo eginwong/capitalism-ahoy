@@ -17,7 +17,7 @@ const ACTIONS = {
   MANAGE_PROPERTIES: (gameState, player = gameState.currentPlayer) =>
     getProperties(gameState).some((p) => p.ownedBy === player.id),
   PLAYER_INFO: () => true,
-  // TRADE
+  TRADE: () => true,
   END_GAME: () => true,
 };
 
@@ -83,5 +83,10 @@ module.exports = class PlayerActions {
   // returns { buyer, price }
   static auction(UI, players, property, baseCost) {
     return require('./AuctionService').auction(UI, players, property, baseCost);
+  }
+
+  // returns { player, details: { assetsFrom: [], assetsTo: [] }}
+  static trade(UI, gameState) {
+    return require('./TradeService').trade(UI, gameState);
   }
 };

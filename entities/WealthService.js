@@ -49,10 +49,9 @@ module.exports = class WealthService {
    */
   static calculateLiquidity(
     gameState,
-    properties,
+    ownedProperties,
     player = gameState.currentPlayer
   ) {
-    const ownedProperties = properties.filter((p) => p.ownedBy === player.id);
     const totalLiquidAssets = ownedProperties
       .filter((p) => !p.mortgaged)
       .map((p) =>

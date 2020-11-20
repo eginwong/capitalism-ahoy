@@ -32,6 +32,24 @@ const consoleUI = (function (readline) {
     }`;
   }
 
+  function propertyText(prop, disabled = false) {
+    let text = `${mapPropertyGroupToColor(prop)}${
+      prop.buildings === 5
+        ? ' 🏨'
+        : prop.buildings > 0
+        ? ' ' +
+          Array(prop.buildings)
+            .fill()
+            .map((_) => '🏠')
+            .join('')
+        : ''
+    } ${prop.name} - 💰: $${prop.price}${
+      prop.mortgaged ? ' | ' + c.red('mortgaged') : ''
+    }`;
+    if (disabled) return c.inverse(text);
+    return text;
+  }
+
   function mapPropertyLongDisplay(prop) {
     let display = `  ${mapPropertyGroupToColor(prop)} ${prop.name}, position: ${
       prop.position
@@ -67,6 +85,7 @@ const consoleUI = (function (readline) {
     // UI: maybe animate player token?
     displayPropertyDetails: (boardProperty) =>
       console.log(mapPropertyLongDisplay(boardProperty)),
+    promptCLLoop: readline.promptCLLoop,
     promptConfirm: readline.keyInYNStrict,
     promptNumber: readline.questionInt,
     promptSelect: readline.keyInSelect,
@@ -167,45 +186,134 @@ const consoleUI = (function (readline) {
         `Insufficient funds. Player ${player.name} declares bankruptcy.`
       ),
     mapPropertyShortDisplay,
-    showPlayerTable: (players) => {
-      const propertyText = (prop) => {
-        return `${mapPropertyGroupToColor(prop)}${
-          prop.buildings === 5
-            ? ' 🏨'
-            : prop.buildings > 0
-            ? ' ' +
-              Array(prop.buildings)
-                .fill()
-                .map((_) => '🏠')
-                .join('')
-            : ''
-        } ${prop.name} - 💰: $${prop.price}${
-          prop.mortgaged ? ' | ' + c.red('mortgaged') : ''
-        }`;
-      };
+    showPlayerTradeTable: (players) => {
+      let cliTable = new Table();
+      cliTable.push([
+        '',
+        'cash',
+        'assets',
+        'tradeable properties',
+        'n/a properties',
+      ]);
 
+      players.forEach((p) => {
+        // ~ fancy use of tilde operator: https://wsvincent.com/javascript-tilde/ for reference
+        let row = [
+          `${p.name} ${~p.jailed ? '🔒' : ''}${p.bankrupt ? '💀' : ''}`,
+          `${c.green('$' + p.cash)}`,
+          `${c.green('$' + p.assets)}`,
+          `${
+            p.tradeableProps.length !== 0
+              ? p.tradeableProps
+                  .map((p) => propertyText(p))
+                  .reduce((prev, curr) => `${prev}\n${curr}`)
+              : ''
+          }`,
+          `${
+            p.untradeableProps.length !== 0
+              ? p.untradeableProps
+                  .map((p) => propertyText(p, true))
+                  .reduce((prev, curr) => `${prev}\n${curr}`)
+              : ''
+          }`,
+        ];
+        cliTable.push(row);
+      });
+
+      console.log(cliTable.toString());
+    },
+    showPlayerTable: (players) => {
       let cliTable = new Table();
       cliTable.push(['', 'position', 'cash', 'assets', 'properties']);
 
       players.forEach((p) => {
-        // !~ fancy use of tilde operator: https://wsvincent.com/javascript-tilde/ for reference
-        cliTable.push([
+        // ~ fancy use of tilde operator: https://wsvincent.com/javascript-tilde/ for reference
+        let row = [
           `${p.name} ${~p.jailed ? '🔒' : ''}${p.bankrupt ? '💀' : ''}`,
-          `${p.position} (${p.playerBoardSpace.name})`,
+          `${
+            p.playerBoardSpace
+              ? p.position + ' (' + p.playerBoardSpace.name + ')'
+              : ''
+          }`,
           `${c.green('$' + p.cash)}`,
           `${c.green('$' + p.assets)}`,
           `${
             p.properties.length !== 0
               ? p.properties
-                  .map(propertyText)
+                  .map((p) => propertyText(p))
                   .reduce((prev, curr) => `${prev}\n${curr}`)
               : ''
           }`,
-        ]);
+        ];
+        cliTable.push(row);
       });
 
       console.log(cliTable.toString());
     },
+    tradeIntroduction: () =>
+      console.log(
+        `\nWelcome to the trade dialog.\nType 'help' for a list of possible commands.\n`
+      ),
+    tradeInstructions: () =>
+      console.log(`
+    'help': how you found yourself here.
+    'info': show the player details of those involved.
+    'offer': select which assets you want to offer.
+    'request': select which assets you want to receive.
+    'confirm': once all the details are settled, confirm the trade.
+    'cancel': reject a trade or cancel the trade all together.
+    `),
+    displayTradeDetails: (sourcePlayer, targetPlayer, tradeDetails) => {
+      const mapAssets = (p) => {
+        if (p.id) {
+          return `${mapPropertyGroupToColor(p)} ${p.name}`;
+        } else if (p.action) {
+          return `🃏 ${p.type}: ${p.title}`;
+        } else {
+          return `$${p}`;
+        }
+      };
+
+      let cliTable = new Table();
+      if (targetPlayer.id === tradeDetails.tradingPlayerId) {
+        cliTable.push([
+          `${c.bold(sourcePlayer.name)} is trading:`,
+          `${targetPlayer.name} is trading:`,
+        ]);
+      } else {
+        cliTable.push([
+          `${targetPlayer.name} is trading: `,
+          `${c.bold(sourcePlayer.name)} is trading:`,
+        ]);
+      }
+
+      cliTable.push([
+        tradeDetails.askingFor.length !== 0
+          ? tradeDetails.askingFor
+              .map(mapAssets)
+              .reduce((prev, curr) => `${prev}\n${curr}`)
+          : '',
+        tradeDetails.receiving.length !== 0
+          ? tradeDetails.receiving
+              .map(mapAssets)
+              .reduce((prev, curr) => `${prev}\n${curr}`)
+          : '',
+      ]);
+      console.log(cliTable.toString());
+    },
+    tradeError: (errors) => {
+      let errorMsg = `${c.red.bold('ERRORS:\n')}`;
+      errors.forEach((e) => {
+        errorMsg += `\n ${e}`;
+      });
+      console.log(errorMsg);
+    },
+    playerTradeAction: (player) =>
+      console.log(
+        `====================\n\n  ${c.bold(
+          player.name
+        )} is reviewing the trade.`
+      ),
   };
 })(require('readline-sync'));
 

@@ -265,6 +265,46 @@ module.exports = class PropertyManagementService {
     return availableDemoProps;
   }
 
+  static getPlayerProperties(gameState, player = gameState.currentPlayer) {
+    const { properties } = gameState.config.propertyConfig;
+
+    const playerProps = _(properties).filter((p) => p.ownedBy === player.id);
+
+    const tradeableProps = playerProps
+      .groupBy((p) => p.group) // { 'groupName': [properties] }
+      // CHECK: Do not include any monopoly with houses
+      .mapValues((properties) => ({
+        properties,
+        maxBuildingCount: Math.max.apply(
+          Math,
+          properties.map((p) => (p.buildings ? p.buildings : 0))
+        ),
+      })) // { 'groupName': { propertiesInTheGroup: [] } }
+      .filter((pg) => pg.maxBuildingCount === 0)
+      .map((pg) => pg.properties) // [ [ { propertyGroup1 }], [ { propertyGroup2} ] ]
+      .flattenDeep()
+      .value();
+
+    const untradeableProps = playerProps
+      .groupBy((p) => p.group) // { 'groupName': [properties] }
+      .mapValues((properties) => ({
+        properties,
+        maxBuildingCount: Math.max.apply(
+          Math,
+          properties.map((p) => (p.buildings ? p.buildings : 0))
+        ),
+      })) // { 'groupName': { propertiesInTheGroup: [] } }
+      .filter((pg) => pg.maxBuildingCount !== 0)
+      .map((pg) => pg.properties) // [ [ { propertyGroup1 }], [ { propertyGroup2} ] ]
+      .flattenDeep()
+      .value();
+
+    return {
+      untradeableProps,
+      tradeableProps,
+    };
+  }
+
   // always for current player
   static getConstructedHouses(gameState) {
     const {

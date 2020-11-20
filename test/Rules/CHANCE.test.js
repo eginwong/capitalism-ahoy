@@ -4,7 +4,11 @@ const sinon = require('sinon');
 const mockUIFactory = require('../mocks/UI');
 
 const { GameState } = require('../../entities/GameState');
-const { createPlayerFactory, createMonopoly } = require('../testutils');
+const {
+  createPlayerFactory,
+  createMonopoly,
+  getChanceCard,
+} = require('../testutils');
 const config = require('../../config/monopolyConfiguration');
 const Deck = require('../../entities/Components/Deck');
 const PropertyManagementService = require('../../entities/PropertyManagementService');
@@ -104,9 +108,7 @@ describe('Rules -> CHANCE', () => {
       );
     });
     it("should add getoutofjailfree card to the current player's cards and not call discard", () => {
-      const expectedCard = gameState.config.chanceConfig.availableCards.find(
-        (c) => c.action === 'getoutofjailfree'
-      );
+      const expectedCard = getChanceCard(gameState, 'getoutofjailfree');
       sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
 
       eventBus.emit(inputEvent);
@@ -121,9 +123,7 @@ describe('Rules -> CHANCE', () => {
       );
     });
     it('should discard card if not getoutofjailfree', () => {
-      const expectedCard = gameState.config.chanceConfig.availableCards.find(
-        (c) => c.action === 'move'
-      );
+      const expectedCard = getChanceCard(gameState, 'move');
       sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
 
       eventBus.emit(inputEvent);
@@ -289,9 +289,8 @@ describe('Rules -> CHANCE', () => {
     describe('addfunds', () => {
       it(`should add funds by card amount`, () => {
         const startingCash = gameState.currentPlayer.cash;
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'addfunds'
-        );
+        const expectedCard = getChanceCard(gameState, 'addfunds');
+
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
 
         eventBus.emit(inputEvent);
@@ -305,9 +304,7 @@ describe('Rules -> CHANCE', () => {
     describe('removefunds', () => {
       it(`should remove funds by card amount`, () => {
         const startingCash = gameState.currentPlayer.cash;
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'removefunds'
-        );
+        const expectedCard = getChanceCard(gameState, 'removefunds');
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
 
         eventBus.emit(inputEvent);
@@ -318,9 +315,7 @@ describe('Rules -> CHANCE', () => {
         );
       });
       it(`should not decrement property charge if player is bankrupt`, () => {
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'removefunds'
-        );
+        const expectedCard = getChanceCard(gameState, 'removefunds');
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
         gameState.currentPlayer.bankrupt = true;
         const wealthServiceStub = sinon.stub(WealthService, 'decrement');
@@ -333,9 +328,7 @@ describe('Rules -> CHANCE', () => {
         );
       });
       it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'removefunds'
-        );
+        const expectedCard = getChanceCard(gameState, 'removefunds');
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
         gameState.currentPlayer.cash = 0;
 
@@ -354,9 +347,7 @@ describe('Rules -> CHANCE', () => {
         );
       });
       it(`${collectionsEvent} event should be called if current player has no more cash to pay the fine`, () => {
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'removefunds'
-        );
+        const expectedCard = getChanceCard(gameState, 'removefunds');
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
         gameState.currentPlayer.cash = 0;
         eventBus.emit(inputEvent);
@@ -369,9 +360,7 @@ describe('Rules -> CHANCE', () => {
     });
     describe('jail', () => {
       it(`should emit ${jailEvent}`, () => {
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'jail'
-        );
+        const expectedCard = getChanceCard(gameState, 'jail');
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
 
         eventBus.emit(inputEvent);
@@ -385,9 +374,7 @@ describe('Rules -> CHANCE', () => {
     describe('propertyCharges', () => {
       it(`should remove funds by amount of houses and hotels`, () => {
         const startingCash = gameState.currentPlayer.cash;
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'propertycharges'
-        );
+        const expectedCard = getChanceCard(gameState, 'propertycharges');
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
         const testProperties = gameState.config.propertyConfig.properties.filter(
           (p) => p.group === 'Yellow'
@@ -415,9 +402,7 @@ describe('Rules -> CHANCE', () => {
         );
       });
       it(`should not decrement property charge if player is bankrupt`, () => {
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'propertycharges'
-        );
+        const expectedCard = getChanceCard(gameState, 'propertycharges');
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
         const testProperties = gameState.config.propertyConfig.properties.filter(
           (p) => p.group === 'Purple'
@@ -439,9 +424,7 @@ describe('Rules -> CHANCE', () => {
         );
       });
       it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'propertycharges'
-        );
+        const expectedCard = getChanceCard(gameState, 'propertycharges');
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
         const testProperties = gameState.config.propertyConfig.properties.filter(
           (p) => p.group === 'Purple'
@@ -473,9 +456,7 @@ describe('Rules -> CHANCE', () => {
         );
       });
       it(`${collectionsEvent} event should be called if current player has no more cash to pay the fine`, () => {
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'propertycharges'
-        );
+        const expectedCard = getChanceCard(gameState, 'propertycharges');
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
         const testProperties = gameState.config.propertyConfig.properties.filter(
           (p) => p.group === 'Purple'
@@ -499,9 +480,7 @@ describe('Rules -> CHANCE', () => {
       it(`should remove funds by amount and pay all other players`, () => {
         const startingCash = gameState.currentPlayer.cash;
         const startingCashOfOtherPlayers = gameState.players[1].cash;
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'removefundstoplayers'
-        );
+        const expectedCard = getChanceCard(gameState, 'removefundstoplayers');
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
         const otherPlayersCount = gameState.players.length - 1;
 
@@ -523,9 +502,7 @@ describe('Rules -> CHANCE', () => {
       it(`should remove funds by amount and pay all other players that are not bankrupt`, () => {
         const startingCash = gameState.currentPlayer.cash;
         const startingCashOfOtherPlayers = gameState.players[1].cash;
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'removefundstoplayers'
-        );
+        const expectedCard = getChanceCard(gameState, 'removefundstoplayers');
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
         const otherPlayersCount = gameState.players.length - 2; // excluding bankrupt player
         gameState.players[2].bankrupt = true;
@@ -553,9 +530,7 @@ describe('Rules -> CHANCE', () => {
         gameState.currentPlayer.cash = startingCash;
         gameState.currentPlayer.bankrupt = true;
         const startingCashOfOtherPlayers = gameState.players[1].cash;
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'removefundstoplayers'
-        );
+        const expectedCard = getChanceCard(gameState, 'removefundstoplayers');
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
 
         eventBus.emit(inputEvent);
@@ -574,9 +549,7 @@ describe('Rules -> CHANCE', () => {
         );
       });
       it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'removefundstoplayers'
-        );
+        const expectedCard = getChanceCard(gameState, 'removefundstoplayers');
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
         gameState.currentPlayer.cash = 0;
 
@@ -597,9 +570,7 @@ describe('Rules -> CHANCE', () => {
         );
       });
       it(`${collectionsEvent} event should be called if current player has no more cash to pay the fine`, () => {
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'removefundstoplayers'
-        );
+        const expectedCard = getChanceCard(gameState, 'removefundstoplayers');
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
         gameState.currentPlayer.cash = 0;
         eventBus.emit(inputEvent);

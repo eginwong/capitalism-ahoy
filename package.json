@@ -46,7 +46,8 @@
       ".gitignore",
       "*.json",
       "*.lock",
-      "*.md"
+      "*.md",
+      "*.png"
     ],
     "parser": "babel-eslint",
     "parserOptions": {
