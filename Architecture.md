@@ -2,9 +2,9 @@
 
 ## High Level
 
-| Inputs                | Entry Point | Game Loop | Outputs        |
-|-----------------------|-------------|-----------|--------------: |
-| void \| saveFile.json | main.js     | game.js   | saveFile.json  |
+| Inputs                | Entry Point | Game Loop |       Outputs |
+| --------------------- | ----------- | --------- | ------------: |
+| void \| saveFile.json | main.js     | game.js   | saveFile.json |
 
 ### `main.js`
 
@@ -61,16 +61,18 @@ The game loop runs on the assumption that named `Events` have a one-to-one assoc
 
 ```javascript
 const Rules = {
-    /* ... */
-    "MOVE_PLAYER": [
-        function promptCurrentPlayerToRollDice (_, gameState) { /* ... */ },
-        function movePlayerTokenSpacesEqualToDiceROll ({ UI, notify }, gameState) {
-            /* ... */
-            notify("PLAYER_MOVED");
-        }
-    ],
-    /* ... */
-}
+  /* ... */
+  MOVE_PLAYER: [
+    function promptCurrentPlayerToRollDice(_, gameState) {
+      /* ... */
+    },
+    function movePlayerTokenSpacesEqualToDiceROll({ UI, notify }, gameState) {
+      /* ... */
+      notify('PLAYER_MOVED');
+    },
+  ],
+  /* ... */
+};
 ```
 
 Note that calls to `notify` typically happen at the _end_ of a `Rule` (i.e., the last executed line of the last `Action` in the `Rule`'s array of `Action`s) and that the `eventBus` must be synchronous, as mentioned earlier.
@@ -96,6 +98,24 @@ Services encapsulate behaviours of a component for use in other components. For 
 Other services:
 
 - `WealthService` - interfaces all the money-related operations of a game
+
+## Trade Finite State Machine Diagram
+
+![Trade FSM](./images/trade-fsm.png)
+
+```puml
+'http://www.plantuml.com/plantuml/uml/SyfFKj2rKt3CoKnELR1Io4ZDoSa70000
+
+@startuml
+[*] --> New
+New --> Offer : A makes offer
+New --> Cancel : A cancels trade
+Offer --> New : B rejects offer
+Offer --> Accept : (A/B) accepts offer
+Offer --> Offer : (A/B) counter offers
+Accept --> [*]
+@enduml
+```
 
 ## Misc
 

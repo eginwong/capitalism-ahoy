@@ -4,7 +4,12 @@ const sinon = require('sinon');
 const mockUIFactory = require('../mocks/UI');
 
 const { GameState } = require('../../entities/GameState');
-const { createPlayerFactory, createMonopoly } = require('../testutils');
+const {
+  createPlayerFactory,
+  createMonopoly,
+  getChanceCard,
+  getCommunityChestCard,
+} = require('../testutils');
 const PlayerActions = require('../../entities/PlayerActions');
 const PropertyManagementService = require('../../entities/PropertyManagementService');
 const config = require('../../config/monopolyConfiguration');
@@ -72,12 +77,12 @@ describe('Rules -> BANKRUPTCY', () => {
       );
     });
     it(`should discard all cards remaining on the current player`, () => {
-      const chanceCard = gameState.config.chanceConfig.availableCards.find(
-        (c) => c.action === 'getoutofjailfree'
+      const chanceCard = getChanceCard(gameState, 'getoutofjailfree');
+      const communityChestCard = getCommunityChestCard(
+        gameState,
+        'getoutofjailfree'
       );
-      const communityChestCard = gameState.config.communityChestConfig.availableCards.find(
-        (c) => c.action === 'getoutofjailfree'
-      );
+
       gameState.currentPlayer.cards = [chanceCard, communityChestCard];
 
       eventBus.emit(inputEvent);

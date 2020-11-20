@@ -7,6 +7,7 @@ module.exports = function mockUIFactory() {
     promptConfirm: () => true,
     promptNumber: () => true,
     promptSelect: () => true,
+    promptCLLoop: () => true,
     endTurn: () => true,
     rollingDice: () => true,
     rollDiceDisplay: () => true,
@@ -41,5 +42,11 @@ module.exports = function mockUIFactory() {
     playerLost: () => true,
     mapPropertyShortDisplay: () => true,
     showPlayerTable: () => true,
+    showPlayerTradeTable: () => true,
+    tradeInstructions: () => true,
+    displayTradeDetails: () => true,
+    tradeIntroduction: () => true,
+    tradeError: () => true,
+    playerTradeAction: () => true,
   };
 };

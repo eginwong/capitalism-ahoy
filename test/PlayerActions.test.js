@@ -3,9 +3,10 @@ const sinon = require('sinon');
 const mockUIFactory = require('./mocks/UI');
 
 const { GameState } = require('../entities/GameState');
-const { createPlayerFactory } = require('./testutils');
+const { createPlayerFactory, getChanceCard } = require('./testutils');
 const PlayerActions = require('../entities/PlayerActions');
 const AuctionService = require('../entities/AuctionService');
+const TradeService = require('../entities/TradeService');
 const config = require('../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
 const { calculateLiquidity } = require('../entities/WealthService');
@@ -93,9 +94,7 @@ describe('PlayerActions', () => {
       it('returns if player is in jail and has a card with action getoutofjailfree', () => {
         gameState.currentPlayer.jailed = 0;
         gameState.currentPlayer.cards = [
-          gameState.config.chanceConfig.availableCards.find(
-            (c) => c.action === 'getoutofjailfree'
-          ),
+          getChanceCard(gameState, 'getoutofjailfree'),
         ];
         expect(PlayerActions.refresh(gameState)).to.contain(
           'USE_GET_OUT_OF_JAIL_FREE_CARD',
@@ -159,6 +158,14 @@ describe('PlayerActions', () => {
         expect(PlayerActions.refresh(gameState)).to.contain(
           'PLAYER_INFO',
           'PLAYER_INFO action is not available'
+        );
+      });
+    });
+    describe('TRADE', () => {
+      it('always returns', () => {
+        expect(PlayerActions.refresh(gameState)).to.contain(
+          'TRADE',
+          'TRADE action is not available'
         );
       });
     });
@@ -412,6 +419,19 @@ describe('PlayerActions', () => {
           testBaseCost
         )
       ).to.equal(true, `Game did not call the AuctionService`);
+    });
+  });
+
+  describe('trade', () => {
+    it('calls the TradeService', () => {
+      const UI = mockUIFactory();
+      const tradeServiceStub = sinon.stub(TradeService, 'trade');
+
+      PlayerActions.trade(UI, gameState);
+      expect(tradeServiceStub.calledOnceWithExactly(UI, gameState)).to.equal(
+        true,
+        `Game did not call the TradeService`
+      );
     });
   });
 });

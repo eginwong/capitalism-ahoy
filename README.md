@@ -22,6 +22,12 @@
 
 - TODO
 
+### LIMITATIONS
+
+- `Trade` can only allow up to a maximum of 35 options. Anything above 35 will cause the game to throw an exception.
+  - mitigation: the maximum number of available assets for trade in a regular game is 32 (29 for properties, 1 for cash, 2 for cards).
+  - cause: due to underlying limitation of `readline-sync` library
+
 ### ARCHITECTURE
 
 [Architecture Documentation](./Architecture.md)

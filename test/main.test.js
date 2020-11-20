@@ -7,6 +7,8 @@ const {
   createPlayerFactory,
   fillStub,
   createMonopoly,
+  getCommunityChestCard,
+  getChanceCard,
 } = require('./testutils');
 const mockUIFactory = require('./mocks/UI');
 const Dice = require('../entities/Components/Dice');
@@ -280,9 +282,7 @@ describe('main', () => {
         ];
         fillStub(diceStub, diceStubValues);
 
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'getoutofjailfree'
-        );
+        const expectedCard = getChanceCard(gameState, 'getoutofjailfree');
         const deckDrawStub = sinon.stub(Deck, 'draw');
         deckDrawStub.returns({ card: expectedCard, deck: [] });
 
@@ -357,12 +357,12 @@ describe('main', () => {
         ];
         fillStub(diceStub, diceStubValues);
 
-        const expectedCommunityChestCard = gameState.config.communityChestConfig.availableCards.find(
-          (c) => c.action === 'getoutofjailfree'
+        const expectedCommunityChestCard = getCommunityChestCard(
+          gameState,
+          'getoutofjailfree'
         );
-        const expectedChanceCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'getoutofjailfree'
-        );
+        const expectedChanceCard = getChanceCard(gameState, 'getoutofjailfree');
+
         const deckDrawStub = sinon.stub(Deck, 'draw');
         deckDrawStub
           .onCall(0)
@@ -537,9 +537,7 @@ describe('main', () => {
         ];
         fillStub(diceStub, diceStubValues);
 
-        const expectedCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'getoutofjailfree'
-        );
+        const expectedCard = getChanceCard(gameState, 'getoutofjailfree');
         const deckDrawStub = sinon.stub(Deck, 'draw');
         deckDrawStub.returns({ card: expectedCard, deck: [] });
 
@@ -1167,8 +1165,9 @@ describe('main', () => {
         const diceStub = sinon.stub(Dice, 'roll');
         const diceStubValues = [[6], [1], [2, 2], [1, 1], [2, 3]];
         fillStub(diceStub, diceStubValues);
-        const communityChestCard = gameState.config.communityChestConfig.availableCards.find(
-          (c) => c.action === 'getoutofjailfree'
+        const communityChestCard = getCommunityChestCard(
+          gameState,
+          'getoutofjailfree'
         );
 
         userInterface.prompt = promptStub;

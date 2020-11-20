@@ -265,7 +265,9 @@ module.exports = {
       const boardProperty = gameState.currentBoardProperty;
       const playerBuyingPower = require('../WealthService').calculateLiquidity(
         gameState,
-        require('../PropertyManagementService').getProperties(gameState)
+        require('../PropertyManagementService')
+          .getProperties(gameState)
+          .filter((p) => p.ownedBy === gameState.currentPlayer.id)
       );
 
       if (playerBuyingPower < boardProperty.price) {
@@ -868,13 +870,17 @@ module.exports = {
         gameState.config.propertyConfig.minimumPropertyPrice
       );
 
+      const properties = require('../PropertyManagementService').getProperties(
+        gameState
+      );
+
       const availablePlayers = gameState.players
         .filter((p) => !p.bankrupt)
         .map((player) => ({
           ...player,
           liquidity: calculateLiquidity(
             gameState,
-            gameState.config.propertyConfig.properties,
+            properties.filter((p) => p.ownedBy === player.id),
             player
           ),
         }))
@@ -966,8 +972,9 @@ module.exports = {
       ) {
         liquidity = calculateLiquidity(
           gameState,
-          gameState.config.propertyConfig.properties,
-          gameState.currentPlayer
+          require('../PropertyManagementService')
+            .getProperties(gameState)
+            .filter((p) => p.ownedBy === gameState.currentPlayer.id)
         );
 
         if (liquidity < subTurn.charge) {

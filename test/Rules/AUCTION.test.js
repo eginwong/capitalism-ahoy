@@ -40,6 +40,7 @@ describe('Rules -> AUCTION', () => {
 
     let turnValuesUpdatedSpy;
     let collectionsSpy;
+    let properties;
 
     beforeEach(() => {
       let { emit: notify } = eventBus;
@@ -56,6 +57,8 @@ describe('Rules -> AUCTION', () => {
 
       eventBus.on(turnValuesUpdatedEvent, turnValuesUpdatedSpy);
       eventBus.on(collectionsEvent, collectionsSpy);
+
+      properties = gameState.config.propertyConfig.properties;
     });
 
     it('should make a call to the UI#auctionInstructions and UI#wonAuction', () => {
@@ -68,7 +71,7 @@ describe('Rules -> AUCTION', () => {
         ...player,
         liquidity: require('../../entities/WealthService').calculateLiquidity(
           gameState,
-          gameState.config.propertyConfig.properties,
+          properties.filter((p) => p.ownedBy === player.id),
           player
         ),
       }));
@@ -94,7 +97,7 @@ describe('Rules -> AUCTION', () => {
         ...player,
         liquidity: require('../../entities/WealthService').calculateLiquidity(
           gameState,
-          gameState.config.propertyConfig.properties,
+          properties.filter((p) => p.ownedBy === player.id),
           player
         ),
       }));
@@ -117,7 +120,7 @@ describe('Rules -> AUCTION', () => {
         ...player,
         liquidity: require('../../entities/WealthService').calculateLiquidity(
           gameState,
-          gameState.config.propertyConfig.properties,
+          properties.filter((p) => p.ownedBy === player.id),
           player
         ),
       }));
@@ -139,7 +142,7 @@ describe('Rules -> AUCTION', () => {
         ...player,
         liquidity: require('../../entities/WealthService').calculateLiquidity(
           gameState,
-          gameState.config.propertyConfig.properties,
+          properties.filter((p) => p.ownedBy === player.id),
           player
         ),
       }));
@@ -177,7 +180,7 @@ describe('Rules -> AUCTION', () => {
         ...player,
         liquidity: require('../../entities/WealthService').calculateLiquidity(
           gameState,
-          gameState.config.propertyConfig.properties,
+          properties.filter((p) => p.ownedBy === player.id),
           player
         ),
       }));
@@ -206,7 +209,7 @@ describe('Rules -> AUCTION', () => {
         ...player,
         liquidity: require('../../entities/WealthService').calculateLiquidity(
           gameState,
-          gameState.config.propertyConfig.properties,
+          properties.filter((p) => p.ownedBy === player.id),
           player
         ),
       }));
@@ -228,7 +231,7 @@ describe('Rules -> AUCTION', () => {
         ...player,
         liquidity: require('../../entities/WealthService').calculateLiquidity(
           gameState,
-          gameState.config.propertyConfig.properties,
+          properties.filter((p) => p.ownedBy === player.id),
           player
         ),
       }));
@@ -237,9 +240,7 @@ describe('Rules -> AUCTION', () => {
         buyer: expectedBuyer,
         price: expectedBuyer.cash,
       });
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'mediterraneanave'
-      );
+      const testProperty = properties.find((p) => p.id === 'mediterraneanave');
       gameState.currentBoardProperty = testProperty;
 
       eventBus.emit(inputEvent);
@@ -258,7 +259,7 @@ describe('Rules -> AUCTION', () => {
         ...player,
         liquidity: require('../../entities/WealthService').calculateLiquidity(
           gameState,
-          gameState.config.propertyConfig.properties,
+          properties.filter((p) => p.ownedBy === player.id),
           player
         ),
       }));
@@ -267,9 +268,7 @@ describe('Rules -> AUCTION', () => {
         buyer: expectedBuyer,
         price: expectedBuyer.cash,
       });
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'mediterraneanave'
-      );
+      const testProperty = properties.find((p) => p.id === 'mediterraneanave');
       gameState.currentBoardProperty = testProperty;
 
       eventBus.emit(inputEvent);
@@ -287,14 +286,12 @@ describe('Rules -> AUCTION', () => {
         ...player,
         liquidity: require('../../entities/WealthService').calculateLiquidity(
           gameState,
-          gameState.config.propertyConfig.properties,
+          properties.filter((p) => p.ownedBy === player.id),
           player
         ),
       }));
       const expectedBuyer = bidders[0];
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'mediterraneanave'
-      );
+      const testProperty = properties.find((p) => p.id === 'mediterraneanave');
       gameState.currentBoardProperty = testProperty;
 
       eventBus.emit(inputEvent);
@@ -315,7 +312,7 @@ describe('Rules -> AUCTION', () => {
           ...player,
           liquidity: require('../../entities/WealthService').calculateLiquidity(
             gameState,
-            gameState.config.propertyConfig.properties,
+            properties.filter((p) => p.ownedBy === player.id),
             player
           ),
         }));
@@ -324,7 +321,7 @@ describe('Rules -> AUCTION', () => {
           buyer: expectedBuyer,
           price: expectedBuyer.cash,
         });
-        const testProperty = gameState.config.propertyConfig.properties.find(
+        const testProperty = properties.find(
           (p) => p.id === 'mediterraneanave'
         );
         testProperty.mortgaged = true;
@@ -348,7 +345,7 @@ describe('Rules -> AUCTION', () => {
           ...player,
           liquidity: require('../../entities/WealthService').calculateLiquidity(
             gameState,
-            gameState.config.propertyConfig.properties,
+            properties.filter((p) => p.ownedBy === player.id),
             player
           ),
         }));
@@ -357,9 +354,7 @@ describe('Rules -> AUCTION', () => {
           buyer: expectedBuyer,
           price: expectedBuyer.cash,
         });
-        const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.id === 'pennsylvaniaave'
-        );
+        const testProperty = properties.find((p) => p.id === 'pennsylvaniaave');
         testProperty.mortgaged = true;
         gameState.currentBoardProperty = testProperty;
         const {
@@ -381,7 +376,7 @@ describe('Rules -> AUCTION', () => {
           ...player,
           liquidity: require('../../entities/WealthService').calculateLiquidity(
             gameState,
-            gameState.config.propertyConfig.properties,
+            properties.filter((p) => p.ownedBy === player.id),
             player
           ),
         }));
@@ -390,7 +385,7 @@ describe('Rules -> AUCTION', () => {
           buyer: expectedBuyer,
           price: expectedBuyer.cash,
         });
-        const testProperty = gameState.config.propertyConfig.properties.find(
+        const testProperty = properties.find(
           (p) => p.id === 'mediterraneanave'
         );
         testProperty.mortgaged = true;
@@ -416,11 +411,11 @@ describe('Rules -> AUCTION', () => {
           ...player,
           liquidity: require('../../entities/WealthService').calculateLiquidity(
             gameState,
-            gameState.config.propertyConfig.properties,
+            properties.filter((p) => p.ownedBy === player.id),
             player
           ),
         }));
-        const testProperty = gameState.config.propertyConfig.properties.find(
+        const testProperty = properties.find(
           (p) => p.id === 'mediterraneanave'
         );
         const expectedBuyer = bidders[0];
@@ -457,11 +452,11 @@ describe('Rules -> AUCTION', () => {
           ...player,
           liquidity: require('../../entities/WealthService').calculateLiquidity(
             gameState,
-            gameState.config.propertyConfig.properties,
+            properties.filter((p) => p.ownedBy === player.id),
             player
           ),
         }));
-        const testProperty = gameState.config.propertyConfig.properties.find(
+        const testProperty = properties.find(
           (p) => p.id === 'mediterraneanave'
         );
         const expectedBuyer = bidders[0];
@@ -487,7 +482,7 @@ describe('Rules -> AUCTION', () => {
       });
       it('does not prompt the winning player to unmortgage the property if liquidity does not allow', () => {
         const auctionPromptStub = sinon.stub(PlayerActions, 'auction');
-        const testProperty = gameState.config.propertyConfig.properties.find(
+        const testProperty = properties.find(
           (p) => p.id === 'mediterraneanave'
         );
         testProperty.mortgaged = true;
@@ -496,7 +491,7 @@ describe('Rules -> AUCTION', () => {
           ...player,
           liquidity: require('../../entities/WealthService').calculateLiquidity(
             gameState,
-            gameState.config.propertyConfig.properties,
+            properties.filter((p) => p.ownedBy === player.id),
             player
           ),
         }));
@@ -520,11 +515,11 @@ describe('Rules -> AUCTION', () => {
           ...player,
           liquidity: require('../../entities/WealthService').calculateLiquidity(
             gameState,
-            gameState.config.propertyConfig.properties,
+            properties.filter((p) => p.ownedBy === player.id),
             player
           ),
         }));
-        const testProperty = gameState.config.propertyConfig.properties.find(
+        const testProperty = properties.find(
           (p) => p.id === 'mediterraneanave'
         );
         testProperty.mortgaged = true;
@@ -553,11 +548,11 @@ describe('Rules -> AUCTION', () => {
           ...player,
           liquidity: require('../../entities/WealthService').calculateLiquidity(
             gameState,
-            gameState.config.propertyConfig.properties,
+            properties.filter((p) => p.ownedBy === player.id),
             player
           ),
         }));
-        const testProperty = gameState.config.propertyConfig.properties.find(
+        const testProperty = properties.find(
           (p) => p.id === 'mediterraneanave'
         );
         testProperty.mortgaged = true;

@@ -35,4 +35,16 @@ module.exports = {
         p.ownedBy = playerId;
       });
   },
+
+  getCommunityChestCard: (gameState, action) => {
+    return gameState.config.communityChestConfig.availableCards.find(
+      (c) => c.action === action
+    );
+  },
+
+  getChanceCard: (gameState, action) => {
+    return gameState.config.chanceConfig.availableCards.find(
+      (c) => c.action === action
+    );
+  },
 };
