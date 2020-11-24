@@ -1028,8 +1028,9 @@ describe('main', () => {
         const diceStub = sinon.stub(Dice, 'roll');
         const diceStubValues = [[6], [1], [1, 1]];
         fillStub(diceStub, diceStubValues);
-        const expectedCommunityChestCard = gameState.config.communityChestConfig.availableCards.find(
-          (c) => c.action === 'addfundsfromplayers'
+        const expectedCommunityChestCard = getCommunityChestCard(
+          gameState,
+          'addfundsfromplayers'
         );
         const deckDrawStub = sinon.stub(Deck, 'draw');
         deckDrawStub
@@ -1086,8 +1087,9 @@ describe('main', () => {
         const diceStub = sinon.stub(Dice, 'roll');
         const diceStubValues = [[6], [1], [3, 4]];
         fillStub(diceStub, diceStubValues);
-        const expectedChanceCard = gameState.config.chanceConfig.availableCards.find(
-          (c) => c.action === 'removefundstoplayers'
+        const expectedChanceCard = getChanceCard(
+          gameState,
+          'removefundstoplayers'
         );
         const deckDrawStub = sinon.stub(Deck, 'draw');
         deckDrawStub.onCall(0).returns({ card: expectedChanceCard, deck: [] });
@@ -1221,6 +1223,108 @@ describe('main', () => {
         expect(gameState.players[1].cards).to.deep.equal(
           [],
           'Player #2 has remaining cards after bankruptcy'
+        );
+      }
+    );
+
+    // TODO: hot start
+    it(
+      gwt`cold start | game is loaded | player trades properties with cards and cash, interest calculated correctly`,
+      () => {
+        // arrange
+        const promptStub = sinon.stub(PlayerActions, 'prompt');
+        const promptSelectStub = sinon.stub(PlayerActions, 'select');
+        const tradeStub = sinon.stub(PlayerActions, 'trade');
+        const {
+          properties,
+          mortgageValueMultiplier,
+          interestRate,
+        } = gameState.config.propertyConfig;
+
+        const promptStubValues = [
+          '', // highest rolling player
+          '',
+        ];
+
+        const orientalAveProp = properties.find((p) => p.id === 'orientalave');
+        const balticAveProp = properties.find((p) => p.id === 'balticave');
+
+        const promptSelectStubValues = [
+          'ROLL_DICE', // community chest
+          'ROLL_DICE',
+          'BUY_PROPERTY', // oriental ave
+          'MANAGE_PROPERTIES',
+          'MORTGAGE',
+          orientalAveProp,
+          'CANCEL',
+          'CANCEL',
+          'CANCEL',
+          'END_TURN',
+          'ROLL_DICE', // p2
+          'BUY_PROPERTY', // baltic ave
+          'TRADE',
+          'END_GAME',
+        ];
+        userInterface.prompt = fillStub(promptStub, promptStubValues);
+        userInterface.promptSelect = fillStub(
+          promptSelectStub,
+          promptSelectStubValues
+        );
+        const diceStub = sinon.stub(Dice, 'roll');
+        const diceStubValues = [[6], [1], [1, 1], [1, 3], [1, 2]];
+        fillStub(diceStub, diceStubValues);
+        const communityChestCard = getCommunityChestCard(
+          gameState,
+          'getoutofjailfree'
+        );
+        const deckDrawStub = sinon.stub(Deck, 'draw');
+        deckDrawStub.returns({ card: communityChestCard, deck: [] });
+        const cashDeal = 300;
+        tradeStub.returns({
+          0: [balticAveProp, cashDeal],
+          1: [communityChestCard, orientalAveProp],
+          status: require('../entities/TradeService').TradeStatus.ACCEPT,
+        });
+
+        require('../entities/Game')({
+          eventBus,
+          userInterface,
+          gameState,
+        });
+
+        // player 2 gets card + property + mortgage, and unmortgages on receive
+        // player 1 gets property,
+        // player 2 starts trade
+        // ensure interest and properties are correctly swapped
+
+        expect(gameState.players[0].cards).to.deep.equal(
+          [],
+          `Player #1's cards were not traded as expected`
+        );
+        expect(gameState.players[0].cash).to.equal(
+          startingCash -
+            orientalAveProp.price / mortgageValueMultiplier +
+            cashDeal
+        );
+        expect(gameState.players[0].assets).to.equal(
+          balticAveProp.price,
+          "Player #1's assets were not correctly added after trade"
+        );
+        expect(gameState.players[1].cards).to.deep.equal(
+          [communityChestCard],
+          `Player #2's cards were not traded as expected`
+        );
+        expect(gameState.players[1].cash).to.equal(
+          startingCash -
+            balticAveProp.price -
+            (orientalAveProp.price / mortgageValueMultiplier) * interestRate -
+            cashDeal -
+            orientalAveProp.price / mortgageValueMultiplier,
+          "Player #2's cash was not correctly deducted after purchase, trade with interest, and then unmortgaging property"
+        );
+        expect(gameState.players[1].assets).to.equal(
+          orientalAveProp.price,
+          "Player #2's assets were not correctly added after trade"
         );
       }
     );

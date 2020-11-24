@@ -13,7 +13,7 @@ module.exports = class WealthService {
    * @param {*} assetPrice
    */
   static buyAsset(player, assetPrice, assetValue = assetPrice) {
-    this.decrement(player, assetPrice);
+    WealthService.decrement(player, assetPrice);
     player.assets += assetValue;
   }
 
@@ -23,7 +23,7 @@ module.exports = class WealthService {
    * @param {*} buildingPrice, either house or hotel but same buildingCost
    */
   static sellAsset(player, buildingPrice) {
-    this.increment(player, buildingPrice);
+    WealthService.increment(player, buildingPrice);
     player.assets -= buildingPrice;
   }
 
@@ -34,8 +34,19 @@ module.exports = class WealthService {
    * @param {*} amount
    */
   static exchange(sourcePlayer, targetPlayer, amount) {
-    this.decrement(sourcePlayer, amount);
-    this.increment(targetPlayer, amount);
+    WealthService.decrement(sourcePlayer, amount);
+    WealthService.increment(targetPlayer, amount);
+  }
+
+  /**
+   * Exchange of assets between two players (i.e., property on trade)
+   * @param {*} sourcePlayer player who is giving away the asset
+   * @param {*} targetPlayer player who is receiving the asset
+   * @param {*} assetPrice
+   */
+  static exchangeAsset(sourcePlayer, targetPlayer, assetPrice) {
+    sourcePlayer.assets -= assetPrice;
+    targetPlayer.assets += assetPrice;
   }
 
   static calculateNetWorth(player) {
