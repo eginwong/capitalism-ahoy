@@ -12,7 +12,7 @@ const consoleUI = (function (readline) {
     'Light Green': c.bgGreenBright('Light Green'),
     Railroad: c.bgBlack.white('Railroad'),
     Utilities: c.bgCyan('Utilities'),
-    Yellow: c.bgYellow('Yellow'),
+    Yellow: c.bgYellowBright('Yellow'),
   };
 
   function mapPropertyGroupToColor(prop) {
@@ -263,7 +263,12 @@ const consoleUI = (function (readline) {
     'confirm': once all the details are settled, confirm the trade.
     'cancel': reject a trade or cancel the trade all together.
     `),
-    displayTradeDetails: (sourcePlayer, targetPlayer, tradeDetails) => {
+    displayTradeDetails: (
+      currentPlayerId,
+      sourcePlayer,
+      targetPlayer,
+      tradeDetails
+    ) => {
       const mapAssets = (p) => {
         if (p.id) {
           return `${mapPropertyGroupToColor(p)} ${p.name}`;
@@ -275,30 +280,42 @@ const consoleUI = (function (readline) {
       };
 
       let cliTable = new Table();
-      if (targetPlayer.id === tradeDetails.tradingPlayerId) {
+      if (targetPlayer.id === currentPlayerId) {
         cliTable.push([
-          `${c.bold(sourcePlayer.name)} is trading:`,
-          `${targetPlayer.name} is trading:`,
+          `${c.bold(sourcePlayer.name)} is receiving:`,
+          `${targetPlayer.name} is receiving:`,
+        ]);
+        cliTable.push([
+          tradeDetails[sourcePlayer.id].length !== 0
+            ? tradeDetails[sourcePlayer.id]
+                .map(mapAssets)
+                .reduce((prev, curr) => `${prev}\n${curr}`)
+            : '',
+          tradeDetails[targetPlayer.id].length !== 0
+            ? tradeDetails[targetPlayer.id]
+                .map(mapAssets)
+                .reduce((prev, curr) => `${prev}\n${curr}`)
+            : '',
         ]);
       } else {
         cliTable.push([
-          `${targetPlayer.name} is trading: `,
-          `${c.bold(sourcePlayer.name)} is trading:`,
+          `${targetPlayer.name} is receiving: `,
+          `${c.bold(sourcePlayer.name)} is receiving:`,
+        ]);
+        cliTable.push([
+          tradeDetails[targetPlayer.id].length !== 0
+            ? tradeDetails[targetPlayer.id]
+                .map(mapAssets)
+                .reduce((prev, curr) => `${prev}\n${curr}`)
+            : '',
+          tradeDetails[sourcePlayer.id].length !== 0
+            ? tradeDetails[sourcePlayer.id]
+                .map(mapAssets)
+                .reduce((prev, curr) => `${prev}\n${curr}`)
+            : '',
         ]);
       }
 
-      cliTable.push([
-        tradeDetails.askingFor.length !== 0
-          ? tradeDetails.askingFor
-              .map(mapAssets)
-              .reduce((prev, curr) => `${prev}\n${curr}`)
-          : '',
-        tradeDetails.receiving.length !== 0
-          ? tradeDetails.receiving
-              .map(mapAssets)
-              .reduce((prev, curr) => `${prev}\n${curr}`)
-          : '',
-      ]);
       console.log(cliTable.toString());
     },
     tradeError: (errors) => {
@@ -314,6 +331,14 @@ const consoleUI = (function (readline) {
           player.name
         )} is reviewing the trade.`
       ),
+    unmortgageOptionPrompt: (prop, interestFee, unmortgageFee) =>
+      console.log(`Would you like to unmortgage this property (${mapPropertyGroupToColor(
+        prop
+      )} ${prop.name}}) right now? You've already paid the interest rate! 
+    Cost: 
+      interest fee: $${interestFee} (already paid)
+      unmortgage fee: $${unmortgageFee}
+    If yes, total cost: $${unmortgageFee}\n`),
   };
 })(require('readline-sync'));
 

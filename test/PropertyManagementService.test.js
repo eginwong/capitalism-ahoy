@@ -925,7 +925,7 @@ describe('PropertyManagementService', () => {
       ).to.deep.equal([], 'Properties returned that have 0 buildings');
     });
   });
-  describe('getPlayerProperties', () => {
+  describe('getPlayerPropertiesForTrade', () => {
     it('should return the properties of the current player if optional player param is not passed', () => {
       const propertyGroup = 'Purple';
       createMonopoly(gameState, propertyGroup);
@@ -940,7 +940,7 @@ describe('PropertyManagementService', () => {
       expectedUntradeablePropertiesOfGroup[0].buildings = 1;
 
       expect(
-        PropertyManagementService.getPlayerProperties(gameState)
+        PropertyManagementService.getPlayerPropertiesForTrade(gameState)
       ).to.deep.equal(
         {
           untradeableProps: expectedUntradeablePropertiesOfGroup,
@@ -959,7 +959,7 @@ describe('PropertyManagementService', () => {
       );
 
       expect(
-        PropertyManagementService.getPlayerProperties(gameState)
+        PropertyManagementService.getPlayerPropertiesForTrade(gameState)
       ).to.deep.equal(
         {
           untradeableProps: [],
@@ -982,8 +982,10 @@ describe('PropertyManagementService', () => {
       );
 
       expect(
-        PropertyManagementService.getPlayerProperties(gameState, targetPlayer)
-          .tradeableProps
+        PropertyManagementService.getPlayerPropertiesForTrade(
+          gameState,
+          targetPlayer
+        ).tradeableProps
       ).to.deep.equal(
         [...expectedPropertiesOfGroup1, ...expectedPropertiesOfGroup2],
         'Properties that are not tradeable are returned for input player'
@@ -1004,7 +1006,10 @@ describe('PropertyManagementService', () => {
       expectedPropertiesOfGroup2[0].buildings = 1;
 
       expect(
-        PropertyManagementService.getPlayerProperties(gameState, targetPlayer)
+        PropertyManagementService.getPlayerPropertiesForTrade(
+          gameState,
+          targetPlayer
+        )
       ).to.deep.equal(
         {
           tradeableProps: expectedPropertiesOfGroup1,
@@ -1014,7 +1019,7 @@ describe('PropertyManagementService', () => {
       );
     });
     it('should not return properties if none are owned', () => {
-      const playerProps = PropertyManagementService.getPlayerProperties(
+      const playerProps = PropertyManagementService.getPlayerPropertiesForTrade(
         gameState
       );
       expect(playerProps.tradeableProps).to.deep.equal(

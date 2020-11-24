@@ -850,7 +850,6 @@ module.exports = {
       }
     },
   ],
-  //   TRADE,
   AUCTION: [
     ({ UI }) => UI.auctionInstructions(),
     ({ UI, notify }, gameState) => {
@@ -939,7 +938,6 @@ module.exports = {
               },
             })(gameState);
             notify('TURN_VALUES_UPDATED');
-
             notify('COLLECTIONS');
           }
 
@@ -1085,6 +1083,140 @@ module.exports = {
         gameState.currentBoardProperty = prop;
         notify('AUCTION');
       }
+    },
+  ],
+  TRADE: [
+    ({ UI, notify }, gameState) => {
+      const {
+        exchange,
+        exchangeAsset,
+        decrement,
+        calculateLiquidity,
+      } = require('../WealthService');
+      const {
+        changeOwner,
+        unmortgage,
+        getProperties,
+        findProperty,
+      } = require('../PropertyManagementService');
+      const tradeDetails = require('../PlayerActions').trade(UI, gameState);
+      if (!tradeDetails) return;
+
+      const {
+        mortgageValueMultiplier,
+        interestRate,
+      } = gameState.config.propertyConfig;
+
+      const currentPlayer = gameState.currentPlayer;
+      const tradingPlayerId = Object.keys(tradeDetails)
+        .map((k) => parseInt(k, 10))
+        .find((p) => !isNaN(p) && p !== currentPlayer.id);
+      const findPlayer = (id) => gameState.players.find((p) => p.id === id);
+      const tradePartner = findPlayer(tradingPlayerId);
+      // process cash first
+      const cashToCurrentPlayer = tradeDetails[currentPlayer.id].find(
+        (a) => typeof a === 'number'
+      );
+      const cashToTradePartner = tradeDetails[tradingPlayerId].find(
+        (a) => typeof a === 'number'
+      );
+      if (cashToCurrentPlayer) {
+        exchange(tradePartner, currentPlayer, cashToCurrentPlayer);
+      }
+      if (cashToTradePartner) {
+        exchange(currentPlayer, tradePartner, cashToTradePartner);
+      }
+
+      const isSource = (p) => p.id === currentPlayer.id;
+      const playerTransactions = [currentPlayer, tradePartner];
+
+      // process transactions without mortgages first
+      const playerWorkingTransactions = playerTransactions.map((p) => ({
+        source: isSource(p) ? tradePartner : currentPlayer,
+        target: p,
+        details: tradeDetails[isSource(p) ? currentPlayer.id : tradePartner.id],
+      }));
+
+      playerWorkingTransactions.forEach((pt) => {
+        for (let a of pt.details) {
+          // card
+          if (a.action) {
+            pt.source.cards = pt.source.cards.filter(
+              (c) => !(c.action === a.action && c.type === a.type)
+            );
+            pt.target.cards.push(a);
+          }
+
+          // property
+          if (a.id) {
+            exchangeAsset(
+              pt.source,
+              pt.target,
+              a.mortgaged ? a.price / mortgageValueMultiplier : a.price
+            );
+            const referencedProp = findProperty(gameState, a.id);
+            changeOwner(referencedProp, pt.target.id);
+          }
+        }
+      });
+
+      // handle all mortgage costs at the end to allow maximum ability for player to avoid bankruptcy
+      playerWorkingTransactions
+        .map((pwt) => ({
+          player: pwt.target, // after swapping properties
+          mortgagedProps: pwt.details.filter((p) => p.mortgaged),
+        }))
+        .forEach((pwt) => {
+          const playerProps = getProperties(gameState).filter(
+            (p) => p.ownedBy === pwt.player.id
+          );
+
+          pwt.mortgagedProps.forEach((mp) => {
+            // charge interest and offer to toggle
+            const unmortgageFee = mp.price / mortgageValueMultiplier;
+            const interestFee = interestRate * unmortgageFee;
+
+            if (pwt.player.cash < interestFee) {
+              require('./updateTurnValues')({
+                subTurn: {
+                  playerId: pwt.player.id,
+                  charge: interestFee,
+                },
+              })(gameState);
+              notify('TURN_VALUES_UPDATED');
+              notify('COLLECTIONS');
+            }
+            decrement(pwt.player, interestFee);
+
+            const playerCurrentLiquidity = calculateLiquidity(
+              gameState,
+              playerProps,
+              pwt.player
+            );
+            if (playerCurrentLiquidity < unmortgageFee) return;
+
+            const shouldUnmortgage = require('../PlayerActions').confirm(
+              UI,
+              UI.unmortgageOptionPrompt(mp, interestFee, unmortgageFee)
+            );
+
+            if (!shouldUnmortgage) return;
+
+            if (pwt.player.cash < unmortgageFee) {
+              require('./updateTurnValues')({
+                subTurn: {
+                  playerId: pwt.player.id,
+                  charge: unmortgageFee,
+                },
+              })(gameState);
+              notify('TURN_VALUES_UPDATED');
+              notify('COLLECTIONS');
+            }
+
+            const referencedProp = findProperty(gameState, mp.id);
+            unmortgage(gameState, referencedProp, false);
+          });
+        });
     },
   ],
 };

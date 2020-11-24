@@ -75,11 +75,8 @@ describe('TradeService', () => {
       });
 
       expect(
-        TradeService.trade(userInterface, gameState).tradingPlayerId
-      ).to.equal(
-        tradingPartner.id,
-        'target trading player id was not returned'
-      );
+        TradeService.trade(userInterface, gameState)[tradingPartner.id]
+      ).to.deep.equal([], 'target trading player id property was not returned');
     });
     it('should allow player to cancel trade with another player', () => {
       const promptSelectStub = sinon.stub(userInterface, 'promptSelect');
@@ -125,8 +122,8 @@ describe('TradeService', () => {
       );
       promptSelectStub.returns(0);
       const mockOffer = {
-        receiving: [100],
-        askingFor: [expectedTradeProp],
+        [tradingPartner.id]: [100],
+        [gameState.currentPlayer.id]: [expectedTradeProp],
         status: TradeService.TradeStatus.OFFER,
       };
       determineTradeAssetsStub.onCall(0).returns(mockOffer);
@@ -137,7 +134,6 @@ describe('TradeService', () => {
       expect(TradeService.trade(userInterface, gameState)).to.deep.equal(
         {
           ...mockOffer,
-          tradingPlayerId: tradingPartner.id,
           status: TradeService.TradeStatus.ACCEPT,
         },
         `Trade Details were not as expected after trading partner accepts offer`
@@ -158,13 +154,13 @@ describe('TradeService', () => {
         );
         promptSelectStub.onCall(0).returns(0);
         determineTradeAssetsStub.onCall(0).returns({
-          receiving: [100],
-          askingFor: [expectedTradeProp],
+          [tradingPartner.id]: [100],
+          [gameState.currentPlayer.id]: [expectedTradeProp],
           status: TradeService.TradeStatus.OFFER,
         });
         determineTradeAssetsStub.onCall(1).returns({
-          receiving: [200],
-          askingFor: [expectedTradeProp],
+          [tradingPartner.id]: [200],
+          [gameState.currentPlayer.id]: [expectedTradeProp],
           status: TradeService.TradeStatus.OFFER,
         });
         determineTradeAssetsStub.onCall(2).returns({
@@ -193,18 +189,18 @@ describe('TradeService', () => {
         promptSelectStub.onCall(0).returns(0);
         promptSelectStub.onCall(1).returns(-1);
         determineTradeAssetsStub.onCall(0).returns({
-          receiving: [100],
-          askingFor: [expectedTradeProp],
+          [tradingPartner.id]: [100],
+          [gameState.currentPlayer.id]: [expectedTradeProp],
           status: TradeService.TradeStatus.OFFER,
         });
         determineTradeAssetsStub.onCall(1).returns({
-          receiving: [100],
-          askingFor: [expectedTradeProp],
+          [tradingPartner.id]: [100],
+          [gameState.currentPlayer.id]: [expectedTradeProp],
           status: TradeService.TradeStatus.CANCEL,
         });
         determineTradeAssetsStub.onCall(2).returns({
-          receiving: [100],
-          askingFor: [expectedTradeProp],
+          [tradingPartner.id]: [100],
+          [gameState.currentPlayer.id]: [expectedTradeProp],
           status: TradeService.TradeStatus.CANCEL,
         });
 
@@ -229,14 +225,14 @@ describe('TradeService', () => {
         );
         promptSelectStub.returns(0);
         const mockOffer = {
-          receiving: [100],
-          askingFor: [expectedTradeProp],
+          [tradingPartner.id]: [100],
+          [gameState.currentPlayer.id]: [expectedTradeProp],
           status: TradeService.TradeStatus.OFFER,
         };
         determineTradeAssetsStub.onCall(0).returns(mockOffer);
         determineTradeAssetsStub.onCall(1).returns({
           ...mockOffer,
-          receiving: [200],
+          [tradingPartner.id]: [200],
         });
         determineTradeAssetsStub.onCall(2).returns({
           status: TradeService.TradeStatus.ACCEPT,
@@ -245,9 +241,8 @@ describe('TradeService', () => {
         expect(TradeService.trade(userInterface, gameState)).to.deep.equal(
           {
             ...mockOffer,
-            receiving: [200],
-            askingFor: [expectedTradeProp],
-            tradingPlayerId: tradingPartner.id,
+            [tradingPartner.id]: [200],
+            [gameState.currentPlayer.id]: [expectedTradeProp],
             status: TradeService.TradeStatus.ACCEPT,
           },
           `Trade Details were not as expected after trading partner counter offers and player accepts offer`
@@ -266,7 +261,7 @@ describe('TradeService', () => {
         const {
           tradeableProps,
           untradeableProps,
-        } = PropertyManagementService.getPlayerProperties(gameState, p);
+        } = PropertyManagementService.getPlayerPropertiesForTrade(gameState, p);
         return {
           ...p,
           tradeableProps,
@@ -280,8 +275,8 @@ describe('TradeService', () => {
       const tradingPartner = players.find((p) => p.id === tradingPartnerId);
       const tradeDetails = {
         tradingPlayerId: tradingPartnerId,
-        askingFor: [],
-        receiving: [],
+        [gameState.currentPlayer.id]: [],
+        [tradingPartner.id]: [],
         status: TradeService.TradeStatus.NEW,
       };
 
@@ -321,7 +316,7 @@ describe('TradeService', () => {
         const {
           tradeableProps,
           untradeableProps,
-        } = PropertyManagementService.getPlayerProperties(gameState, p);
+        } = PropertyManagementService.getPlayerPropertiesForTrade(gameState, p);
         return {
           ...p,
           tradeableProps,
@@ -337,8 +332,8 @@ describe('TradeService', () => {
       createMonopoly(gameState, propertyGroup, tradingPartnerId);
       const tradeDetails = {
         tradingPlayerId: tradingPartnerId,
-        receiving: [],
-        askingFor: [],
+        [tradingPartner.id]: [],
+        [gameState.currentPlayer.id]: [],
         status: TradeService.TradeStatus.NEW,
       };
       const showPlayerTradeTableUISpy = sinon.spy();
@@ -349,6 +344,7 @@ describe('TradeService', () => {
 
       TradeService.info(
         userInterface,
+        gameState.currentPlayer.id,
         sourcePlayer,
         tradingPartner,
         tradeDetails
@@ -365,6 +361,7 @@ describe('TradeService', () => {
       );
       expect(
         displayTradeDetailsUISpy.calledOnceWithExactly(
+          gameState.currentPlayer.id,
           sourcePlayer,
           tradingPartner,
           tradeDetails
@@ -378,8 +375,8 @@ describe('TradeService', () => {
       const tradingPartnerId = 1;
       const tradeDetails = {
         tradingPlayerId: tradingPartnerId,
-        receiving: [],
-        askingFor: [],
+        [tradingPartnerId]: [],
+        [gameState.currentPlayer.id]: [],
         status: TradeService.TradeStatus.NEW,
       };
 
@@ -409,7 +406,10 @@ describe('TradeService', () => {
           const {
             tradeableProps,
             untradeableProps,
-          } = PropertyManagementService.getPlayerProperties(gameState, p);
+          } = PropertyManagementService.getPlayerPropertiesForTrade(
+            gameState,
+            p
+          );
           return {
             ...p,
             tradeableProps,
@@ -422,9 +422,8 @@ describe('TradeService', () => {
 
       it(`allows player to 'request' target player assets`, () => {
         const tradeDetails = {
-          tradingPlayerId: tradingPartnerId,
-          askingFor: [],
-          receiving: [],
+          [gameState.currentPlayer.id]: [],
+          [tradingPartner.id]: [],
           status: TradeService.TradeStatus.NEW,
         };
         const tempTradeDetails = cloneDeep(tradeDetails);
@@ -447,16 +446,15 @@ describe('TradeService', () => {
         expect(tempTradeDetails).to.deep.equal(
           {
             ...tradeDetails,
-            receiving: [purpleProps[0]],
+            [gameState.currentPlayer.id]: [purpleProps[0]],
           },
           `Did not return updated trade details to include requested asset`
         );
       });
       it(`allows player to 'request' target player's card`, () => {
         const tradeDetails = {
-          tradingPlayerId: tradingPartnerId,
-          askingFor: [],
-          receiving: [],
+          [gameState.currentPlayer.id]: [],
+          [tradingPartner.id]: [],
           status: TradeService.TradeStatus.NEW,
         };
         const tempTradeDetails = cloneDeep(tradeDetails);
@@ -479,7 +477,7 @@ describe('TradeService', () => {
         expect(tempTradeDetails).to.deep.equal(
           {
             ...tradeDetails,
-            receiving: [purpleProps[0]],
+            [gameState.currentPlayer.id]: [purpleProps[0]],
           },
           `Did not return updated trade details to include requested asset`
         );
@@ -487,8 +485,8 @@ describe('TradeService', () => {
       it(`allows player to 'request' and remove target player assets`, () => {
         const tradeDetails = {
           tradingPlayerId: tradingPartnerId,
-          askingFor: [],
-          receiving: [],
+          [gameState.currentPlayer.id]: [],
+          [tradingPartner.id]: [],
           status: TradeService.TradeStatus.NEW,
         };
         const tempTradeDetails = cloneDeep(tradeDetails);
@@ -513,8 +511,8 @@ describe('TradeService', () => {
       it(`allows player to 'request' target player cash`, () => {
         const tradeDetails = {
           tradingPlayerId: tradingPartnerId,
-          askingFor: [],
-          receiving: [],
+          [gameState.currentPlayer.id]: [],
+          [tradingPartner.id]: [],
           status: TradeService.TradeStatus.NEW,
         };
         const tempTradeDetails = cloneDeep(tradeDetails);
@@ -539,7 +537,7 @@ describe('TradeService', () => {
         expect(tempTradeDetails).to.deep.equal(
           {
             ...tradeDetails,
-            receiving: [arbitraryCashAmount],
+            [gameState.currentPlayer.id]: [arbitraryCashAmount],
           },
           `Did not include cash in trade details`
         );
@@ -551,8 +549,8 @@ describe('TradeService', () => {
       it(`allows player to 'request' and remove target player cash`, () => {
         const tradeDetails = {
           tradingPlayerId: tradingPartnerId,
-          askingFor: [],
-          receiving: [],
+          [gameState.currentPlayer.id]: [],
+          [tradingPartner.id]: [],
           status: TradeService.TradeStatus.NEW,
         };
         const tempTradeDetails = cloneDeep(tradeDetails);
@@ -581,8 +579,8 @@ describe('TradeService', () => {
       it(`does not change trade details status if assets are not modified`, () => {
         const tradeDetails = {
           tradingPlayerId: tradingPartnerId,
-          receiving: [purpleProps[0]],
-          askingFor: [100],
+          [tradingPartner.id]: [purpleProps[0]],
+          [gameState.currentPlayer.id]: [100],
           status: TradeService.TradeStatus.OFFER,
         };
         const tempTradeDetails = cloneDeep(tradeDetails);
@@ -607,8 +605,8 @@ describe('TradeService', () => {
       it(`changes trade details status to NEW if assets are modified`, () => {
         const tradeDetails = {
           tradingPlayerId: tradingPartnerId,
-          receiving: [purpleProps[0]],
-          askingFor: [100],
+          [gameState.currentPlayer.id]: [purpleProps[0]],
+          [tradingPartner.id]: [100],
           status: TradeService.TradeStatus.OFFER,
         };
         const tempTradeDetails = cloneDeep(tradeDetails);
@@ -627,7 +625,7 @@ describe('TradeService', () => {
         expect(tempTradeDetails).to.deep.equal(
           {
             ...tradeDetails,
-            receiving: [...purpleProps],
+            [gameState.currentPlayer.id]: [...purpleProps],
             status: TradeService.TradeStatus.NEW,
           },
           `Did not return NEW status when 'request' changed trade details`
@@ -635,9 +633,8 @@ describe('TradeService', () => {
       });
       it(`changes trade assets when source player is the trading player`, () => {
         const tradeDetails = {
-          tradingPlayerId: tradingPartnerId,
-          askingFor: [],
-          receiving: [],
+          [gameState.currentPlayer.id]: [],
+          [tradingPartner.id]: [],
           status: TradeService.TradeStatus.NEW,
         };
         const tempTradeDetails = cloneDeep(tradeDetails);
@@ -660,7 +657,7 @@ describe('TradeService', () => {
         expect(tempTradeDetails).to.deep.equal(
           {
             ...tradeDetails,
-            askingFor: [arbitraryCashAmount],
+            [tradingPartner.id]: [arbitraryCashAmount],
           },
           `Did not correctly swap context for 'offer'`
         );
@@ -675,8 +672,13 @@ describe('TradeService', () => {
 
         const tradeDetails = {
           tradingPlayerId: tradingPartnerId,
-          askingFor: [],
-          receiving: [purpleProps[0], communityChestCard, chanceCard, 300],
+          [tradingPartner.id]: [],
+          [gameState.currentPlayer.id]: [
+            purpleProps[0],
+            communityChestCard,
+            chanceCard,
+            300,
+          ],
           status: TradeService.TradeStatus.OFFER,
         };
         const tempTradeDetails = cloneDeep(tradeDetails);
@@ -698,10 +700,10 @@ describe('TradeService', () => {
         expect(tempTradeDetails).to.deep.equal(
           {
             ...tradeDetails,
-            receiving: [],
+            [gameState.currentPlayer.id]: [],
             status: TradeService.TradeStatus.NEW,
           },
-          `Did not remove assets from receiving as expected`
+          `Did not remove assets from [gameState.currentPlayer.id] as expected`
         );
       });
     });
@@ -717,7 +719,7 @@ describe('TradeService', () => {
         const {
           tradeableProps,
           untradeableProps,
-        } = PropertyManagementService.getPlayerProperties(gameState, p);
+        } = PropertyManagementService.getPlayerPropertiesForTrade(gameState, p);
         return {
           ...p,
           tradeableProps,
@@ -729,9 +731,8 @@ describe('TradeService', () => {
       );
       const tradingPartner = players.find((p) => p.id === tradingPartnerId);
       const tradeDetails = {
-        tradingPlayerId: tradingPartnerId,
-        askingFor: [100],
-        receiving: [],
+        [gameState.currentPlayer.id]: [],
+        [tradingPartner.id]: [100],
         status: TradeService.TradeStatus.OFFER,
       };
       const tempTradeDetails = cloneDeep(tradeDetails);
@@ -754,8 +755,8 @@ describe('TradeService', () => {
       expect(tempTradeDetails).to.deep.equal(
         {
           ...tradeDetails,
-          askingFor: [],
-          receiving: [arbitraryCashAmount],
+          [gameState.currentPlayer.id]: [arbitraryCashAmount],
+          [tradingPartner.id]: [],
           status: TradeService.TradeStatus.NEW,
         },
         `Did not clear cash in the offer in trade details`
@@ -770,7 +771,7 @@ describe('TradeService', () => {
         const {
           tradeableProps,
           untradeableProps,
-        } = PropertyManagementService.getPlayerProperties(gameState, p);
+        } = PropertyManagementService.getPlayerPropertiesForTrade(gameState, p);
         return {
           ...p,
           tradeableProps,
@@ -782,9 +783,8 @@ describe('TradeService', () => {
       );
       const tradingPartner = players.find((p) => p.id === tradingPartnerId);
       const tradeDetails = {
-        tradingPlayerId: tradingPartnerId,
-        askingFor: [],
-        receiving: [100],
+        [gameState.currentPlayer.id]: [100],
+        [tradingPartner.id]: [],
         status: TradeService.TradeStatus.OFFER,
       };
       const tempTradeDetails = cloneDeep(tradeDetails);
@@ -807,8 +807,8 @@ describe('TradeService', () => {
       expect(tempTradeDetails).to.deep.equal(
         {
           ...tradeDetails,
-          askingFor: [arbitraryCashAmount],
-          receiving: [],
+          [gameState.currentPlayer.id]: [],
+          [tradingPartner.id]: [arbitraryCashAmount],
           status: TradeService.TradeStatus.NEW,
         },
         `Did not clear cash in the request in trade details`
@@ -823,7 +823,7 @@ describe('TradeService', () => {
         const {
           tradeableProps,
           untradeableProps,
-        } = PropertyManagementService.getPlayerProperties(gameState, p);
+        } = PropertyManagementService.getPlayerPropertiesForTrade(gameState, p);
         return {
           ...p,
           tradeableProps,
@@ -835,9 +835,8 @@ describe('TradeService', () => {
       );
       const tradingPartner = players.find((p) => p.id === tradingPartnerId);
       const tradeDetails = {
-        tradingPlayerId: tradingPartnerId,
-        askingFor: [],
-        receiving: [100],
+        [gameState.currentPlayer.id]: [100],
+        [tradingPartner.id]: [],
         status: TradeService.TradeStatus.OFFER,
       };
       const tempTradeDetails = cloneDeep(tradeDetails);
@@ -884,7 +883,10 @@ describe('TradeService', () => {
           const {
             tradeableProps,
             untradeableProps,
-          } = PropertyManagementService.getPlayerProperties(gameState, p);
+          } = PropertyManagementService.getPlayerPropertiesForTrade(
+            gameState,
+            p
+          );
           return {
             ...p,
             tradeableProps,
@@ -897,8 +899,8 @@ describe('TradeService', () => {
       it('returns undefined if confirm prompt is false', () => {
         const tradeDetails = {
           tradingPlayerId: tradingPartnerId,
-          receiving: [100],
-          askingFor: [purpleProps[0]],
+          [tradingPartner.id]: [100],
+          [gameState.currentPlayer.id]: [purpleProps[0]],
           status: TradeService.TradeStatus.NEW,
         };
 
@@ -923,6 +925,7 @@ describe('TradeService', () => {
 
         expect(
           displayTradeDetailsUISpy.calledOnceWithExactly(
+            gameState.currentPlayer.id,
             sourcePlayer,
             tradingPartner,
             tradeDetails
@@ -935,8 +938,8 @@ describe('TradeService', () => {
       it('returns true if confirm prompt is true', () => {
         const tradeDetails = {
           tradingPlayerId: tradingPartnerId,
-          receiving: [100],
-          askingFor: [purpleProps[0]],
+          [tradingPartner.id]: [100],
+          [gameState.currentPlayer.id]: [purpleProps[0]],
           status: TradeService.TradeStatus.NEW,
         };
 
@@ -958,6 +961,7 @@ describe('TradeService', () => {
 
         expect(
           displayTradeDetailsUISpy.calledOnceWithExactly(
+            gameState.currentPlayer.id,
             sourcePlayer,
             tradingPartner,
             tradeDetails
@@ -970,8 +974,8 @@ describe('TradeService', () => {
       it('updates trade details status to OFFER if previous was not OFFER if confirm prompt is true', () => {
         const tradeDetails = {
           tradingPlayerId: tradingPartnerId,
-          receiving: [100],
-          askingFor: [purpleProps[0]],
+          [tradingPartner.id]: [100],
+          [gameState.currentPlayer.id]: [purpleProps[0]],
           status: TradeService.TradeStatus.NEW,
         };
         const confirmUIStub = sinon.stub(userInterface, 'promptConfirm');
@@ -993,8 +997,8 @@ describe('TradeService', () => {
       it('updates trade details status to ACCEPT if previous was OFFER if confirm prompt is true', () => {
         const tradeDetails = {
           tradingPlayerId: tradingPartnerId,
-          receiving: [100],
-          askingFor: [purpleProps[0]],
+          [tradingPartner.id]: [100],
+          [gameState.currentPlayer.id]: [purpleProps[0]],
           status: TradeService.TradeStatus.OFFER,
         };
         const confirmUIStub = sinon.stub(userInterface, 'promptConfirm');
@@ -1016,8 +1020,8 @@ describe('TradeService', () => {
       it('CONSTRAINT: does not allow action if only assets have been requested', () => {
         const tradeDetails = {
           tradingPlayerId: tradingPartnerId,
-          receiving: [],
-          askingFor: [purpleProps[0]],
+          [tradingPartner.id]: [],
+          [gameState.currentPlayer.id]: [purpleProps[0]],
           status: TradeService.TradeStatus.OFFER,
         };
         const confirmUISpy = sinon.spy(userInterface, 'promptConfirm');
@@ -1043,8 +1047,8 @@ describe('TradeService', () => {
       it('CONSTRAINT: does not allow action if only assets have been offered', () => {
         const tradeDetails = {
           tradingPlayerId: tradingPartnerId,
-          receiving: [100],
-          askingFor: [],
+          [tradingPartner.id]: [100],
+          [gameState.currentPlayer.id]: [],
           status: TradeService.TradeStatus.OFFER,
         };
         const confirmUISpy = sinon.spy(userInterface, 'promptConfirm');
@@ -1083,7 +1087,10 @@ describe('TradeService', () => {
             const {
               tradeableProps,
               untradeableProps,
-            } = PropertyManagementService.getPlayerProperties(gameState, p);
+            } = PropertyManagementService.getPlayerPropertiesForTrade(
+              gameState,
+              p
+            );
             return {
               ...p,
               tradeableProps,
@@ -1097,8 +1104,8 @@ describe('TradeService', () => {
 
           const tradeDetails = {
             tradingPlayerId: tradingPartnerId,
-            receiving: [expensiveProperty],
-            askingFor: [dollar],
+            [tradingPartner.id]: [expensiveProperty],
+            [gameState.currentPlayer.id]: [dollar],
             status: TradeService.TradeStatus.OFFER,
           };
           const confirmUISpy = sinon.spy(userInterface, 'promptConfirm');
@@ -1135,7 +1142,10 @@ describe('TradeService', () => {
             const {
               tradeableProps,
               untradeableProps,
-            } = PropertyManagementService.getPlayerProperties(gameState, p);
+            } = PropertyManagementService.getPlayerPropertiesForTrade(
+              gameState,
+              p
+            );
             return {
               ...p,
               tradeableProps,
@@ -1150,8 +1160,8 @@ describe('TradeService', () => {
 
           const tradeDetails = {
             tradingPlayerId: tradingPartnerId,
-            receiving: [dollar],
-            askingFor: [expensiveProperty],
+            [tradingPartner.id]: [dollar],
+            [gameState.currentPlayer.id]: [expensiveProperty],
             status: TradeService.TradeStatus.OFFER,
           };
           const confirmUISpy = sinon.spy(userInterface, 'promptConfirm');
@@ -1187,7 +1197,10 @@ describe('TradeService', () => {
             const {
               tradeableProps,
               untradeableProps,
-            } = PropertyManagementService.getPlayerProperties(gameState, p);
+            } = PropertyManagementService.getPlayerPropertiesForTrade(
+              gameState,
+              p
+            );
             return {
               ...p,
               tradeableProps,
@@ -1201,8 +1214,8 @@ describe('TradeService', () => {
 
           const tradeDetails = {
             tradingPlayerId: tradingPartnerId,
-            receiving: [arbitraryCashAmount],
-            askingFor: [expensiveProperty],
+            [tradingPartner.id]: [arbitraryCashAmount],
+            [gameState.currentPlayer.id]: [expensiveProperty],
             status: TradeService.TradeStatus.OFFER,
           };
           const confirmUISpy = sinon.spy(userInterface, 'promptConfirm');

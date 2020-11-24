@@ -8,19 +8,20 @@ module.exports = class TradeService {
   static trade(UI, gameState) {
     const { NEW, CANCEL, OFFER, ACCEPT } = TradeService.TradeStatus;
 
+    const getPlayerPropertiesForTrade = PropertyManagementService.getPlayerPropertiesForTrade.bind(
+      PropertyManagementService,
+      gameState
+    );
+
     const players = gameState.players
       .filter((p) => !p.bankrupt)
-      .map((p) => {
-        const {
-          tradeableProps,
-          untradeableProps,
-        } = PropertyManagementService.getPlayerProperties(gameState, p);
-        return {
-          ...p,
-          tradeableProps,
-          untradeableProps,
-        };
-      });
+      .map((p) => [p, getPlayerPropertiesForTrade(p)])
+      .map(([p, { tradeableProps, untradeableProps }]) => ({
+        ...p,
+        tradeableProps,
+        untradeableProps,
+      }));
+
     const sourcePlayer = players.find(
       (p) => p.id === gameState.currentPlayer.id
     );
@@ -30,10 +31,8 @@ module.exports = class TradeService {
     // select player menu
     UI.showPlayerTradeTable(players);
     let tradeDetails = {
-      tradingPlayerId: -1,
-      askingFor: [], // assets that belong to trading partner
-      receiving: [], // assets that belong to current player
       status: NEW,
+      [sourcePlayer.id]: [],
     };
 
     while (tradeDetails.status === NEW) {
@@ -46,7 +45,10 @@ module.exports = class TradeService {
       if (!~playerSelection) return;
 
       const tradingPartner = eligiblePlayers[playerSelection];
-      tradeDetails.tradingPlayerId = tradingPartner.id;
+      tradeDetails = {
+        ...tradeDetails,
+        [tradingPartner.id]: [],
+      };
 
       // initial trade state
       let playerContext = {};
@@ -71,7 +73,6 @@ module.exports = class TradeService {
           targetPlayer,
           tradeDetails
         );
-        // CANCEL, OFFER, ACCEPT
 
         switch (tempTradeDetails.status) {
           case CANCEL:
@@ -80,8 +81,8 @@ module.exports = class TradeService {
           case OFFER:
             tradeDetails = {
               ...tradeDetails, // for future-proofing
-              askingFor: tempTradeDetails.askingFor,
-              receiving: tempTradeDetails.receiving,
+              [sourcePlayer.id]: tempTradeDetails[sourcePlayer.id],
+              [tradingPartner.id]: tempTradeDetails[tradingPartner.id],
               status: OFFER,
             };
             break;
@@ -99,9 +100,14 @@ module.exports = class TradeService {
     UI.tradeInstructions();
   }
 
-  static info(UI, sourcePlayer, targetPlayer, tradeDetails) {
+  static info(UI, currentPlayerId, sourcePlayer, targetPlayer, tradeDetails) {
     UI.showPlayerTradeTable([sourcePlayer, targetPlayer]);
-    UI.displayTradeDetails(sourcePlayer, targetPlayer, tradeDetails);
+    UI.displayTradeDetails(
+      currentPlayerId,
+      sourcePlayer,
+      targetPlayer,
+      tradeDetails
+    );
   }
 
   static cancel(tradeDetails) {
@@ -112,26 +118,31 @@ module.exports = class TradeService {
   static confirm(UI, gameState, sourcePlayer, targetPlayer, tradeDetails) {
     const { OFFER, ACCEPT } = TradeService.TradeStatus;
 
-    UI.displayTradeDetails(sourcePlayer, targetPlayer, tradeDetails);
+    UI.displayTradeDetails(
+      gameState.currentPlayer.id,
+      sourcePlayer,
+      targetPlayer,
+      tradeDetails
+    );
 
     const validations = [
       () =>
-        tradeDetails.askingFor.length === 0
-          ? Errors.NO_REQUESTED_ASSETS_IN_TRADE
-          : null,
-      () =>
-        tradeDetails.receiving.length === 0
+        tradeDetails[sourcePlayer.id].length === 0
           ? Errors.NO_OFFERED_ASSETS_IN_TRADE
           : null,
+      () =>
+        tradeDetails[targetPlayer.id].length === 0
+          ? Errors.NO_REQUESTED_ASSETS_IN_TRADE
+          : null,
       () => {
-        const gettingInTrade = tradeDetails.receiving;
-        const propertiesGettingInTrade = gettingInTrade.filter((a) => a.id);
+        const gettingInTrade = tradeDetails[targetPlayer.id];
+        const propertiesGettingInTrade = gettingInTrade.filter((p) => p.id);
         const cashGettingInTrade = gettingInTrade.find(
           (a) => typeof a === 'number'
         );
-        const givingAwayInTrade = tradeDetails.askingFor;
+        const givingAwayInTrade = tradeDetails[sourcePlayer.id];
         const propertiesGivingAwayInTrade = givingAwayInTrade.filter(
-          (a) => a.id
+          (p) => p.id
         );
         const cashGivingAwayInTrade = givingAwayInTrade.find(
           (a) => typeof a === 'number'
@@ -156,9 +167,9 @@ module.exports = class TradeService {
         const sourceCost = propertiesGettingInTrade
           .filter((p) => p.mortgaged)
           .reduce(
-            (acc, cum) =>
+            (acc, prop) =>
               acc +
-              (cum.price /
+              (prop.price /
                 gameState.config.propertyConfig.mortgageValueMultiplier) *
                 gameState.config.propertyConfig.interestRate,
             0
@@ -176,9 +187,9 @@ module.exports = class TradeService {
         const targetCost = propertiesGivingAwayInTrade
           .filter((p) => p.mortgaged)
           .reduce(
-            (acc, cum) =>
+            (acc, prop) =>
               acc +
-              (cum.price /
+              (prop.price /
                 gameState.config.propertyConfig.mortgageValueMultiplier) *
                 gameState.config.propertyConfig.interestRate,
             0
@@ -209,9 +220,8 @@ module.exports = class TradeService {
     currentTradeDetails
   ) {
     const { CARD, CASH, PROPERTY } = TradeService.AssetType;
-    const isRequest = sourcePlayer.id !== originalTradeDetails.tradingPlayerId;
-    const assetAttribute = isRequest ? 'receiving' : 'askingFor';
-    const oppositeAssetAttribute = !isRequest ? 'receiving' : 'askingFor';
+    const assetAttribute = sourcePlayer.id;
+    const oppositeAssetAttribute = targetPlayer.id;
 
     let tradeableAssets = [
       ...targetPlayer.tradeableProps.map((a) => ({
@@ -315,9 +325,15 @@ module.exports = class TradeService {
     tradeDetails
   ) {
     let interactiveTradeDetails = cloneDeep(tradeDetails);
+    const currentPlayerId = gameState.currentPlayer.id;
 
     UI.tradeIntroduction();
-    UI.displayTradeDetails(sourcePlayer, targetPlayer, interactiveTradeDetails);
+    UI.displayTradeDetails(
+      currentPlayerId,
+      sourcePlayer,
+      targetPlayer,
+      interactiveTradeDetails
+    );
 
     /* istanbul ignore next */
     UI.promptCLLoop({
@@ -325,6 +341,7 @@ module.exports = class TradeService {
       info: () =>
         TradeService.info(
           UI,
+          currentPlayerId,
           sourcePlayer,
           targetPlayer,
           interactiveTradeDetails

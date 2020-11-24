@@ -130,6 +130,34 @@ describe('WealthService', () => {
       );
     });
   });
+  describe('exchangeAsset', () => {
+    it('should increment assets of target player', () => {
+      const startingPlayer2Assets = gameState.players[1].assets;
+      const assetPrice = 50;
+      WealthService.exchangeAsset(
+        gameState.players[0],
+        gameState.players[1],
+        assetPrice
+      );
+      expect(gameState.players[1].assets).to.equal(
+        startingPlayer2Assets + assetPrice,
+        "Incorrectly incremented target player's assets from exchange"
+      );
+    });
+    it('should decrement assets of source player', () => {
+      const startingPlayer1Assets = gameState.players[0].assets;
+      const assetPrice = 50;
+      WealthService.exchangeAsset(
+        gameState.players[0],
+        gameState.players[1],
+        assetPrice
+      );
+      expect(gameState.players[0].assets).to.equal(
+        startingPlayer1Assets - assetPrice,
+        "Incorrectly decremented source player's assets from exchange"
+      );
+    });
+  });
   describe('calculateLiquidity', () => {
     it('should calculate with mortgaged assets', () => {
       const properties = [

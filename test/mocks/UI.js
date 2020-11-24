@@ -48,5 +48,6 @@ module.exports = function mockUIFactory() {
     tradeIntroduction: () => true,
     tradeError: () => true,
     playerTradeAction: () => true,
+    unmortgageOptionPrompt: () => true,
   };
 };
