@@ -335,10 +335,10 @@ const consoleUI = (function (readline) {
       console.log(`Would you like to unmortgage this property (${mapPropertyGroupToColor(
         prop
       )} ${prop.name}}) right now? You've already paid the interest rate! 
-    Cost: 
-      interest fee: $${interestFee} (already paid)
-      unmortgage fee: $${unmortgageFee}
-    If yes, total cost: $${unmortgageFee}\n`),
+    ${c.underline('Cost')}: 
+      ${c.bold('interest fee')}: $${interestFee} (already paid)
+      ${c.bold('unmortgage fee')}: ${c.red('$' + unmortgageFee)}
+    If yes, ${c.bold('total cost')}: ${c.red('$' + unmortgageFee)}\n`),
   };
 })(require('readline-sync'));
 
