@@ -83,6 +83,7 @@ const consoleUI = (function (readline) {
     // UI: remove active class from all players
     // UI: toggle active class on that player
     // UI: maybe animate player token?
+    playerRoll: (roll) => console.log(`\t\t   ${roll}`),
     displayPropertyDetails: (boardProperty) =>
       console.log(mapPropertyLongDisplay(boardProperty)),
     promptCLLoop: readline.promptCLLoop,
@@ -299,7 +300,7 @@ const consoleUI = (function (readline) {
         ]);
       } else {
         cliTable.push([
-          `${targetPlayer.name} is receiving: `,
+          `${targetPlayer.name} is receiving:`,
           `${c.bold(sourcePlayer.name)} is receiving:`,
         ]);
         cliTable.push([

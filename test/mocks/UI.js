@@ -3,6 +3,7 @@ module.exports = function mockUIFactory() {
   return {
     startGame: () => true,
     startTurn: () => false,
+    playerRoll: () => true,
     prompt: () => true,
     promptConfirm: () => true,
     promptNumber: () => true,

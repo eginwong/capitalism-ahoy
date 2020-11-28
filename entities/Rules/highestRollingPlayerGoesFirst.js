@@ -9,7 +9,7 @@ module.exports = function highestRollingPlayerGoesFirst({ UI }, { players }) {
   let rolls = players.map(({ name }) => {
     UI.prompt(`${name} roll dice - `);
     let roll = require('../Components/Dice').roll()[0];
-    console.log(`\t\t   `, roll);
+    UI.playerRoll(roll);
     return roll;
   });
   let { hIndex: shiftValue } = rolls.reduce(
