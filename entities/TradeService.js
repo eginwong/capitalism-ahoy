@@ -22,10 +22,10 @@ module.exports = class TradeService {
         untradeableProps,
       }));
 
-    const sourcePlayer = players.find(
-      (p) => p.id === gameState.currentPlayer.id
+    const sourcePlayer = require('./helpers').findById(
+      players,
+      gameState.currentPlayer.id
     );
-
     const eligiblePlayers = players.filter((p) => p.id !== sourcePlayer.id);
 
     // select player menu

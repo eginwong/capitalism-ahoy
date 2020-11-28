@@ -3,6 +3,7 @@ const BoardService = require('../entities/BoardService');
 const { GameState } = require('../entities/GameState');
 const { createPlayerFactory } = require('./testutils');
 const config = require('../config/monopolyConfiguration');
+const { findById, findByPosition } = require('../entities/helpers');
 
 describe('BoardService', () => {
   let gameState;
@@ -39,8 +40,9 @@ describe('BoardService', () => {
       const targetPlayer = gameState.players[0];
       const arbitraryPosition = 12;
       targetPlayer.position = arbitraryPosition;
-      const expectedProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.position === arbitraryPosition
+      const expectedProperty = findByPosition(
+        gameState.config.propertyConfig.properties,
+        arbitraryPosition
       );
 
       expect(
@@ -56,8 +58,9 @@ describe('BoardService', () => {
     it('should return property closest to player by property group when property is before GO', () => {
       const startingPlayerPosition = 10;
       gameState.currentPlayer.position = startingPlayerPosition;
-      const pennsylvaniaRailroadProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'pennsylvaniarailroad'
+      const pennsylvaniaRailroadProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'pennsylvaniarailroad'
       );
       const propertyGroup = pennsylvaniaRailroadProperty.group;
 
@@ -73,8 +76,9 @@ describe('BoardService', () => {
     it('should return property closest to player by property group when property is after GO', () => {
       const startingPlayerPosition = 39;
       gameState.currentPlayer.position = startingPlayerPosition;
-      const readingRailroadProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'readingrailroad'
+      const readingRailroadProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'readingrailroad'
       );
       const propertyGroup = readingRailroadProperty.group;
 
@@ -93,8 +97,9 @@ describe('BoardService', () => {
     it('should return property position if not wrapping around the board', () => {
       const startingPlayerPosition = 3;
       gameState.currentPlayer.position = startingPlayerPosition;
-      const readingRailroadProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'readingrailroad'
+      const readingRailroadProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'readingrailroad'
       );
       expect(
         BoardService.retrievePositionToPropertyWithoutNormalization(
@@ -109,8 +114,9 @@ describe('BoardService', () => {
     it('should return property position added to length of the board if wrapping around the board', () => {
       const startingPlayerPosition = 39;
       gameState.currentPlayer.position = startingPlayerPosition;
-      const readingRailroadProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'readingrailroad'
+      const readingRailroadProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'readingrailroad'
       );
       expect(
         BoardService.retrievePositionToPropertyWithoutNormalization(

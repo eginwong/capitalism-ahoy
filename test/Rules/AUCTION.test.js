@@ -8,6 +8,7 @@ const PlayerActions = require('../../entities/PlayerActions');
 const { createPlayerFactory } = require('../testutils');
 const config = require('../../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
+const { findById } = require('../../entities/helpers');
 
 describe('Rules -> AUCTION', () => {
   let gameState;
@@ -151,8 +152,9 @@ describe('Rules -> AUCTION', () => {
         buyer: expectedBuyer,
         price: expectedBuyer.cash,
       });
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'mediterraneanave'
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'mediterraneanave'
       );
       gameState.currentBoardProperty = testProperty;
 
@@ -240,7 +242,7 @@ describe('Rules -> AUCTION', () => {
         buyer: expectedBuyer,
         price: expectedBuyer.cash,
       });
-      const testProperty = properties.find((p) => p.id === 'mediterraneanave');
+      const testProperty = findById(properties, 'mediterraneanave');
       gameState.currentBoardProperty = testProperty;
 
       eventBus.emit(inputEvent);
@@ -268,7 +270,7 @@ describe('Rules -> AUCTION', () => {
         buyer: expectedBuyer,
         price: expectedBuyer.cash,
       });
-      const testProperty = properties.find((p) => p.id === 'mediterraneanave');
+      const testProperty = findById(properties, 'mediterraneanave');
       gameState.currentBoardProperty = testProperty;
 
       eventBus.emit(inputEvent);
@@ -291,7 +293,7 @@ describe('Rules -> AUCTION', () => {
         ),
       }));
       const expectedBuyer = bidders[0];
-      const testProperty = properties.find((p) => p.id === 'mediterraneanave');
+      const testProperty = findById(properties, 'mediterraneanave');
       gameState.currentBoardProperty = testProperty;
 
       eventBus.emit(inputEvent);
@@ -321,9 +323,7 @@ describe('Rules -> AUCTION', () => {
           buyer: expectedBuyer,
           price: expectedBuyer.cash,
         });
-        const testProperty = properties.find(
-          (p) => p.id === 'mediterraneanave'
-        );
+        const testProperty = findById(properties, 'mediterraneanave');
         testProperty.mortgaged = true;
         gameState.currentBoardProperty = testProperty;
         const {
@@ -354,7 +354,7 @@ describe('Rules -> AUCTION', () => {
           buyer: expectedBuyer,
           price: expectedBuyer.cash,
         });
-        const testProperty = properties.find((p) => p.id === 'pennsylvaniaave');
+        const testProperty = findById(properties, 'pennsylvaniaave');
         testProperty.mortgaged = true;
         gameState.currentBoardProperty = testProperty;
         const {
@@ -385,9 +385,7 @@ describe('Rules -> AUCTION', () => {
           buyer: expectedBuyer,
           price: expectedBuyer.cash,
         });
-        const testProperty = properties.find(
-          (p) => p.id === 'mediterraneanave'
-        );
+        const testProperty = findById(properties, 'mediterraneanave');
         testProperty.mortgaged = true;
         gameState.currentBoardProperty = testProperty;
         const unmortgageConfirmStub = sinon.stub(PlayerActions, 'confirm');
@@ -415,9 +413,7 @@ describe('Rules -> AUCTION', () => {
             player
           ),
         }));
-        const testProperty = properties.find(
-          (p) => p.id === 'mediterraneanave'
-        );
+        const testProperty = findById(properties, 'mediterraneanave');
         const expectedBuyer = bidders[0];
         auctionPromptStub.returns({
           buyer: expectedBuyer,
@@ -456,9 +452,7 @@ describe('Rules -> AUCTION', () => {
             player
           ),
         }));
-        const testProperty = properties.find(
-          (p) => p.id === 'mediterraneanave'
-        );
+        const testProperty = findById(properties, 'mediterraneanave');
         const expectedBuyer = bidders[0];
         auctionPromptStub.returns({
           buyer: expectedBuyer,
@@ -482,9 +476,7 @@ describe('Rules -> AUCTION', () => {
       });
       it('does not prompt the winning player to unmortgage the property if liquidity does not allow', () => {
         const auctionPromptStub = sinon.stub(PlayerActions, 'auction');
-        const testProperty = properties.find(
-          (p) => p.id === 'mediterraneanave'
-        );
+        const testProperty = findById(properties, 'mediterraneanave');
         testProperty.mortgaged = true;
         gameState.players[0].cash = testProperty.price;
         const bidders = gameState.players.map((player) => ({
@@ -519,9 +511,7 @@ describe('Rules -> AUCTION', () => {
             player
           ),
         }));
-        const testProperty = properties.find(
-          (p) => p.id === 'mediterraneanave'
-        );
+        const testProperty = findById(properties, 'mediterraneanave');
         testProperty.mortgaged = true;
         gameState.players[0].cash = testProperty.price;
         const assetValue = 300;
@@ -552,9 +542,7 @@ describe('Rules -> AUCTION', () => {
             player
           ),
         }));
-        const testProperty = properties.find(
-          (p) => p.id === 'mediterraneanave'
-        );
+        const testProperty = findById(properties, 'mediterraneanave');
         testProperty.mortgaged = true;
         gameState.players[0].cash = testProperty.price;
         const assetValue = 300;

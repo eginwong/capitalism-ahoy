@@ -8,6 +8,7 @@ const WealthService = require('../../entities/WealthService');
 const { createPlayerFactory } = require('../testutils');
 const config = require('../../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
+const { findById } = require('../../entities/helpers');
 
 describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
   let gameState;
@@ -71,8 +72,9 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
     });
 
     it(`should emit ${jailEvent} event if special property is go to jail`, () => {
-      const property = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'gotojail'
+      const property = findById(
+        gameState.config.propertyConfig.properties,
+        'gotojail'
       );
       gameState.currentBoardProperty = property;
 
@@ -84,8 +86,9 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
       );
     });
     it(`should emit ${chanceEvent} event if special property is chance`, () => {
-      const property = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'chance1'
+      const property = findById(
+        gameState.config.propertyConfig.properties,
+        'chance1'
       );
       gameState.currentBoardProperty = property;
 
@@ -97,8 +100,9 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
       );
     });
     it(`should emit ${communityChestEvent} event if special property is communityChest`, () => {
-      const property = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'communitychest1'
+      const property = findById(
+        gameState.config.propertyConfig.properties,
+        'communitychest1'
       );
       gameState.currentBoardProperty = property;
 
@@ -110,8 +114,9 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
       );
     });
     it(`should emit ${incomeTaxEvent} event if special property is income tax`, () => {
-      const incomeTaxProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'incometax'
+      const incomeTaxProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'incometax'
       );
       gameState.currentBoardProperty = incomeTaxProperty;
 
@@ -123,8 +128,9 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
       );
     });
     it(`should decrement luxury tax if special property is luxury tax`, () => {
-      const luxuryTaxProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'luxurytax'
+      const luxuryTaxProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'luxurytax'
       );
       gameState.currentBoardProperty = luxuryTaxProperty;
       const originalCash = gameState.currentPlayer.cash;
@@ -137,8 +143,9 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
       );
     });
     it('should make a call to the UI#luxuryTaxPaid', () => {
-      const luxuryTaxProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'luxurytax'
+      const luxuryTaxProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'luxurytax'
       );
       gameState.currentBoardProperty = luxuryTaxProperty;
       const uiSpy = sinon.spy();
@@ -153,8 +160,9 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
       );
     });
     it(`${collectionsEvent} event sets the turn value subturn player and charge`, () => {
-      const luxuryTaxProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'luxurytax'
+      const luxuryTaxProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'luxurytax'
       );
       gameState.currentBoardProperty = luxuryTaxProperty;
       gameState.currentPlayer.cash = 0;
@@ -173,8 +181,9 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
       );
     });
     it(`${collectionsEvent} event should be called if current player has no more cash to pay the fine`, () => {
-      const luxuryTaxProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'luxurytax'
+      const luxuryTaxProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'luxurytax'
       );
       gameState.currentBoardProperty = luxuryTaxProperty;
       gameState.currentPlayer.cash = 0;
@@ -186,8 +195,9 @@ describe('Rules -> RESOLVE_SPECIAL_PROPERTY', () => {
       );
     });
     it('should not decrement luxury tax if player is bankrupt', () => {
-      const luxuryTaxProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'luxurytax'
+      const luxuryTaxProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'luxurytax'
       );
       gameState.currentBoardProperty = luxuryTaxProperty;
       gameState.currentPlayer.cash = 0;

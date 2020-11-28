@@ -13,6 +13,7 @@ const TradeService = require('../entities/TradeService');
 const PropertyManagementService = require('../entities/PropertyManagementService');
 const config = require('../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
+const { findById, findByGroup } = require('../entities/helpers');
 
 describe('TradeService', () => {
   let gameState;
@@ -112,8 +113,9 @@ describe('TradeService', () => {
       const tradingPartner = gameState.players[1];
       const propertyGroup = 'Purple';
       createMonopoly(gameState, propertyGroup, tradingPartner.id);
-      const expectedTradeProp = gameState.config.propertyConfig.properties.find(
-        (p) => p.group === propertyGroup
+      const expectedTradeProp = findByGroup(
+        gameState.config.propertyConfig.properties,
+        propertyGroup
       );
       const promptSelectStub = sinon.stub(userInterface, 'promptSelect');
       const determineTradeAssetsStub = sinon.stub(
@@ -144,8 +146,9 @@ describe('TradeService', () => {
         const tradingPartner = gameState.players[1];
         const propertyGroup = 'Purple';
         createMonopoly(gameState, propertyGroup, tradingPartner.id);
-        const expectedTradeProp = gameState.config.propertyConfig.properties.find(
-          (p) => p.group === propertyGroup
+        const expectedTradeProp = findByGroup(
+          gameState.config.propertyConfig.properties,
+          propertyGroup
         );
         const promptSelectStub = sinon.stub(userInterface, 'promptSelect');
         const determineTradeAssetsStub = sinon.stub(
@@ -178,8 +181,9 @@ describe('TradeService', () => {
         const tradingPartner = gameState.players[1];
         const propertyGroup = 'Purple';
         createMonopoly(gameState, propertyGroup, tradingPartner.id);
-        const expectedTradeProp = gameState.config.propertyConfig.properties.find(
-          (p) => p.group === propertyGroup
+        const expectedTradeProp = findByGroup(
+          gameState.config.propertyConfig.properties,
+          propertyGroup
         );
         const promptSelectStub = sinon.stub(userInterface, 'promptSelect');
         const determineTradeAssetsStub = sinon.stub(
@@ -215,8 +219,9 @@ describe('TradeService', () => {
         const tradingPartner = gameState.players[1];
         const propertyGroup = 'Purple';
         createMonopoly(gameState, propertyGroup, tradingPartner.id);
-        const expectedTradeProp = gameState.config.propertyConfig.properties.find(
-          (p) => p.group === propertyGroup
+        const expectedTradeProp = findByGroup(
+          gameState.config.propertyConfig.properties,
+          propertyGroup
         );
         const promptSelectStub = sinon.stub(userInterface, 'promptSelect');
         const determineTradeAssetsStub = sinon.stub(
@@ -269,10 +274,8 @@ describe('TradeService', () => {
         };
       });
 
-      const sourcePlayer = players.find(
-        (p) => p.id === gameState.currentPlayer.id
-      );
-      const tradingPartner = players.find((p) => p.id === tradingPartnerId);
+      const sourcePlayer = findById(players, gameState.currentPlayer.id);
+      const tradingPartner = findById(players, tradingPartnerId);
       const tradeDetails = {
         tradingPlayerId: tradingPartnerId,
         [gameState.currentPlayer.id]: [],
@@ -323,11 +326,9 @@ describe('TradeService', () => {
           untradeableProps,
         };
       });
-      const sourcePlayer = players.find(
-        (p) => p.id === gameState.currentPlayer.id
-      );
+      const sourcePlayer = findById(players, gameState.currentPlayer.id);
       const tradingPartnerId = 1;
-      const tradingPartner = players.find((p) => p.id === tradingPartnerId);
+      const tradingPartner = findById(players, tradingPartnerId);
       const propertyGroup = 'Purple';
       createMonopoly(gameState, propertyGroup, tradingPartnerId);
       const tradeDetails = {
@@ -416,8 +417,8 @@ describe('TradeService', () => {
             untradeableProps,
           };
         });
-        sourcePlayer = players.find((p) => p.id === gameState.currentPlayer.id);
-        tradingPartner = players.find((p) => p.id === tradingPartnerId);
+        sourcePlayer = findById(players, gameState.currentPlayer.id);
+        tradingPartner = findById(players, tradingPartnerId);
       });
 
       it(`allows player to 'request' target player assets`, () => {
@@ -726,10 +727,8 @@ describe('TradeService', () => {
           untradeableProps,
         };
       });
-      const sourcePlayer = players.find(
-        (p) => p.id === gameState.currentPlayer.id
-      );
-      const tradingPartner = players.find((p) => p.id === tradingPartnerId);
+      const sourcePlayer = findById(players, gameState.currentPlayer.id);
+      const tradingPartner = findById(players, tradingPartnerId);
       const tradeDetails = {
         [gameState.currentPlayer.id]: [],
         [tradingPartner.id]: [100],
@@ -778,10 +777,8 @@ describe('TradeService', () => {
           untradeableProps,
         };
       });
-      const sourcePlayer = players.find(
-        (p) => p.id === gameState.currentPlayer.id
-      );
-      const tradingPartner = players.find((p) => p.id === tradingPartnerId);
+      const sourcePlayer = findById(players, gameState.currentPlayer.id);
+      const tradingPartner = findById(players, tradingPartnerId);
       const tradeDetails = {
         [gameState.currentPlayer.id]: [100],
         [tradingPartner.id]: [],
@@ -830,10 +827,8 @@ describe('TradeService', () => {
           untradeableProps,
         };
       });
-      const sourcePlayer = players.find(
-        (p) => p.id === gameState.currentPlayer.id
-      );
-      const tradingPartner = players.find((p) => p.id === tradingPartnerId);
+      const sourcePlayer = findById(players, gameState.currentPlayer.id);
+      const tradingPartner = findById(players, tradingPartnerId);
       const tradeDetails = {
         [gameState.currentPlayer.id]: [100],
         [tradingPartner.id]: [],
@@ -893,8 +888,8 @@ describe('TradeService', () => {
             untradeableProps,
           };
         });
-        sourcePlayer = players.find((p) => p.id === gameState.currentPlayer.id);
-        tradingPartner = players.find((p) => p.id === tradingPartnerId);
+        sourcePlayer = findById(players, gameState.currentPlayer.id);
+        tradingPartner = findById(players, tradingPartnerId);
       });
       it('returns undefined if confirm prompt is false', () => {
         const tradeDetails = {
@@ -1074,8 +1069,9 @@ describe('TradeService', () => {
       describe(`ACTION: 'confirm', bankruptcy check`, () => {
         it('CONSTRAINT: does not allow action if trade bankrupts source player', () => {
           const tradingPartnerId = 1;
-          const expensiveProperty = gameState.config.propertyConfig.properties.find(
-            (p) => p.id === 'boardwalk'
+          const expensiveProperty = findById(
+            gameState.config.propertyConfig.properties,
+            'boardwalk'
           );
           expensiveProperty.mortgaged = true;
           expensiveProperty.ownedBy = tradingPartnerId;
@@ -1097,10 +1093,8 @@ describe('TradeService', () => {
               untradeableProps,
             };
           });
-          const sourcePlayer = players.find(
-            (p) => p.id === gameState.currentPlayer.id
-          );
-          const tradingPartner = players.find((p) => p.id === tradingPartnerId);
+          const sourcePlayer = findById(players, gameState.currentPlayer.id);
+          const tradingPartner = findById(players, tradingPartnerId);
 
           const tradeDetails = {
             tradingPlayerId: tradingPartnerId,
@@ -1130,8 +1124,9 @@ describe('TradeService', () => {
         });
         it('CONSTRAINT: does not allow action if trade bankrupts target player', () => {
           const tradingPartnerId = 1;
-          const expensiveProperty = gameState.config.propertyConfig.properties.find(
-            (p) => p.id === 'boardwalk'
+          const expensiveProperty = findById(
+            gameState.config.propertyConfig.properties,
+            'boardwalk'
           );
           expensiveProperty.mortgaged = true;
           expensiveProperty.ownedBy = gameState.currentPlayer.id;
@@ -1152,10 +1147,8 @@ describe('TradeService', () => {
               untradeableProps,
             };
           });
-          const sourcePlayer = players.find(
-            (p) => p.id === gameState.currentPlayer.id
-          );
-          const tradingPartner = players.find((p) => p.id === tradingPartnerId);
+          const sourcePlayer = findById(players, gameState.currentPlayer.id);
+          const tradingPartner = findById(players, tradingPartnerId);
           tradingPartner.cash = arbitraryLowCashAmount;
 
           const tradeDetails = {
@@ -1186,8 +1179,9 @@ describe('TradeService', () => {
         });
         it('CONSTRAINT: allow action if trade does not bankrupt either player', () => {
           const tradingPartnerId = 1;
-          const expensiveProperty = gameState.config.propertyConfig.properties.find(
-            (p) => p.id === 'boardwalk'
+          const expensiveProperty = findById(
+            gameState.config.propertyConfig.properties,
+            'boardwalk'
           );
           expensiveProperty.mortgaged = true;
           expensiveProperty.ownedBy = gameState.currentPlayer.id;
@@ -1207,10 +1201,8 @@ describe('TradeService', () => {
               untradeableProps,
             };
           });
-          const sourcePlayer = players.find(
-            (p) => p.id === gameState.currentPlayer.id
-          );
-          const tradingPartner = players.find((p) => p.id === tradingPartnerId);
+          const sourcePlayer = findById(players, gameState.currentPlayer.id);
+          const tradingPartner = findById(players, tradingPartnerId);
 
           const tradeDetails = {
             tradingPlayerId: tradingPartnerId,

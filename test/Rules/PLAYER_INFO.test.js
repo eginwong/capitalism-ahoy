@@ -7,6 +7,7 @@ const { GameState } = require('../../entities/GameState');
 const { createPlayerFactory } = require('../testutils');
 const config = require('../../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
+const { findById } = require('../../entities/helpers');
 
 describe('Rules -> PLAYER_INFO', () => {
   let gameState;
@@ -50,7 +51,7 @@ describe('Rules -> PLAYER_INFO', () => {
       const uiSpy = sinon.spy();
       userInterface.showPlayerTable = uiSpy;
       const allProperties = gameState.config.propertyConfig.properties;
-      const goProperty = allProperties.find((p) => p.id === 'go');
+      const goProperty = findById(allProperties, 'go');
 
       const expectedPlayersInput = gameState.players.map((p) => ({
         ...p,

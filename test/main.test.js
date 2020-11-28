@@ -16,6 +16,7 @@ const Deck = require('../entities/Components/Deck');
 const PlayerActions = require('../entities/PlayerActions');
 const config = require('../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
+const { findById } = require('../entities/helpers');
 
 function gwt(strings) {
   const statements = strings.raw[0].split(' | ');
@@ -174,11 +175,13 @@ describe('main', () => {
           '',
         ];
 
-        const boardwalkProp = gameState.config.propertyConfig.properties.find(
-          (p) => p.id === 'boardwalk'
+        const boardwalkProp = findById(
+          gameState.config.propertyConfig.properties,
+          'boardwalk'
         );
-        const parkPlaceProp = gameState.config.propertyConfig.properties.find(
-          (p) => p.id === 'parkplace'
+        const parkPlaceProp = findById(
+          gameState.config.propertyConfig.properties,
+          'parkplace'
         );
 
         const promptSelectStubValues = [
@@ -664,8 +667,9 @@ describe('main', () => {
           '',
         ];
 
-        const mediterraneanAveProp = gameState.config.propertyConfig.properties.find(
-          (p) => p.id === 'mediterraneanave'
+        const mediterraneanAveProp = findById(
+          gameState.config.propertyConfig.properties,
+          'mediterraneanave'
         );
 
         const promptSelectStubValues = [
@@ -777,8 +781,9 @@ describe('main', () => {
           '',
         ];
 
-        const orientalAveProp = gameState.config.propertyConfig.properties.find(
-          (p) => p.id === 'orientalave'
+        const orientalAveProp = findById(
+          gameState.config.propertyConfig.properties,
+          'orientalave'
         );
 
         const promptSelectStubValues = [
@@ -807,8 +812,9 @@ describe('main', () => {
         const diceStubValues = [[6], [1], [1, 2]];
         fillStub(diceStub, diceStubValues);
 
-        const orientalAve = gameState.config.propertyConfig.properties.find(
-          (p) => p.id === 'orientalave'
+        const orientalAve = findById(
+          gameState.config.propertyConfig.properties,
+          'orientalave'
         );
         orientalAve.ownedBy = gameState.players[1].id;
         gameState.players[1].cash = 40;
@@ -848,8 +854,9 @@ describe('main', () => {
         '',
       ];
 
-      const orientalAveProp = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'orientalave'
+      const orientalAveProp = findById(
+        gameState.config.propertyConfig.properties,
+        'orientalave'
       );
 
       const promptSelectStubValues = [
@@ -876,16 +883,18 @@ describe('main', () => {
       const diceStubValues = [[6], [1], [1, 2], [1, 4]];
       fillStub(diceStub, diceStubValues);
 
-      const orientalAve = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'orientalave'
+      const orientalAve = findById(
+        gameState.config.propertyConfig.properties,
+        'orientalave'
       );
       orientalAve.ownedBy = gameState.players[1].id;
       orientalAve.mortgaged = true;
       gameState.players[1].assets =
         orientalAve.price /
         gameState.config.propertyConfig.mortgageValueMultiplier;
-      const railRoad = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'readingrailroad'
+      const railRoad = findById(
+        gameState.config.propertyConfig.properties,
+        'readingrailroad'
       );
 
       require('../entities/Game')({
@@ -921,11 +930,13 @@ describe('main', () => {
           '',
         ];
 
-        const boardwalkProp = gameState.config.propertyConfig.properties.find(
-          (p) => p.id === 'boardwalk'
+        const boardwalkProp = findById(
+          gameState.config.propertyConfig.properties,
+          'boardwalk'
         );
-        const parkPlaceProp = gameState.config.propertyConfig.properties.find(
-          (p) => p.id === 'parkplace'
+        const parkPlaceProp = findById(
+          gameState.config.propertyConfig.properties,
+          'parkplace'
         );
 
         const promptSelectStubValues = [
@@ -1133,11 +1144,13 @@ describe('main', () => {
           '',
         ];
 
-        const boardwalkProp = gameState.config.propertyConfig.properties.find(
-          (p) => p.id === 'boardwalk'
+        const boardwalkProp = findById(
+          gameState.config.propertyConfig.properties,
+          'boardwalk'
         );
-        const parkPlaceProp = gameState.config.propertyConfig.properties.find(
-          (p) => p.id === 'parkplace'
+        const parkPlaceProp = findById(
+          gameState.config.propertyConfig.properties,
+          'parkplace'
         );
 
         const promptSelectStubValues = [
@@ -1246,8 +1259,8 @@ describe('main', () => {
           '',
         ];
 
-        const orientalAveProp = properties.find((p) => p.id === 'orientalave');
-        const balticAveProp = properties.find((p) => p.id === 'balticave');
+        const orientalAveProp = findById(properties, 'orientalave');
+        const balticAveProp = findById(properties, 'balticave');
 
         const promptSelectStubValues = [
           'ROLL_DICE', // community chest

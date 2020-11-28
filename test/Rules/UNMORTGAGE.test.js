@@ -8,6 +8,7 @@ const { createPlayerFactory, createMonopoly } = require('../testutils');
 const PlayerActions = require('../../entities/PlayerActions');
 const config = require('../../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
+const { findByGroup } = require('../../entities/helpers');
 
 describe('Rules -> UNMORTGAGE', () => {
   let gameState;
@@ -82,8 +83,9 @@ describe('Rules -> UNMORTGAGE', () => {
     it(`should unmortgage property returned from the prompt if output is a valid property`, () => {
       const propertyGroup = 'Purple';
       createMonopoly(gameState, propertyGroup);
-      const expectedProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.group === propertyGroup
+      const expectedProperty = findByGroup(
+        gameState.config.propertyConfig.properties,
+        propertyGroup
       );
       expectedProperty.mortgaged = true;
       const originalMortgageState = expectedProperty.mortgaged;
@@ -104,8 +106,9 @@ describe('Rules -> UNMORTGAGE', () => {
       gameState.currentPlayer.cash = 32; // unmortgage would cost 30 + 10% = 33
       const propertyGroup = 'Purple';
       createMonopoly(gameState, propertyGroup);
-      const expectedProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.group === propertyGroup
+      const expectedProperty = findByGroup(
+        gameState.config.propertyConfig.properties,
+        propertyGroup
       );
       expectedProperty.mortgaged = true;
       const originalMortgageState = expectedProperty.mortgaged;

@@ -7,6 +7,7 @@ const { GameState } = require('../../entities/GameState');
 const { createPlayerFactory } = require('../testutils');
 const config = require('../../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
+const { findByGroup, findByPosition } = require('../../entities/helpers');
 
 describe('Rules -> MOVE_PLAYER', () => {
   let gameState;
@@ -139,8 +140,9 @@ describe('Rules -> MOVE_PLAYER', () => {
       );
     });
     it(`should emit ${resolveNewPropertyEvent} event if property is not owned`, () => {
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.position === 3
+      const testProperty = findByPosition(
+        gameState.config.propertyConfig.properties,
+        3
       );
       gameState.currentPlayer.position = testProperty.position;
 
@@ -151,8 +153,9 @@ describe('Rules -> MOVE_PLAYER', () => {
       );
     });
     it(`should not emit ${resolveNewPropertyEvent} event if property is owned`, () => {
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.position === 3
+      const testProperty = findByPosition(
+        gameState.config.propertyConfig.properties,
+        3
       );
       testProperty.ownedBy = 1;
       gameState.currentPlayer.position = testProperty.position;
@@ -164,8 +167,9 @@ describe('Rules -> MOVE_PLAYER', () => {
       );
     });
     it(`should emit ${payRentEvent} event if property is owned, not mortgaged, and belonging to someone else`, () => {
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.position === defaultTurnValMovement
+      const testProperty = findByPosition(
+        gameState.config.propertyConfig.properties,
+        defaultTurnValMovement
       );
       testProperty.ownedBy = 1;
       gameState.currentPlayer.position = testProperty.position;
@@ -177,8 +181,9 @@ describe('Rules -> MOVE_PLAYER', () => {
       );
     });
     it(`should not emit ${payRentEvent} event if property is owned by current player`, () => {
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.position === defaultTurnValMovement
+      const testProperty = findByPosition(
+        gameState.config.propertyConfig.properties,
+        defaultTurnValMovement
       );
       testProperty.ownedBy = gameState.currentPlayer.id;
       gameState.currentPlayer.position = testProperty.position;
@@ -189,8 +194,9 @@ describe('Rules -> MOVE_PLAYER', () => {
       );
     });
     it(`should not emit ${payRentEvent} event if property is mortgaged`, () => {
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.position === defaultTurnValMovement
+      const testProperty = findByPosition(
+        gameState.config.propertyConfig.properties,
+        defaultTurnValMovement
       );
       testProperty.mortgaged = true;
       gameState.currentPlayer.position = testProperty.position;
@@ -201,8 +207,9 @@ describe('Rules -> MOVE_PLAYER', () => {
       );
     });
     it(`should not emit ${payRentEvent} event if property is special`, () => {
-      const specialProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.group === 'Special'
+      const specialProperty = findByGroup(
+        gameState.config.propertyConfig.properties,
+        'Special'
       );
       // turn value movement
       gameState.currentPlayer.position = specialProperty.position;
@@ -213,8 +220,9 @@ describe('Rules -> MOVE_PLAYER', () => {
       );
     });
     it(`should emit ${resolveSpecialPropertyEvent} event if property is special`, () => {
-      const specialProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.group === 'Special'
+      const specialProperty = findByGroup(
+        gameState.config.propertyConfig.properties,
+        'Special'
       );
       // turn value movement
       gameState.currentPlayer.position = specialProperty.position;

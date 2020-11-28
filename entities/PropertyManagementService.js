@@ -1,5 +1,6 @@
 const WealthService = require('./WealthService');
 const { _ } = require('lodash');
+const { findById } = require('./helpers');
 
 /**
  * Responsibility:
@@ -21,15 +22,14 @@ module.exports = class PropertyManagementService {
   }
 
   static findProperty(gameState, id) {
-    return PropertyManagementService.getProperties(gameState).find(
-      (prop) => prop.id === id
-    );
+    return findById(PropertyManagementService.getProperties(gameState), id);
   }
 
   static getCurrentPlayerBoardProperty(gameState) {
     const position = gameState.currentPlayer.position;
-    return PropertyManagementService.getProperties(gameState).find(
-      (prop) => prop.position === position
+    return require('../entities/helpers').findByPosition(
+      PropertyManagementService.getProperties(gameState),
+      position
     );
   }
 

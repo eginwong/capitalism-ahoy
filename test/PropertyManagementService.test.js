@@ -4,6 +4,7 @@ const { GameState } = require('../entities/GameState');
 const { createPlayerFactory, createMonopoly } = require('./testutils');
 const config = require('../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
+const { findByGroup, findByPosition } = require('../entities/helpers');
 
 describe('PropertyManagementService', () => {
   let gameState;
@@ -110,8 +111,9 @@ describe('PropertyManagementService', () => {
     describe('common properties', () => {
       it(`should charge rent based on buildings if built on the property`, () => {
         const ownerId = 1;
-        const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.position === 3
+        const testProperty = findByPosition(
+          gameState.config.propertyConfig.properties,
+          3
         );
         testProperty.ownedBy = ownerId;
         testProperty.buildings = 3;
@@ -126,8 +128,9 @@ describe('PropertyManagementService', () => {
       });
       it(`should charge monopoly if all properties owned in group and no buildings are built`, () => {
         const ownerId = 1;
-        const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.position === 3
+        const testProperty = findByPosition(
+          gameState.config.propertyConfig.properties,
+          3
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;
@@ -142,8 +145,9 @@ describe('PropertyManagementService', () => {
       });
       it(`should not charge monopoly if not all properties owned in group`, () => {
         const ownerId = 1;
-        const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.position === 3
+        const testProperty = findByPosition(
+          gameState.config.propertyConfig.properties,
+          3
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;
@@ -159,8 +163,9 @@ describe('PropertyManagementService', () => {
     describe('railroads', () => {
       it(`should charge based on railroads owned`, () => {
         const ownerId = 1;
-        const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.group === 'Railroad'
+        const testProperty = findByGroup(
+          gameState.config.propertyConfig.properties,
+          'Railroad'
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;
@@ -175,8 +180,9 @@ describe('PropertyManagementService', () => {
       });
       it(`should charge multiplier for railroad rent if optional multiplier is passed`, () => {
         const ownerId = 1;
-        const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.group === 'Railroad'
+        const testProperty = findByGroup(
+          gameState.config.propertyConfig.properties,
+          'Railroad'
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;
@@ -195,8 +201,9 @@ describe('PropertyManagementService', () => {
     describe('utilities', () => {
       it(`should charge based on roll`, () => {
         const ownerId = 1;
-        const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.group === 'Utilities'
+        const testProperty = findByGroup(
+          gameState.config.propertyConfig.properties,
+          'Utilities'
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;
@@ -212,8 +219,9 @@ describe('PropertyManagementService', () => {
       });
       it(`should charge 10x multiplier for both utilities owned`, () => {
         const ownerId = 1;
-        const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.position === 12
+        const testProperty = findByPosition(
+          gameState.config.propertyConfig.properties,
+          12
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;
@@ -230,8 +238,9 @@ describe('PropertyManagementService', () => {
       });
       it(`should charge turn value multiplier if passed`, () => {
         const ownerId = 1;
-        const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.position === 12
+        const testProperty = findByPosition(
+          gameState.config.propertyConfig.properties,
+          12
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;
@@ -281,8 +290,9 @@ describe('PropertyManagementService', () => {
     });
     it('returns false when player does not own all properties in the specified board group', () => {
       const propertyGroup = 'Purple';
-      gameState.config.propertyConfig.properties.find(
-        (p) => p.group === propertyGroup
+      findByGroup(
+        gameState.config.propertyConfig.properties,
+        propertyGroup
       ).ownedBy = gameState.currentPlayer.id;
 
       expect(
@@ -689,8 +699,9 @@ describe('PropertyManagementService', () => {
     });
     it('should not return properties that are not in a monopoly', () => {
       const propertyGroup = 'Purple';
-      gameState.config.propertyConfig.properties.find(
-        (p) => p.group === propertyGroup
+      findByGroup(
+        gameState.config.propertyConfig.properties,
+        propertyGroup
       ).ownedBy = gameState.currentPlayer.id;
 
       expect(

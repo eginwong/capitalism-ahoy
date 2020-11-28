@@ -9,8 +9,9 @@ module.exports = class BoardSevice {
   }
 
   static getPropertyAtPosition(gameState, player) {
-    return PropertyManagementService.getProperties(gameState).find(
-      (prop) => prop.position === player.position
+    return require('../entities/helpers').findByPosition(
+      PropertyManagementService.getProperties(gameState),
+      player.position
     );
   }
 
