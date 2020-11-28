@@ -14,6 +14,7 @@ const Deck = require('../../entities/Components/Deck');
 const PropertyManagementService = require('../../entities/PropertyManagementService');
 const WealthService = require('../../entities/WealthService');
 const { cloneDeep } = require('lodash');
+const { findById } = require('../../entities/helpers');
 
 describe('Rules -> CHANCE', () => {
   let gameState;
@@ -154,7 +155,7 @@ describe('Rules -> CHANCE', () => {
           `${inputEvent} for a move card did not move the player from its starting position`
         );
         expect(gameState.currentPlayer.position).to.equal(
-          properties.find((p) => p.id === 'go').position + properties.length,
+          findById(properties, 'go').position + properties.length,
           `${inputEvent} for a move card did not move the player's position to expected position + the count of all properties to circle around`
         );
       });
@@ -174,7 +175,7 @@ describe('Rules -> CHANCE', () => {
           `${inputEvent} did not call ${movePlayerEvent} when card action is move`
         );
         expect(gameState.currentPlayer.position).to.equal(
-          properties.find((p) => p.id === 'illinoisave').position,
+          findById(properties, 'illinoisave').position,
           `${inputEvent} for a move card did not move the player's position to expected position`
         );
       });
@@ -211,9 +212,7 @@ describe('Rules -> CHANCE', () => {
         );
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
         const properties = gameState.config.propertyConfig.properties;
-        const expectedProperty = properties.find(
-          (p) => p.id === 'readingrailroad'
-        );
+        const expectedProperty = findById(properties, 'readingrailroad');
 
         eventBus.emit(inputEvent);
 
@@ -238,9 +237,7 @@ describe('Rules -> CHANCE', () => {
         );
         sinon.stub(Deck, 'draw').returns({ card: expectedCard, deck: [] });
         const properties = gameState.config.propertyConfig.properties;
-        const expectedProperty = properties.find(
-          (p) => p.id === 'pennsylvaniarailroad'
-        );
+        const expectedProperty = findById(properties, 'pennsylvaniarailroad');
 
         eventBus.emit(inputEvent);
 

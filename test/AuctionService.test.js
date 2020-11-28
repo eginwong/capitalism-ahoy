@@ -8,6 +8,7 @@ const AuctionService = require('../entities/AuctionService');
 const config = require('../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
 const { calculateLiquidity } = require('../entities/WealthService');
+const { findById } = require('../entities/helpers');
 
 describe('AuctionService', () => {
   let gameState;
@@ -34,8 +35,9 @@ describe('AuctionService', () => {
   describe('auction', () => {
     it('re-auctions when no one bids', () => {
       const testBaseCost = 100;
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'mediterraneanave'
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'mediterraneanave'
       );
       const UI = mockUIFactory();
       const playersWithLiquidity = gameState.players.map((player) => ({
@@ -68,8 +70,9 @@ describe('AuctionService', () => {
     });
     it('continues auction rounds until only one player is left', () => {
       const testBaseCost = 100;
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'mediterraneanave'
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'mediterraneanave'
       );
       const UI = mockUIFactory();
       const playersWithLiquidity = gameState.players.map((player) => ({
@@ -103,8 +106,9 @@ describe('AuctionService', () => {
     });
     it('calls expected UI calls for auction process', () => {
       const testBaseCost = 100;
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'mediterraneanave'
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'mediterraneanave'
       );
       const UI = mockUIFactory();
       const playersWithLiquidity = gameState.players.map((player) => ({
@@ -156,8 +160,9 @@ describe('AuctionService', () => {
     });
     it('filters players out of the auction so that subsequent rounds are shorter', () => {
       const testBaseCost = 100;
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'mediterraneanave'
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'mediterraneanave'
       );
       const UI = mockUIFactory();
       const playersWithLiquidity = gameState.players.map((player) => ({
@@ -192,8 +197,9 @@ describe('AuctionService', () => {
     });
     it('eliminates player if bid is not a number', () => {
       const testBaseCost = 100;
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'mediterraneanave'
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'mediterraneanave'
       );
       const UI = mockUIFactory();
       const playersWithLiquidity = gameState.players.map((player) => ({
@@ -226,8 +232,9 @@ describe('AuctionService', () => {
     });
     it('eliminates player if bid is below current lowest bid', () => {
       const testBaseCost = 100;
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'mediterraneanave'
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'mediterraneanave'
       );
       const UI = mockUIFactory();
       const playersWithLiquidity = gameState.players.map((player) => ({
@@ -262,8 +269,9 @@ describe('AuctionService', () => {
     });
     it("eliminates player if bid is above player's liquidity", () => {
       const testBaseCost = 100;
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'mediterraneanave'
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'mediterraneanave'
       );
       const UI = mockUIFactory();
       const playersWithLiquidity = gameState.players.map((player) => ({
@@ -296,8 +304,9 @@ describe('AuctionService', () => {
     });
     it('returns buyer and price at the end of the auction', () => {
       const testBaseCost = 100;
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'mediterraneanave'
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'mediterraneanave'
       );
       const UI = mockUIFactory();
       const playersWithLiquidity = gameState.players.map((player) => ({
@@ -334,8 +343,9 @@ describe('AuctionService', () => {
     });
     it("returns player's highest bid even if the following round, they enter in an invalid bid", () => {
       const testBaseCost = 100;
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'mediterraneanave'
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'mediterraneanave'
       );
       const UI = mockUIFactory();
       const playersWithLiquidity = gameState.players.map((player) => ({

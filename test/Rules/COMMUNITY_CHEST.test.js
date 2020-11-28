@@ -14,6 +14,7 @@ const Deck = require('../../entities/Components/Deck');
 const PropertyManagementService = require('../../entities/PropertyManagementService');
 const WealthService = require('../../entities/WealthService');
 const { cloneDeep } = require('lodash');
+const { findById } = require('../../entities/helpers');
 
 describe('Rules -> COMMUNITY_CHEST', () => {
   let gameState;
@@ -162,7 +163,7 @@ describe('Rules -> COMMUNITY_CHEST', () => {
           `${inputEvent} for a move card did not move the player from its starting position`
         );
         expect(gameState.currentPlayer.position).to.equal(
-          properties.find((p) => p.id === 'go').position + properties.length,
+          findById(properties, 'go').position + properties.length,
           `${inputEvent} for a move card did not move the player's position to expected position + the count of all properties to circle around`
         );
       });

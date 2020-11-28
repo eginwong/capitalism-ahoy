@@ -10,6 +10,7 @@ const TradeService = require('../entities/TradeService');
 const config = require('../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
 const { calculateLiquidity } = require('../entities/WealthService');
+const { findById } = require('../entities/helpers');
 
 describe('PlayerActions', () => {
   let gameState;
@@ -391,8 +392,9 @@ describe('PlayerActions', () => {
   describe('auction', () => {
     it('calls the AuctionService', () => {
       const testBaseCost = 100;
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'mediterraneanave'
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'mediterraneanave'
       );
       const UI = mockUIFactory();
       const playersWithLiquidity = gameState.players.map((player) => ({

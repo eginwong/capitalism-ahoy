@@ -317,8 +317,9 @@ module.exports = {
   PAY_RENT: [
     ({ UI, notify }, gameState) => {
       const boardProperty = gameState.currentBoardProperty;
-      const owner = gameState.players.find(
-        (p) => p.id === boardProperty.ownedBy
+      const owner = require('../helpers').findById(
+        gameState.players,
+        boardProperty.ownedBy
       );
       let player = gameState.currentPlayer;
 
@@ -909,7 +910,10 @@ module.exports = {
       }
 
       // need to reset values of winning player, otherwise the collections are not persisted
-      let winningPlayer = gameState.players.find((p) => p.id === buyer.id);
+      let winningPlayer = require('../helpers').findById(
+        gameState.players,
+        buyer.id
+      );
       const boardPropertyMortgagePrice =
         boardProperty.price / mortgageValueMultiplier;
 
@@ -1015,8 +1019,9 @@ module.exports = {
       UI.playerLost(gameState.currentPlayer);
 
       // must update the player from gamestate directly
-      gameState.players.find(
-        (p) => p.id === gameState.currentPlayer.id
+      require('../helpers').findById(
+        gameState.players,
+        gameState.currentPlayer.id
       ).bankrupt = true;
       gameState.gameOver =
         gameState.players.filter((p) => !p.bankrupt).length <= 1;
@@ -1111,8 +1116,10 @@ module.exports = {
       const tradingPlayerId = Object.keys(tradeDetails)
         .map((k) => parseInt(k, 10))
         .find((p) => !isNaN(p) && p !== currentPlayer.id);
-      const findPlayer = (id) => gameState.players.find((p) => p.id === id);
-      const tradePartner = findPlayer(tradingPlayerId);
+      const tradePartner = require('../helpers').findById(
+        gameState.players,
+        tradingPlayerId
+      );
       // process cash first
       const cashToCurrentPlayer = tradeDetails[currentPlayer.id].find(
         (a) => typeof a === 'number'

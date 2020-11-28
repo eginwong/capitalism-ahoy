@@ -6,6 +6,7 @@ const mockUIFactory = require('../mocks/UI');
 const { GameState } = require('../../entities/GameState');
 const { createPlayerFactory } = require('../testutils');
 const config = require('../../config/monopolyConfiguration');
+const { findById } = require('../../entities/helpers');
 
 describe('Rules -> JAIL', () => {
   let gameState;
@@ -60,8 +61,9 @@ describe('Rules -> JAIL', () => {
     });
     it("should update player's position to jail", () => {
       eventBus.emit(inputEvent);
-      const jailPosition = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'jail'
+      const jailPosition = findById(
+        gameState.config.propertyConfig.properties,
+        'jail'
       ).position;
       expect(gameState.currentPlayer.position).to.equal(
         jailPosition,

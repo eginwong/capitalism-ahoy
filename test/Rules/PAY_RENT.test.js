@@ -7,6 +7,11 @@ const { GameState } = require('../../entities/GameState');
 const { createPlayerFactory, createMonopoly } = require('../testutils');
 const config = require('../../config/monopolyConfiguration.json');
 const { cloneDeep } = require('lodash');
+const {
+  findById,
+  findByPosition,
+  findByGroup,
+} = require('../../entities/helpers');
 
 describe('Rules -> PAY_RENT', () => {
   let gameState;
@@ -62,9 +67,10 @@ describe('Rules -> PAY_RENT', () => {
 
     it('should make a call to the UI#payingRent', () => {
       const ownerId = 1;
-      const owner = gameState.players.find((p) => p.id === ownerId);
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'balticave'
+      const owner = findById(gameState.players, ownerId);
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'balticave'
       );
       testProperty.ownedBy = ownerId;
       gameState.currentBoardProperty = testProperty;
@@ -83,9 +89,10 @@ describe('Rules -> PAY_RENT', () => {
     });
     it(`should exchange rent cost between current player and owner`, () => {
       const ownerId = 1;
-      const owner = gameState.players.find((p) => p.id === ownerId);
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'balticave'
+      const owner = findById(gameState.players, ownerId);
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'balticave'
       );
       testProperty.ownedBy = ownerId;
       gameState.currentBoardProperty = testProperty;
@@ -107,9 +114,10 @@ describe('Rules -> PAY_RENT', () => {
       // invert player ids
       gameState.players.find((p) => p.name === 'player1').id = 1;
       gameState.players.find((p) => p.name === 'player2').id = 0;
-      const owner = gameState.players.find((p) => p.id === ownerId);
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'balticave'
+      const owner = findById(gameState.players, ownerId);
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'balticave'
       );
       testProperty.ownedBy = ownerId;
       gameState.currentBoardProperty = testProperty;
@@ -128,9 +136,10 @@ describe('Rules -> PAY_RENT', () => {
     });
     it(`should exchange only what rent cost is available when current player is about to be bankrupt`, () => {
       const ownerId = 1;
-      const owner = gameState.players.find((p) => p.id === ownerId);
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'balticave'
+      const owner = findById(gameState.players, ownerId);
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'balticave'
       );
       testProperty.ownedBy = ownerId;
       gameState.currentBoardProperty = testProperty;
@@ -150,8 +159,9 @@ describe('Rules -> PAY_RENT', () => {
     });
     it(`${collectionsEvent} event sets the turn value subturn player id and charge`, () => {
       const ownerId = 1;
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'balticave'
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'balticave'
       );
       testProperty.ownedBy = ownerId;
       gameState.currentBoardProperty = testProperty;
@@ -173,8 +183,9 @@ describe('Rules -> PAY_RENT', () => {
     });
     it(`${collectionsEvent} event should be called if current player has no more cash to pay the fine`, () => {
       const ownerId = 1;
-      const testProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'balticave'
+      const testProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'balticave'
       );
       testProperty.ownedBy = ownerId;
       gameState.currentBoardProperty = testProperty;
@@ -191,9 +202,10 @@ describe('Rules -> PAY_RENT', () => {
     describe('common properties', () => {
       it(`should charge rent based on buildings if built on the property`, () => {
         const ownerId = 1;
-        const owner = gameState.players.find((p) => p.id === ownerId);
-        const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.id === 'balticave'
+        const owner = findById(gameState.players, ownerId);
+        const testProperty = findById(
+          gameState.config.propertyConfig.properties,
+          'balticave'
         );
         testProperty.ownedBy = ownerId;
         testProperty.buildings = 3;
@@ -215,9 +227,10 @@ describe('Rules -> PAY_RENT', () => {
       });
       it(`should charge monopoly if all properties owned in group and no buildings are built`, () => {
         const ownerId = 1;
-        const owner = gameState.players.find((p) => p.id === ownerId);
-        const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.id === 'balticave'
+        const owner = findById(gameState.players, ownerId);
+        const testProperty = findById(
+          gameState.config.propertyConfig.properties,
+          'balticave'
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;
@@ -239,9 +252,10 @@ describe('Rules -> PAY_RENT', () => {
     describe('railroads', () => {
       it(`should charge based on railroads owned`, () => {
         const ownerId = 1;
-        const owner = gameState.players.find((p) => p.id === ownerId);
-        const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.group === 'Railroad'
+        const owner = findById(gameState.players, ownerId);
+        const testProperty = findByGroup(
+          gameState.config.propertyConfig.properties,
+          'Railroad'
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;
@@ -264,9 +278,10 @@ describe('Rules -> PAY_RENT', () => {
     describe('utilities', () => {
       it(`should charge based on roll`, () => {
         const ownerId = 1;
-        const owner = gameState.players.find((p) => p.id === ownerId);
-        const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.group === 'Utilities'
+        const owner = findById(gameState.players, ownerId);
+        const testProperty = findByGroup(
+          gameState.config.propertyConfig.properties,
+          'Utilities'
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;
@@ -287,9 +302,10 @@ describe('Rules -> PAY_RENT', () => {
       });
       it(`should charge 10x multiplier for both utilities owned`, () => {
         const ownerId = 1;
-        const owner = gameState.players.find((p) => p.id === ownerId);
-        const testProperty = gameState.config.propertyConfig.properties.find(
-          (p) => p.position === 12
+        const owner = findById(gameState.players, ownerId);
+        const testProperty = findByPosition(
+          gameState.config.propertyConfig.properties,
+          12
         );
         testProperty.ownedBy = ownerId;
         gameState.currentBoardProperty = testProperty;

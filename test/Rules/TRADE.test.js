@@ -16,6 +16,7 @@ const {
 } = require('../testutils');
 const config = require('../../config/monopolyConfiguration');
 const { cloneDeep } = require('lodash');
+const { findById } = require('../../entities/helpers');
 
 describe('Rules -> TRADE', () => {
   let gameState;
@@ -76,7 +77,7 @@ describe('Rules -> TRADE', () => {
       purpleProps = gameState.config.propertyConfig.properties.filter(
         (p) => p.group === purplePropertyGroup
       );
-      targetPlayer = gameState.players.find((p) => p.id === tradingPartnerId);
+      targetPlayer = findById(gameState.players, tradingPartnerId);
       sourcePlayerPrestate = cloneDeep(gameState.currentPlayer);
       targetPlayerPrestate = cloneDeep(targetPlayer);
     });
@@ -220,8 +221,9 @@ describe('Rules -> TRADE', () => {
       WealthService.buyAsset(targetPlayer, purpleProps[0].price);
       targetPlayerPrestate = cloneDeep(targetPlayer);
 
-      const boardwalkProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'boardwalk'
+      const boardwalkProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'boardwalk'
       );
       boardwalkProperty.ownedBy = gameState.currentPlayer.id;
       WealthService.buyAsset(gameState.currentPlayer, boardwalkProperty.price);
@@ -267,8 +269,9 @@ describe('Rules -> TRADE', () => {
       );
       targetPlayerPrestate = cloneDeep(targetPlayer);
 
-      const boardwalkProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'boardwalk'
+      const boardwalkProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'boardwalk'
       );
       boardwalkProperty.ownedBy = gameState.currentPlayer.id;
       WealthService.buyAsset(gameState.currentPlayer, boardwalkProperty.price);
@@ -303,8 +306,9 @@ describe('Rules -> TRADE', () => {
       WealthService.buyAsset(targetPlayer, purpleProps[1].price);
       targetPlayerPrestate = cloneDeep(targetPlayer);
 
-      const boardwalkProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'boardwalk'
+      const boardwalkProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'boardwalk'
       );
       boardwalkProperty.ownedBy = gameState.currentPlayer.id;
       WealthService.buyAsset(gameState.currentPlayer, boardwalkProperty.price);
@@ -343,8 +347,9 @@ describe('Rules -> TRADE', () => {
       WealthService.buyAsset(targetPlayer, purpleProps[1].price);
       targetPlayerPrestate = cloneDeep(targetPlayer);
 
-      const boardwalkProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'boardwalk'
+      const boardwalkProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'boardwalk'
       );
       boardwalkProperty.ownedBy = gameState.currentPlayer.id;
       WealthService.buyAsset(gameState.currentPlayer, boardwalkProperty.price);
@@ -376,8 +381,9 @@ describe('Rules -> TRADE', () => {
       WealthService.buyAsset(targetPlayer, purpleProps[1].price);
       targetPlayerPrestate = cloneDeep(targetPlayer);
 
-      const boardwalkProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'boardwalk'
+      const boardwalkProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'boardwalk'
       );
       boardwalkProperty.ownedBy = gameState.currentPlayer.id;
       WealthService.buyAsset(gameState.currentPlayer, boardwalkProperty.price);
@@ -412,8 +418,9 @@ describe('Rules -> TRADE', () => {
       WealthService.buyAsset(targetPlayer, purpleProps[1].price);
       targetPlayerPrestate = cloneDeep(targetPlayer);
 
-      const boardwalkProperty = gameState.config.propertyConfig.properties.find(
-        (p) => p.id === 'boardwalk'
+      const boardwalkProperty = findById(
+        gameState.config.propertyConfig.properties,
+        'boardwalk'
       );
       boardwalkProperty.ownedBy = gameState.currentPlayer.id;
       WealthService.buyAsset(gameState.currentPlayer, boardwalkProperty.price);

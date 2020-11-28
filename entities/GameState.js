@@ -12,8 +12,9 @@ class GameState {
   get currentPlayer() {
     // add override for intra-turn context switches
     if (this.turnValues?.subTurn?.playerId) {
-      return this.players.find(
-        (p) => p.id === this.turnValues.subTurn.playerId
+      return require('./helpers').findById(
+        this.players,
+        this.turnValues.subTurn.playerId
       );
     }
     return this.players[this.turn % this.players.length];
