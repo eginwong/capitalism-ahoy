@@ -117,6 +117,10 @@ module.exports = class TradeService {
 
   static confirm(UI, gameState, sourcePlayer, targetPlayer, tradeDetails) {
     const { OFFER, ACCEPT } = TradeService.TradeStatus;
+    const {
+      mortgageValueMultiplier,
+      interestRate,
+    } = gameState.config.propertyConfig;
 
     UI.displayTradeDetails(
       gameState.currentPlayer.id,
@@ -168,10 +172,7 @@ module.exports = class TradeService {
           .filter((p) => p.mortgaged)
           .reduce(
             (acc, prop) =>
-              acc +
-              (prop.price /
-                gameState.config.propertyConfig.mortgageValueMultiplier) *
-                gameState.config.propertyConfig.interestRate,
+              acc + (prop.price / mortgageValueMultiplier) * interestRate,
             0
           );
 
@@ -188,10 +189,7 @@ module.exports = class TradeService {
           .filter((p) => p.mortgaged)
           .reduce(
             (acc, prop) =>
-              acc +
-              (prop.price /
-                gameState.config.propertyConfig.mortgageValueMultiplier) *
-                gameState.config.propertyConfig.interestRate,
+              acc + (prop.price / mortgageValueMultiplier) * interestRate,
             0
           );
         const isBankrupt =
