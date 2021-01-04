@@ -3,6 +3,9 @@
 [![Build Status](https://travis-ci.com/eginwong/capitalism-ahoy.svg?branch=master)](https://travis-ci.com/eginwong/capitalism-ahoy)
 [![codecov](https://codecov.io/gh/eginwong/capitalism-ahoy/branch/master/graph/badge.svg)](https://codecov.io/gh/eginwong/capitalism-ahoy)
 
+## System Requirements
+- [Node.js](https://nodejs.org/en/download/)
+
 ## Rules
 
 - [Reference](https://www.hasbro.com/common/instruct/00009.pdf)
